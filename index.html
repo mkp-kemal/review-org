@@ -271,7 +271,6 @@
                             <!-- </div> -->
                         </div>
                     </div>
-
                     <div>
                         <label for="season" class="block text-lg font-semibold mb-2">Season</label>
                         <select id="season" name="season"
@@ -284,6 +283,33 @@
                             <option value="FALL">Fall</option>
                         </select>
                     </div>
+
+                    <div>
+                        <label for="season-year" class="block text-lg font-semibold mb-2">Season Year</label>
+                        <select id="season-year" name="seasonYear"
+                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
+                            required>
+                            <option value="">Select year</option>
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                        </select>
+                    </div>
+
+                    <!-- <div>
+                        <label for="age-level" class="block text-lg font-semibold mb-2">Age Group at Time of
+                            Play</label>
+                        <select id="age-level" name="ageLevelAtReview"
+                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
+                            required>
+                            <option value="">Select age group</option>
+                            <option value="12U">12U</option>
+                            <option value="14U">14U</option>
+                            <option value="16U">16U</option>
+                        </select>
+                    </div> -->
+
 
                     <h3 class="text-xl font-semibold border-t pt-6">Rate Your Experience (1-5 Stars)</h3>
 
@@ -465,7 +491,7 @@
                             `;
                                     div.addEventListener('click', () => {
                                         if (hiddenInput) hiddenInput.value = team.id;
-                                        window.location.href = `TeamProfile.html?id=${team.id}`;
+                                        window.location.href = `Org_profile.html?id=${team.id}`;
                                     });
                                     teamWrapper.appendChild(div);
                                 });
@@ -496,7 +522,7 @@
         initTeamSearch(heroInput);
 
         // Review form search
-        const reviewInput = document.getElementById('team-search');
+        const reviewInput = document.getElementById('team-big-search');
         const teamIdInput = document.getElementById('team-id');
         initTeamSearch(reviewInput, { hiddenInput: teamIdInput });
 
