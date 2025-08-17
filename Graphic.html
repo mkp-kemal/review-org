@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The State of Youth Travel Baseball - An Infographic by CurveballCritiques</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        .stat-number {
+            font-weight: 900;
+            color: #2E5A9A;
+            line-height: 1;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            color: #7497D1;
+            line-height: 1;
+        }
+        .flow-box {
+            border: 2px solid #B3C9E9;
+            background-color: #f0f4f8;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="bg-[#00173D] py-8">
+        <div class="container mx-auto px-6 text-center text-white">
+            <h1 class="text-4xl md:text-5xl font-black tracking-tight">THE STATE OF YOUTH TRAVEL BASEBALL</h1>
+            <p class="mt-4 text-lg text-[#B3C9E9] max-w-3xl mx-auto">A multi-billion dollar industry defined by high stakes, high costs, and a critical need for transparency.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6 md:p-10">
+
+        <section id="market-size" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">A High-Stakes Game</h2>
+            <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">The youth baseball economy is not just large; it's expanding rapidly, reflecting massive financial and emotional investment from millions of families.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="stat-card">
+                    <p class="text-xl font-semibold text-gray-700 mb-2">2024 Market Value</p>
+                    <p class="stat-number text-7xl md:text-8xl">$50.62B</p>
+                    <p class="mt-4 text-gray-600">The total economic ecosystem surrounding youth baseball, including fees, equipment, travel, and instruction.</p>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Projected Market Growth (USD Billions)</h3>
+                    <div class="chart-container h-80">
+                        <canvas id="marketGrowthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="costs" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">The Price of Playing</h2>
+            <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">For families in the travel ball circuit, participation requires a staggering financial commitment, often with little transparency into the true, all-in costs.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="stat-card">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Estimated Annual Cost Per Player</h3>
+                    <div class="chart-container h-80">
+                        <canvas id="costComparisonChart"></canvas>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <p class="text-xl font-semibold text-gray-700 mb-2">Total U.S. Participants</p>
+                    <p class="stat-number text-7xl md:text-8xl">25.3M</p>
+                    <p class="mt-4 text-gray-600">(Baseball & Softball Combined)</p>
+                    <p class="mt-8 text-xl font-semibold text-gray-700 mb-2">Where They Play</p>
+                    <div class="chart-container h-64 max-h-250px">
+                        <canvas id="participantSettingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dangers" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">The Hidden Dangers</h2>
+            <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">The high-pressure environment, fueled by the myth of a college scholarship, creates significant risks to player health, development, and long-term love for the game.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="stat-card border-4 border-red-200">
+                    <p class="text-xl font-semibold text-gray-700 mb-2">Financial Return on Investment</p>
+                    <p class="stat-number text-7xl text-red-600">-7.25%</p>
+                    <p class="mt-4 text-gray-600">For the average family, the financial ROI on travel ball participation is negative, failing to increase advancement rates.</p>
+                </div>
+                <div class="stat-card border-4 border-red-200">
+                    <p class="text-xl font-semibold text-gray-700 mb-2">Youth Tommy John Surgeries</p>
+                    <p class="stat-number text-7xl text-red-600">57%</p>
+                    <p class="mt-4 text-gray-600">Overuse injuries have skyrocketed, with a majority of all Tommy John surgeries now performed on youth players.</p>
+                </div>
+                <div class="stat-card border-4 border-red-200">
+                    <p class="text-xl font-semibold text-gray-700 mb-2">Quit By Age 13</p>
+                    <p class="stat-number text-7xl text-red-600">70%</p>
+                    <p class="mt-4 text-gray-600">A majority of children quit organized sports by age 13, often because the high-pressure environment is no longer fun.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="problem-solution" class="mb-20">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                <div>
+                    <h2 class="text-3xl font-bold text-center mb-4">The Cycle of Silence</h2>
+                    <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">A culture of fear prevents honest feedback, allowing poor practices to persist unchecked and leaving families to make uninformed, high-stakes decisions.</p>
+                    <div class="space-y-4 text-center">
+                        <div class="flow-box p-4 rounded-lg font-semibold text-lg">High Financial & Emotional Stakes</div>
+                        <div class="flow-arrow">&#x25BC;</div>
+                        <div class="flow-box p-4 rounded-lg font-semibold text-lg">Fear of Retaliation (Benching, Blacklisting)</div>
+                        <div class="flow-arrow">&#x25BC;</div>
+                        <div class="flow-box p-4 rounded-lg font-semibold text-lg">Parental Silence & Lack of Honest Feedback</div>
+                        <div class="flow-arrow">&#x25BC;</div>
+                        <div class="flow-box p-4 rounded-lg font-semibold text-lg">No Public Accountability for Organizations</div>
+                        <div class="flow-arrow">&#x25BC;</div>
+                        <div class="flow-box p-4 rounded-lg font-semibold text-lg">Poor Decisions, Wasted Money, Player Burnout</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-3xl font-bold text-center mb-4">The Solution: Transparency</h2>
+                    <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">CurveballCritiques.com breaks the cycle by providing a secure, anonymous platform for structured, data-driven reviews across five critical areas.</p>
+                    <div class="space-y-4">
+                        <div class="stat-card p-4 text-left flex items-center">
+                            <span class="text-3xl mr-4">&#x2605;</span>
+                            <div>
+                                <h3 class="font-bold text-lg">Coaching Quality</h3>
+                                <p class="text-gray-600 text-sm">Evaluating temperament, communication, and game knowledge.</p>
+                            </div>
+                        </div>
+                        <div class="stat-card p-4 text-left flex items-center">
+                            <span class="text-3xl mr-4">&#x2605;</span>
+                            <div>
+                                <h3 class="font-bold text-lg">Player Development</h3>
+                                <p class="text-gray-600 text-sm">Assessing focus on fundamentals and fairness of playing time.</p>
+                            </div>
+                        </div>
+                        <div class="stat-card p-4 text-left flex items-center">
+                            <span class="text-3xl mr-4">&#x2605;</span>
+                            <div>
+                                <h3 class="font-bold text-lg">Financial Transparency</h3>
+                                <p class="text-gray-600 text-sm">Rating clarity of fees, overall value, and hidden costs.</p>
+                            </div>
+                        </div>
+                        <div class="stat-card p-4 text-left flex items-center">
+                            <span class="text-3xl mr-4">&#x2605;</span>
+                            <div>
+                                <h3 class="font-bold text-lg">Team Culture</h3>
+                                <p class="text-gray-600 text-sm">Gauging parent drama, sportsmanship, and focus on fun.</p>
+                            </div>
+                        </div>
+                        <div class="stat-card p-4 text-left flex items-center">
+                            <span class="text-3xl mr-4">&#x2605;</span>
+                            <div>
+                                <h3 class="font-bold text-lg">Safety & Health</h3>
+                                <p class="text-gray-600 text-sm">Reporting on adherence to pitch counts and injury protocols.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#00173D] py-8">
+        <div class="container mx-auto px-6 text-center text-white">
+            <p class="font-bold text-2xl">CurveballCritiques.com</p>
+            <p class="mt-2 text-[#B3C9E9]">Bringing data-driven transparency to the youth sports community.</p>
+        </div>
+    </footer>
+
+    <script>
+        const brilliantBlues = {
+            darkest: '#00173D',
+            dark: '#012658',
+            medium: '#2E5A9A',
+            light: '#7497D1',
+            lightest: '#B3C9E9',
+        };
+
+        const tooltipPlugin = {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const item = tooltipItems[0];
+                        let label = item.chart.data.labels[item.dataIndex];
+                        if (Array.isArray(label)) {
+                            return label.join(' ');
+                        } else {
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        function wrapLabel(str, max_width) {
+            const words = str.split(' ');
+            const lines = [];
+            let current_line = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if ((current_line + " " + words[i]).length > max_width) {
+                    lines.push(current_line);
+                    current_line = words[i];
+                } else {
+                    current_line += " " + words[i];
+                }
+            }
+            lines.push(current_line);
+            return lines;
+        }
+
+        new Chart(document.getElementById('marketGrowthChart'), {
+            type: 'line',
+            data: {
+                labels: ['2024', '2026', '2028', '2030', '2033'],
+                datasets: [{
+                    label: 'Market Value (in Billions)',
+                    data: [50.62, 62.5, 77.1, 95.2, 126.19],
+                    borderColor: brilliantBlues.medium,
+                    backgroundColor: 'rgba(46, 90, 154, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value + 'B';
+                            }
+                        }
+                    }
+                },
+                plugins: tooltipPlugin
+            }
+        });
+
+        new Chart(document.getElementById('costComparisonChart'), {
+            type: 'bar',
+            data: {
+                labels: [
+                    wrapLabel('Team/League Registration Fees', 16),
+                    wrapLabel('Uniforms & Team Gear', 16),
+                    'Equipment',
+                    wrapLabel('Private Lessons/Instruction', 16),
+                    wrapLabel('Travel & Lodging', 16)
+                ],
+                datasets: [{
+                    label: 'Low-End Estimate',
+                    data: [500, 200, 300, 0, 500],
+                    backgroundColor: brilliantBlues.lightest,
+                }, {
+                    label: 'Average Estimate',
+                    data: [1500, 500, 750, 1000, 2500],
+                    backgroundColor: brilliantBlues.light,
+                }, {
+                    label: 'High-End Estimate',
+                    data: [3500, 1000, 2000, 5000, 10000],
+                    backgroundColor: brilliantBlues.medium,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                    },
+                    y: {
+                        stacked: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value / 1000 + 'k';
+                            }
+                        }
+                    }
+                },
+                plugins: tooltipPlugin
+            }
+        });
+
+        new Chart(document.getElementById('participantSettingChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Community-Based', 'Travel/Club Leagues', 'Other (School, etc)'],
+                datasets: [{
+                    data: [43, 17, 40],
+                    backgroundColor: [
+                        brilliantBlues.medium,
+                        brilliantBlues.light,
+                        brilliantBlues.lightest
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: tooltipPlugin
+            }
+        });
+    </script>
+</body>
+</html>

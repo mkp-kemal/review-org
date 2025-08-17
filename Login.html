@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In / Sign Up - CurveballCritiques.com</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- config.js hasil generate dari .env -->
+    <script src="functions/config.js"></script>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="functions/config.js"></script>
+
+    <script>
+        (async function () {
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            // if (getCookie('accessToken')) {
+            //     window.location.replace('/');
+            //     return;
+            // }
+
+            const response = await fetch(`${window.APP_CONFIG.API_URL}/auth/check`, {
+                headers: {
+                    'Authorization': `Bearer ${getCookie('accessToken')}`
+                }
+            });
+
+            if (response.ok) {
+                window.location.replace('/');
+            }
+        })();
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body class="text-gray-800">
+
+    <!-- Main Content -->
+    <main class="auth-container p-6">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <a href="index.html" class="text-3xl font-extrabold text-gray-900">
+                    <i class="fas fa-baseball-ball mr-2"></i>CurveballCritiques
+                </a>
+            </div>
+            <!-- Auth Form Card -->
+            <div class="bg-white p-8 md:p-10 rounded-xl shadow-2xl">
+
+                <!-- Login Form (Default View) -->
+                <div id="login-form">
+                    <h2 class="text-3xl font-bold mb-2 text-center">Welcome Back</h2>
+                    <p class="text-gray-600 mb-8 text-center">Log in to access reviews.</p>
+                    <form class="space-y-6">
+                        <div>
+                            <label for="login-email" class="block text-sm font-medium text-gray-700">Email
+                                Address</label>
+                            <input type="email" id="login-email"
+                                class="mt-1 w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-baseline">
+                                <label for="login-password"
+                                    class="block text-sm font-medium text-gray-700">Password</label>
+                                <a href="#" class="text-sm text-blue-600 hover:underline">Forgot password?</a>
+                            </div>
+                            <input type="password" id="login-password"
+                                class="mt-1 w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <button type="submit"
+                                class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 text-lg">Log
+                                In</button>
+                        </div>
+                    </form>
+                    <p class="text-center text-sm text-gray-600 mt-8">
+                        Don't have an account? <a href="#" onclick="toggleForms()"
+                            class="font-semibold text-blue-600 hover:underline">Sign up</a>
+                    </p>
+                </div>
+
+                <!-- Sign Up Form (Hidden by Default) -->
+                <div id="signup-form" class="hidden">
+                    <h2 class="text-3xl font-bold mb-2 text-center">Create Your Account</h2>
+                    <p class="text-gray-600 mb-8 text-center">Join the community to get started.</p>
+                    <form class="space-y-6" method="post">
+                        <div>
+                            <label for="signup-email" class="block text-sm font-medium text-gray-700">Email
+                                Address</label>
+                            <input type="email" id="signup-email"
+                                class="mt-1 w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="signup-password"
+                                class="block text-sm font-medium text-gray-700">Password</label>
+                            <input type="password" id="signup-password"
+                                class="mt-1 w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="signup-password-confirm" class="block text-sm font-medium text-gray-700">Confirm
+                                Password</label>
+                            <input type="password" id="signup-password-confirm"
+                                class="mt-1 w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="pt-4">
+                            <button type="submit"
+                                class="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-all duration-300 text-lg">Create
+                                Account</button>
+                        </div>
+                    </form>
+                    <p class="text-center text-sm text-gray-600 mt-8">
+                        Already have an account? <a href="#" onclick="toggleForms()"
+                            class="font-semibold text-blue-600 hover:underline">Log in</a>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.querySelector('#login-form form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const res = await fetch(`${window.APP_CONFIG.API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+
+                    document.cookie = `accessToken=${data.accessToken}; path=/`;
+                    document.cookie = `refreshToken=${data.refreshToken}; path=/`;
+
+                    window.location.href = '/';
+                } else {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message);
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: `Error ${error.statusCode || ''}`,
+                    text: `Login failed: ${error.message}`,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    background: '#f9fafb',
+                    color: '#111827',
+                    confirmButtonColor: '#2563eb'
+                });
+            }
+        });
+    </script>
+
+
+</body>
+
+</html>

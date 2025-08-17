@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification - CurveballCritiques.com</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        .verification-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body class="text-gray-800">
+
+    <div class="verification-container p-6">
+        <div class="text-center mb-8">
+            <a href="index.html" class="text-3xl font-extrabold text-gray-900">
+                <i class="fas fa-baseball-ball mr-2"></i>CurveballCritiques
+            </a>
+        </div>
+        <div id="loading" class="hidden text-center py-10">
+            <svg class="animate-spin h-10 w-10 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            <p class="mt-4 text-gray-600">Verifying your email, please wait...</p>
+        </div>
+
+        <!-- Success Message Card (Default View) -->
+        <div id="success-card" class="w-full max-w-lg bg-white p-8 md:p-12 rounded-xl shadow-2xl text-center">
+            <div class="text-7xl text-green-500 mb-6">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1 class="text-3xl font-bold mb-3">Email Verified!</h1>
+            <p class="text-gray-600 mb-8">Thank you for verifying your email address. Your account is now active and you
+                can log in to access all features.</p>
+            <a href="auth-page.html"
+                class="w-full inline-block bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 text-lg">
+                Proceed to Log In
+            </a>
+        </div>
+
+        <!-- Error/Invalid Link Message Card (Hidden by Default) -->
+        <div id="error-card" class="w-full max-w-lg bg-white p-8 md:p-12 rounded-xl shadow-2xl text-center hidden">
+            <div class="text-7xl text-red-500 mb-6">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <h1 class="text-3xl font-bold mb-3">Verification Failed</h1>
+            <p class="text-gray-600 mb-8">This verification link is either invalid or has expired. Please request a new
+                verification email.</p>
+            <button
+                class="w-full bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-all duration-300 text-lg">
+                Resend Verification Email
+            </button>
+        </div>
+
+        <!-- Developer Toggle Buttons -->
+        <!-- <div class="mt-8 text-center text-sm">
+            <p class="text-gray-500 mb-2">(For demonstration purposes)</p>
+            <button onclick="showSuccess()" class="bg-gray-200 px-3 py-1 rounded-md">Show Success</button>
+            <button onclick="showError()" class="bg-gray-200 px-3 py-1 rounded-md">Show Error</button>
+        </div> -->
+    </div>
+
+    <script>
+        const successCard = document.getElementById('success-card');
+        const errorCard = document.getElementById('error-card');
+        const loading = document.getElementById('loading');
+
+        function showLoading() {
+            loading.classList.remove('hidden');
+            successCard.classList.add('hidden');
+            errorCard.classList.add('hidden');
+        }
+
+        function showSuccess() {
+            loading.classList.add('hidden');
+            successCard.classList.remove('hidden');
+            errorCard.classList.add('hidden');
+        }
+
+        function showError() {
+            loading.classList.add('hidden');
+            successCard.classList.add('hidden');
+            errorCard.classList.remove('hidden');
+        }
+
+        async function verifyEmail(token) {
+            showLoading();
+            try {
+                const response = await fetch(`http://localhost:4002/auth/verify-email?token=${encodeURIComponent(token)}`, {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Verification failed');
+                }
+
+                showSuccess();
+            } catch (error) {
+                showError();
+                console.error('Email verification error:', error);
+            }
+        }
+
+        function getTokenFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('token');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = getTokenFromUrl();
+            if (token) {
+                verifyEmail(token);
+            } else {
+                showError();
+            }
+        });
+    </script>
+
+
+
+</body>
+
+</html>

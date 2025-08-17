@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write a Review - CurveballCritiques.com</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="functions/config.js"></script>
+    <script src="functions/auth.js"></script>
+    <script src="functions/teams.js"></script>
+    <script src="functions/reviews.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- JWT DECODE -->
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            /* A slightly different bg for a page feel */
+        }
+
+        .star-rating .fa-star.selected,
+        .star-rating .fa-star:hover {
+            color: #ffc107;
+        }
+
+        .star-rating .fa-star {
+            color: #e4e5e9;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .progress-step-circle {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        .progress-step-line {
+            content: '';
+            position: absolute;
+            top: 1.5rem;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            transform: translateX(-50%);
+            z-index: -1;
+        }
+
+        /* State-based styling for progress bar */
+        .progress-step.active .progress-step-circle {
+            background-color: #2563eb;
+            /* blue-600 */
+            color: white;
+            border: 2px solid #2563eb;
+        }
+
+        .progress-step.completed .progress-step-circle {
+            background-color: #16a34a;
+            /* green-600 */
+            color: white;
+            border: 2px solid #16a34a;
+        }
+
+        .progress-step.inactive .progress-step-circle {
+            background-color: #ffffff;
+            color: #9ca3af;
+            /* gray-400 */
+            border: 2px solid #d1d5db;
+            /* gray-300 */
+        }
+
+        .progress-step.completed+.progress-step-line {
+            background-color: #16a34a;
+        }
+
+        .progress-step.active+.progress-step-line {
+            background-color: #2563eb;
+        }
+
+        .progress-step.inactive+.progress-step-line {
+            background-color: #d1d5db;
+        }
+    </style>
+</head>
+
+<body class="text-gray-800">
+
+    <!-- Header / Navigation (Consistent with main page) -->
+    <header class="bg-gray-900 text-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-extrabold text-white">
+                <i class="fas fa-baseball-ball mr-2"></i>CurveballCritiques
+            </a>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="index.html#how-it-works"
+                    class="text-white hover:text-blue-300 transition-colors duration-300">How It Works</a>
+                <a href="index.html#for-organizations"
+                    class="text-white hover:text-blue-300 transition-colors duration-300">For Organizations</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="py-12 md:py-20">
+        <div class="container mx-auto px-6 max-w-4xl">
+
+            <!-- Progress Bar -->
+            <div class="w-full mb-12">
+                <div class="grid grid-cols-4 relative">
+                    <div class="progress-step active" id="step-indicator-1">
+                        <div class="progress-step-circle">1</div>
+                        <p class="text-sm mt-2 text-center font-semibold">Find Team</p>
+                    </div>
+                    <div class="progress-step-line bg-gray-300"></div>
+                    <div class="progress-step inactive" id="step-indicator-2">
+                        <div class="progress-step-circle">2</div>
+                        <p class="text-sm mt-2 text-center">Rate</p>
+                    </div>
+                    <div class="progress-step-line bg-gray-300"></div>
+                    <div class="progress-step inactive" id="step-indicator-3">
+                        <div class="progress-step-circle">3</div>
+                        <p class="text-sm mt-2 text-center">Review</p>
+                    </div>
+                    <div class="progress-step-line bg-gray-300"></div>
+                    <div class="progress-step inactive" id="step-indicator-4">
+                        <div class="progress-step-circle"><i class="fas fa-check"></i></div>
+                        <p class="text-sm mt-2 text-center">Submit</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Steps Container -->
+            <div id="multi-step-form" class="bg-white p-8 md:p-12 rounded-xl shadow-2xl">
+                <form id="reviewForm">
+                    <!-- Step 1: Find Team -->
+                    <div id="form-step-1">
+                        <h2 class="text-3xl font-bold mb-2">Let's Find Your Team</h2>
+                        <p class="text-gray-600 mb-8">Start by finding the organization and team you want to review.</p>
+                        <div id="form-step-1">
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="team-search" class="block text-lg font-semibold mb-2">Organization or
+                                        Team
+                                        Name</label>
+                                    <input type="text" id="team-search" class="w-full p-4 border rounded-lg"
+                                        placeholder="e.g., Dallas Tigers">
+                                    <!-- Suggestions dropdown -->
+                                    <div id="suggestions"
+                                        class="hidden border rounded-lg mt-2 bg-white shadow-lg max-h-60 overflow-y-auto">
+                                        <div id="team-suggestions" class="p-2"></div>
+                                    </div>
+                                    <input type="hidden" id="team-id" name="teamId">
+                                </div>
+                                <div>
+                                    <label for="team-season" class="block text-lg font-semibold mb-2">Season</label>
+                                    <select id="team-season" name="season"
+                                        class="w-full p-4 border rounded-lg bg-white">
+                                        <option>Summer 2025</option>
+                                        <option>Fall 2024</option>
+                                        <option>Summer 2024</option>
+                                        <option>Fall 2023</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-10 text-right">
+                            <div class="inline-block cursor-pointer">
+                                <div onclick="goToStep(2)"
+                                    class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-all duration-300 text-lg">
+                                    Next:
+                                    Rate Experience
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Rate Experience -->
+                    <div id="form-step-2" class="hidden space-y-8 mt-10">
+                        <h2 class="text-3xl font-bold mb-2">Rate Your Experience</h2>
+
+                        <div class="md:flex items-center">
+                            <label class="block font-bold text-lg md:w-1/3">Coaching Quality</label>
+                            <div class="star-rating text-3xl md:w-2/3" data-category="coaching">
+                                <input type="hidden" name="coaching" value="0">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                            </div>
+                        </div>
+
+                        <div class="md:flex items-center">
+                            <label class="block font-bold text-lg md:w-1/3">Player Development</label>
+                            <div class="star-rating text-3xl md:w-2/3" data-category="development">
+                                <input type="hidden" name="development" value="0">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                            </div>
+                        </div>
+
+                        <div class="md:flex items-center">
+                            <label class="block font-bold text-lg md:w-1/3">Financial Transparency</label>
+                            <div class="star-rating text-3xl md:w-2/3" data-category="transparency">
+                                <input type="hidden" name="transparency" value="0">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                            </div>
+                        </div>
+
+                        <div class="md:flex items-center">
+                            <label class="block font-bold text-lg md:w-1/3">Team Culture & Politics</label>
+                            <div class="star-rating text-3xl md:w-2/3" data-category="culture">
+                                <input type="hidden" name="culture" value="0">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                            </div>
+                        </div>
+
+                        <div class="md:flex items-center">
+                            <label class="block font-bold text-lg md:w-1/3">Safety & Health</label>
+                            <div class="star-rating text-3xl md:w-2/3" data-category="safety">
+                                <input type="hidden" name="safety" value="0">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                            </div>
+                        </div>
+                        <div class="mt-10 flex justify-between">
+                            <div class="inline-block cursor-pointer">
+                                <div onclick="goToStep(1)"
+                                    class="bg-gray-200 cursor-pointer text-gray-800 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-all duration-300 text-lg">
+                                    Back
+                                </div>
+                            </div>
+                            <div class="inline-block cursor-pointer">
+                                <div onclick="goToStep(3)"
+                                    class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-all duration-300 text-lg">
+                                    Next:
+                                    Rate Experience
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Write Review -->
+                    <div id="form-step-3" class="hidden mt-10 space-y-6">
+                        <h2 class="text-3xl font-bold mb-2">Share Your Story</h2>
+
+                        <div>
+                            <label for="review-title" class="block text-lg font-semibold mb-2">Review Title</label>
+                            <input type="text" id="review-title" name="title" class="w-full p-4 border rounded-lg">
+                        </div>
+                        <div>
+                            <label for="review-body" class="block text-lg font-semibold mb-2">Your Review</label>
+                            <textarea id="review-body" name="body" rows="5"
+                                class="w-full p-4 border rounded-lg"></textarea>
+                        </div>
+                        <div class="mt-10 flex justify-between">
+                            <div class="inline-block cursor-pointer">
+                                <div onclick="goToStep(2)"
+                                    class="bg-gray-200 cursor-pointer text-gray-800 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-all duration-300 text-lg">
+                                    Back
+                                </div>
+                            </div>
+                            <div class="inline-block cursor-pointer">
+                                <div onclick="goToStep(4)"
+                                    class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-all duration-300 text-lg">
+                                    Next:
+                                    Rate Experience
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Submit -->
+                    <div id="form-step-4" class="hidden">
+                        <div class="text-center">
+                            <div class="text-6xl text-green-500 mb-4"><i class="fas fa-check-circle"></i></div>
+                            <h2 class="text-3xl font-bold mb-2">Ready to Submit?</h2>
+                            <p class="text-gray-600 mb-8 max-w-2xl mx-auto">Thank you for contributing to the community.
+                                Your anonymous review will help hundreds of other families make better decisions.</p>
+                            <div class="p-6 bg-gray-100 rounded-lg text-left text-sm text-gray-700 mb-8">
+                                <label class="flex items-start">
+                                    <input type="checkbox"
+                                        class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1 mr-3">
+                                    <span>I affirm that this review is my genuine opinion, based on my own firsthand
+                                        experience, and that I have no personal or business relationship with this
+                                        organization that would create a conflict of interest. I agree to the <a
+                                            href="#" class="text-blue-600 font-semibold hover:underline">Terms of
+                                            Service</a>.</span>
+                                </label>
+                            </div>
+                            <div class="flex justify-center gap-4">
+                               <div onclick="goToStep(3)"
+                                    class="bg-gray-200 cursor-pointer text-gray-800 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-all duration-300 text-lg">
+                                    Back
+                                </div>
+                                <button type="submit"
+                                    class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700">Submit
+                                    My
+                                    Review</button>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-20">
+        <div class="container mx-auto px-6 py-12 text-center text-gray-400">
+            <p>&copy; 2025 CurveballCritiques, LLC. All Rights Reserved. | <a href="#" class="hover:text-white">Privacy
+                    Policy</a> | <a href="#" class="hover:text-white">Terms of Service</a></p>
+        </div>
+    </footer>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) return;
+
+            // Hide current step
+            document.getElementById(`form-step-${currentStep}`).classList.add('hidden');
+            // Update indicator for current step
+            const currentIndicator = document.getElementById(`step-indicator-${currentStep}`);
+            currentIndicator.classList.remove('active');
+            if (step > currentStep) {
+                currentIndicator.classList.add('completed');
+            } else {
+                currentIndicator.classList.remove('completed');
+            }
+
+
+            // Show new step
+            currentStep = step;
+            document.getElementById(`form-step-${currentStep}`).classList.remove('hidden');
+            // Update indicator for new step
+            const newIndicator = document.getElementById(`step-indicator-${currentStep}`);
+            newIndicator.classList.add('active');
+            newIndicator.classList.remove('completed'); // In case we are going back
+        }
+
+        // Star Rating Logic
+        document.querySelectorAll('.star-rating').forEach(starContainer => {
+            const stars = starContainer.querySelectorAll('.fa-star');
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const value = star.dataset.value;
+                    // Reset all stars in this container
+                    stars.forEach(s => {
+                        s.classList.remove('fas', 'selected');
+                        s.classList.add('far');
+                    });
+                    // Highlight stars up to the selected one
+                    for (let i = 0; i < value; i++) {
+                        stars[i].classList.remove('far');
+                        stars[i].classList.add('fas', 'selected');
+                    }
+                });
+            });
+        });
+
+        // LOAD REVIEW FROM TEAMS & ORGANIZATION ===================================================================
+        document.addEventListener('DOMContentLoaded', loadReviews());
+    </script>
+
+</body>
+
+</html>
