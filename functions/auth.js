@@ -97,7 +97,7 @@ async function fetchWithAuth(url, options = {}) {
         }
 
         // Minta token baru
-        const refreshRes = await fetch('http://localhost:4002/auth/refresh', {
+        const refreshRes = await fetch(`${window.APP_CONFIG.API_URL}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refreshToken })

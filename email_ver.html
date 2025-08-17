@@ -108,7 +108,7 @@
         async function verifyEmail(token) {
             showLoading();
             try {
-                const response = await fetch(`http://localhost:4002/auth/verify-email?token=${encodeURIComponent(token)}`, {
+                const response = await fetch(`${window.APP_CONFIG.API_URL}/auth/verify-email?token=${encodeURIComponent(token)}`, {
                     method: 'GET'
                 });
 
