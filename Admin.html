@@ -218,7 +218,8 @@
             margin-top: 10px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid var(--gray-light);
@@ -321,11 +322,11 @@
                 flex-direction: column;
                 align-items: stretch;
             }
-            
+
             .form-inline .form-group {
                 width: 100%;
             }
-            
+
             .btn {
                 width: 100%;
                 margin-top: 10px;
@@ -395,6 +396,28 @@
                     </div>
 
                     <div class="table-responsive" style="margin-top: 20px;">
+                        <!-- GLOBAL SEARCH ORGANIZATIONS -->
+                        <div class="form-inline" style="margin-bottom:10px;">
+                            <input type="text" id="orgGlobalSearch" class="form-control"
+                                placeholder="🔍 Search all columns" style="flex-grow:1;">
+
+                            <!-- STATUS FILTER -->
+                            <div class="dropdown" style="margin-left:10px; position:relative;">
+                                <button class="btn btn-secondary" onclick="toggleDropdown('orgStatusDropdown')">
+                                    Filter Status
+                                </button>
+                                <div id="orgStatusDropdown" class="dropdown-content"
+                                    style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:10px; z-index:1000;">
+                                    <label><input type="checkbox" class="org-status-filter" value="APPROVED">
+                                        APPROVED</label><br>
+                                    <label><input type="checkbox" class="org-status-filter" value="PENDING">
+                                        PENDING</label><br>
+                                    <label><input type="checkbox" class="org-status-filter" value="REJECTED">
+                                        REJECTED</label>
+                                </div>
+                            </div>
+                        </div>
+
                         <table id="orgTable">
                             <thead>
                                 <tr>
@@ -403,6 +426,7 @@
                                     <th>State</th>
                                     <th>Website</th>
                                     <th>Status</th>
+                                    <th>Reason Reject</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -472,6 +496,27 @@
                     </div>
 
                     <div class="table-responsive" style="margin-top: 20px;">
+                        <!-- GLOBAL SEARCH TEAMS -->
+                        <div class="form-inline" style="margin-bottom:10px; margin-top:20px;">
+                            <input type="text" id="teamGlobalSearch" class="form-control"
+                                placeholder="🔍 Search all columns" style="flex-grow:1;">
+
+                            <!-- STATUS FILTER -->
+                            <div class="dropdown" style="margin-left:10px; position:relative;">
+                                <button class="btn btn-secondary" onclick="toggleDropdown('teamStatusDropdown')">
+                                    Filter Status
+                                </button>
+                                <div id="teamStatusDropdown" class="dropdown-content"
+                                    style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:10px; z-index:1000;">
+                                    <label><input type="checkbox" class="team-status-filter" value="APPROVED">
+                                        APPROVED</label><br>
+                                    <label><input type="checkbox" class="team-status-filter" value="PENDING">
+                                        PENDING</label><br>
+                                    <label><input type="checkbox" class="team-status-filter" value="REJECTED">
+                                        REJECTED</label>
+                                </div>
+                            </div>
+                        </div>
                         <table id="teamTable">
                             <thead>
                                 <tr>
@@ -482,6 +527,7 @@
                                     <th>City</th>
                                     <th>State</th>
                                     <th>Status</th>
+                                    <th>Reason Reject</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -493,12 +539,12 @@
         </div>
 
         <script>
-            document.getElementById('orgCsvFile').addEventListener('change', function(e) {
+            document.getElementById('orgCsvFile').addEventListener('change', function (e) {
                 const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
                 document.getElementById('orgCsvFileName').textContent = fileName;
             });
 
-            document.getElementById('teamCsvFile').addEventListener('change', function(e) {
+            document.getElementById('teamCsvFile').addEventListener('change', function (e) {
                 const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
                 document.getElementById('teamCsvFileName').textContent = fileName;
             });
@@ -532,7 +578,7 @@
 
                 data.forEach(org => {
                     const tr = document.createElement('tr');
-                    
+
                     // Create status badge
                     let statusBadge;
                     if (org.status === 'APPROVED') {
@@ -542,13 +588,14 @@
                     } else {
                         statusBadge = `<span class="badge badge-rejected">${org.status}</span>`;
                     }
-                    
+
                     tr.innerHTML = `
                         <td class="editable" data-field="name" data-id="${org.id}">${org.name}</td>
                         <td class="editable" data-field="city" data-id="${org.id}">${org.city}</td>
                         <td class="editable" data-field="state" data-id="${org.id}">${org.state}</td>
                         <td class="editable" data-field="website" data-id="${org.id}">${org.website || '-'}</td>
                         <td class="editable" data-field="status" data-id="${org.id}">${statusBadge}</td>
+                        <td >${org.rejectedReason || '-'}</td>
                         <td class="actions">
                             <button class="btn btn-danger btn-sm" onclick="deleteOrganization('${org.id}')">
                                 <i class="fas fa-trash"></i> Delete
@@ -583,7 +630,7 @@
                     } else {
                         statusBadge = `<span class="badge badge-rejected">${team.status}</span>`;
                     }
-                    
+
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="editable" data-field="organizationId" data-id="${team.id}">${team.organization.name}</td>
@@ -593,6 +640,7 @@
                         <td class="editable" data-field="city" data-id="${team.id}">${team.city || '-'}</td>
                         <td class="editable" data-field="state" data-id="${team.id}">${team.state || '-'}</td>
                         <td class="editable" data-field="status" data-id="${team.id}">${statusBadge}</td>
+                        <td >${team.rejectedReason || '-'}</td>
                         <td class="actions">
                             <button class="btn btn-danger btn-sm" onclick="deleteTeam('${team.id}')">
                                 <i class="fas fa-trash"></i> Delete
@@ -644,39 +692,76 @@
                             editableElement.value = currentValue === '-' ? '' : currentValue;
                         }
 
-                        cell.innerHTML = ''; 
-                        cell.appendChild(editableElement); 
+                        cell.innerHTML = '';
+                        cell.appendChild(editableElement);
                         editableElement.focus();
                         cell.style.backgroundColor = 'var(--primary-light)';
 
                         const saveChange = async () => {
                             let newValue = (field === 'status' || field === 'organizationId') ? editableElement.value : editableElement.value.trim();
-                            
-                            // Don't save if value didn't change
+
+                            // Jangan simpan kalau tidak berubah
                             if (newValue === currentValue || (currentValue === '-' && !newValue)) {
-                                renderCell();
+                                renderCell(currentValue);
                                 return;
                             }
-                            
+
+                            let bodyData = { [field]: newValue };
+
+                            // Jika REJECTED, minta alasan
+                            if (field === 'status' && newValue === 'REJECTED') {
+                                const { value: reason, isConfirmed } = await Swal.fire({
+                                    title: 'Rejected Reason',
+                                    input: 'text',
+                                    inputPlaceholder: 'Enter reason...',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Save',
+                                    cancelButtonText: 'Cancel',
+                                    inputValidator: (value) => {
+                                        if (!value) return 'Please enter a reason!';
+                                    }
+                                });
+
+                                if (!isConfirmed) {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Failed to save changes (reason required)',
+                                    });
+                                    renderCell(currentValue);
+                                    return;
+                                }
+
+                                bodyData.rejectedReason = reason;
+                            }
+
                             if (newValue || field === 'status' || field === 'organizationId') {
                                 const url = type === 'organization' ? `${API_BASE}/orgs/${id}` : `${API_BASE}/teams/${id}`;
                                 try {
                                     await fetch(url, {
                                         method: 'PATCH',
-                                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` },
-                                        body: JSON.stringify({ [field]: newValue })
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            Authorization: `Bearer ${getCookie('accessToken')}`
+                                        },
+                                        body: JSON.stringify(bodyData)
                                     });
-                                } catch (err) { 
-                                    console.error('Failed to save:', err); 
+                                } catch (err) {
+                                    console.error('Failed to save:', err);
                                     Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to save changes' });
+                                    renderCell(currentValue);
+                                    return;
                                 }
                             }
 
-                            renderCell();
+                            renderCell(newValue);
                             if (type === 'organization') fetchOrganizations(); else fetchTeams();
                         };
 
-                        const renderCell = () => {
+
+                        const renderCell = (newValue) => {
+                            if (!newValue) return;
+
                             if (field === 'organizationId') {
                                 const selectedOrg = orgs.find(o => o.id === newValue);
                                 cell.textContent = selectedOrg ? selectedOrg.name : currentValue;
@@ -699,13 +784,13 @@
                         editableElement.addEventListener('blur', saveChange);
                         editableElement.addEventListener('keydown', e => {
                             if (e.key === 'Enter') editableElement.blur();
-                            if (e.key === 'Escape') { 
+                            if (e.key === 'Escape') {
                                 if (field === 'status') {
                                     cell.innerHTML = currentValue;
                                 } else {
-                                    cell.textContent = currentValue; 
+                                    cell.textContent = currentValue;
                                 }
-                                cell.style.backgroundColor = ''; 
+                                cell.style.backgroundColor = '';
                             }
                         });
                     });
@@ -731,18 +816,18 @@
                         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` },
                         body: JSON.stringify({ name, city, state, website })
                     });
-                    
+
                     if (!response.ok) {
                         const errorData = await response.json();
                         throw new Error(errorData.message || 'Failed to create organization');
                     }
-                    
+
                     // Clear form fields
                     document.getElementById('orgName').value = '';
                     document.getElementById('orgCity').value = '';
                     document.getElementById('orgState').value = '';
                     document.getElementById('orgWebsite').value = '';
-                    
+
                     Swal.fire({ icon: 'success', title: 'Success', text: 'Organization created successfully' });
                     fetchOrganizations();
                 } catch (error) {
@@ -760,20 +845,20 @@
                     cancelButtonColor: '#d33',
                     confirmButtonText: 'Yes, delete it!'
                 });
-                
+
                 if (!result.isConfirmed) return;
-                
+
                 try {
                     const res = await fetch(`${API_BASE}/orgs/${id}`, {
                         method: 'DELETE',
                         headers: { Authorization: `Bearer ${getCookie('accessToken')}` }
                     });
-                    
+
                     if (res.status !== 200) {
                         const data = await res.json();
                         throw new Error(data.message || 'Delete failed');
                     }
-                    
+
                     Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Organization has been deleted.' });
                     fetchOrganizations();
                 } catch (err) {
@@ -794,7 +879,7 @@
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Please select an organization' });
                     return;
                 }
-                
+
                 if (!name) {
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Team name is required' });
                     return;
@@ -806,19 +891,19 @@
                         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` },
                         body: JSON.stringify({ organizationId, name, ageLevel, division, city, state })
                     });
-                    
+
                     if (!response.ok) {
                         const errorData = await response.json();
                         throw new Error(errorData.message || 'Failed to create team');
                     }
-                    
+
                     // Clear form fields
                     document.getElementById('teamName').value = '';
                     document.getElementById('teamAgeLevel').value = '';
                     document.getElementById('teamDivision').value = '';
                     document.getElementById('teamCity').value = '';
                     document.getElementById('teamState').value = '';
-                    
+
                     Swal.fire({ icon: 'success', title: 'Success', text: 'Team created successfully' });
                     fetchTeams();
                 } catch (error) {
@@ -836,20 +921,20 @@
                     cancelButtonColor: '#d33',
                     confirmButtonText: 'Yes, delete it!'
                 });
-                
+
                 if (!result.isConfirmed) return;
-                
+
                 try {
-                    const res = await fetch(`${API_BASE}/teams/${id}`, { 
-                        method: 'DELETE', 
-                        headers: { Authorization: `Bearer ${getCookie('accessToken')}` } 
+                    const res = await fetch(`${API_BASE}/teams/${id}`, {
+                        method: 'DELETE',
+                        headers: { Authorization: `Bearer ${getCookie('accessToken')}` }
                     });
-                    
+
                     if (!res.ok) {
                         const errorData = await res.json();
                         throw new Error(errorData.message || 'Delete failed');
                     }
-                    
+
                     Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Team has been deleted.' });
                     fetchTeams();
                 } catch (err) {
@@ -901,12 +986,12 @@
                         headers: { Authorization: `Bearer ${getCookie('accessToken')}` },
                         body: formData
                     });
-                    
+
                     if (!res.ok) {
                         const errorData = await res.json();
                         throw new Error(errorData.message || 'Upload failed');
                     }
-                    
+
                     const data = await res.json();
                     Swal.fire({
                         icon: 'success',
@@ -916,11 +1001,11 @@
                             <p><i class="fas fa-exclamation-circle" style="color: #f8961e;"></i> Skipped: ${data.data.skipped.length > 0 ? data.data.skipped.join(', ') : 'None'}</p>
                         `
                     });
-                    
+
                     // Reset file input
                     fileInput.value = '';
                     document.getElementById('orgCsvFileName').textContent = 'No file chosen';
-                    
+
                     fetchOrganizations();
                 } catch (err) {
                     console.error('Upload failed:', err);
@@ -931,12 +1016,12 @@
             async function uploadTeamCsv() {
                 const fileInput = document.getElementById('teamCsvFile');
                 const orgId = document.getElementById('teamCsvOrgSelect').value;
-                
+
                 if (!fileInput.files.length) {
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Please select a CSV file' });
                     return;
                 }
-                
+
                 if (!orgId) {
                     Swal.fire({ icon: 'error', title: 'Error', text: 'Please select an organization' });
                     return;
@@ -952,12 +1037,12 @@
                         headers: { Authorization: `Bearer ${getCookie('accessToken')}` },
                         body: formData
                     });
-                    
+
                     if (!res.ok) {
                         const errorData = await res.json();
                         throw new Error(errorData.message || 'Upload failed');
                     }
-                    
+
                     const data = await res.json();
                     Swal.fire({
                         icon: 'success',
@@ -967,11 +1052,11 @@
                             <p><i class="fas fa-exclamation-circle" style="color: #f8961e;"></i> Skipped: ${data.data.skipped.length > 0 ? data.data.skipped.join(', ') : 'None'}</p>
                         `
                     });
-                    
+
                     // Reset file input
                     fileInput.value = '';
                     document.getElementById('teamCsvFileName').textContent = 'No file chosen';
-                    
+
                     fetchTeams();
                 } catch (err) {
                     console.error('Upload failed:', err);
@@ -982,6 +1067,65 @@
             // ---------------- Init ----------------
             document.addEventListener('DOMContentLoaded', () => {
                 checkCredentials();
+            });
+
+            // Toggle dropdown
+            function toggleDropdown(id) {
+                const el = document.getElementById(id);
+                el.style.display = el.style.display === "block" ? "none" : "block";
+            }
+
+            // General filtering function
+            function filterTableGlobalAndStatus(tableId, searchInputId, statusClass, statusIndex) {
+                const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+                const searchValue = document.getElementById(searchInputId).value.toLowerCase();
+
+                // Get checked status filters
+                const checkedStatuses = Array.from(document.querySelectorAll(`.${statusClass}:checked`)).map(cb => cb.value);
+
+                rows.forEach(row => {
+                    let textMatch = false;
+                    let statusMatch = false;
+
+                    // Check global search (any column)
+                    const cells = row.querySelectorAll("td");
+                    for (let cell of cells) {
+                        if (cell.textContent.toLowerCase().includes(searchValue)) {
+                            textMatch = true;
+                            break;
+                        }
+                    }
+                    if (!searchValue) textMatch = true; // no search = match all
+
+                    // Check status filter
+                    const statusText = row.cells[statusIndex]?.textContent.trim();
+                    if (checkedStatuses.length === 0 || checkedStatuses.includes(statusText)) {
+                        statusMatch = true;
+                    }
+
+                    // Show/Hide row
+                    row.style.display = (textMatch && statusMatch) ? "" : "none";
+                });
+            }
+
+            // Event listeners ORGS
+            document.getElementById("orgGlobalSearch").addEventListener("input", () => {
+                filterTableGlobalAndStatus("orgTable", "orgGlobalSearch", "org-status-filter", 4);
+            });
+            document.querySelectorAll(".org-status-filter").forEach(cb => {
+                cb.addEventListener("change", () => {
+                    filterTableGlobalAndStatus("orgTable", "orgGlobalSearch", "org-status-filter", 4);
+                });
+            });
+
+            // Event listeners TEAMS
+            document.getElementById("teamGlobalSearch").addEventListener("input", () => {
+                filterTableGlobalAndStatus("teamTable", "teamGlobalSearch", "team-status-filter", 6);
+            });
+            document.querySelectorAll(".team-status-filter").forEach(cb => {
+                cb.addEventListener("change", () => {
+                    filterTableGlobalAndStatus("teamTable", "teamGlobalSearch", "team-status-filter", 6);
+                });
             });
         </script>
 </body>
