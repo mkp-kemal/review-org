@@ -1,0 +1,207 @@
+<!-- sidebar.html -->
+<div id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <h3><i class="fas fa-shield-alt"></i> <span class="menu-text">Admin Menu</span></h3>
+    <div id="sidebarToggle" class="sidebar-toggle">
+      <i class="fas fa-chevron-left"></i>
+    </div>
+  </div>
+  <ul class="sidebar-menu">
+    <li><a href="#" onclick="loadPage('organizations')"><i class="fas fa-building"></i> <span
+          class="menu-text">Organizations</span></a></li>
+    <li><a href="#" onclick="loadPage('teams')"><i class="fas fa-users"></i> <span class="menu-text">Teams</span></a>
+    </li>
+    <li><a href="#" onclick="loadPage('reviews')"><i class="fas fa-quote-left"></i> <span
+          class="menu-text">Reviews</span></a></li>
+    <li><a href="#" onclick="loadPage('settings')"><i class="fas fa-cog"></i> <span
+          class="menu-text">Settings</span></a></li>
+  </ul>
+  <div class="sidebar-footer">
+    <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a>
+  </div>
+</div>
+
+<style>
+  .sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: var(--primary);
+    color: var(--white);
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 25px 0;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-header {
+    padding: 0 25px 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sidebar-header h3 {
+    color: var(--white);
+    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+  }
+
+  .sidebar-toggle {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: var(--transition);
+    padding: 5px;
+  }
+
+  .sidebar-toggle:hover {
+    color: var(--white);
+  }
+
+  .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+
+  .sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 14px 25px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: var(--transition);
+    font-weight: 500;
+    border-left: 4px solid transparent;
+    white-space: nowrap;
+  }
+
+  .sidebar-menu li a:hover,
+  .sidebar-menu li a.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    border-left-color: var(--white);
+  }
+
+  .sidebar-menu li a i {
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .sidebar-footer {
+    padding: 20px 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .sidebar-footer a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: var(--transition);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .sidebar-footer a:hover {
+    color: var(--white);
+  }
+
+  /* Collapsed state */
+  .sidebar.collapsed {
+    width: 70px;
+  }
+
+  .sidebar.collapsed .menu-text {
+    display: none;
+  }
+
+  .sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(180deg);
+  }
+
+  .sidebar.collapsed .sidebar-menu li a {
+    justify-content: center;
+    padding: 14px 0;
+  }
+
+  .sidebar.collapsed .sidebar-menu li a i {
+    margin-right: 0;
+    font-size: 1.3rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .sidebar:not(.collapsed) {
+      width: 70px;
+    }
+
+    .sidebar:not(.collapsed) .menu-text {
+      display: none;
+    }
+
+    .sidebar:not(.collapsed) .sidebar-menu li a {
+      justify-content: center;
+      padding: 14px 0;
+    }
+
+    .sidebar:not(.collapsed) .sidebar-menu li a i {
+      margin-right: 0;
+      font-size: 1.3rem;
+    }
+  }
+</style>
+
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('sidebarToggle');
+  const mainContent = document.getElementById('main-content');
+
+  // Check localStorage for saved state
+  const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+  if (isCollapsed) {
+    sidebar.classList.add('collapsed');
+    mainContent.style.marginLeft = '70px';
+  }
+
+  // Toggle sidebar
+  toggleBtn.addEventListener('click', function () {
+    sidebar.classList.toggle('collapsed');
+
+    // Update main content margin
+    if (sidebar.classList.contains('collapsed')) {
+      mainContent.style.marginLeft = '70px';
+      localStorage.setItem('sidebarCollapsed', 'true');
+    } else {
+      mainContent.style.marginLeft = '250px';
+      localStorage.setItem('sidebarCollapsed', 'false');
+    }
+  });
+
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener('click', function (e) {
+    if (window.innerWidth <= 768 && !sidebar.contains(e.target)) {
+      sidebar.classList.add('collapsed');
+      mainContent.style.marginLeft = '70px';
+      localStorage.setItem('sidebarCollapsed', 'true');
+    }
+  });
+</script>
