@@ -1,9 +1,10 @@
 <div>
     <div class="card">
-        <div class="card-header">
-            <h2><i class="fas fa-building"></i> Organizations</h2>
+        <div class="card-header bg-primary text-white">
+            <h2><i class="fas fa-building mr-2"></i> Organizations</h2>
         </div>
         <div class="card-body">
+            <!-- Add Organization Form -->
             <div class="form-inline">
                 <div class="form-group">
                     <input type="text" id="orgName" class="form-control" placeholder="Name">
@@ -17,20 +18,13 @@
                 <div class="form-group">
                     <input type="text" id="orgWebsite" class="form-control" placeholder="Website">
                 </div>
-                <!-- <div class="form-group">
-                            <select id="orgStatus" class="form-control">
-                                <option value="PENDING">PENDING</option>
-                                <option value="APPROVED">APPROVED</option>
-                                <option value="REJECTED">REJECTED</option>
-                            </select>
-                        </div> -->
                 <button class="btn btn-primary" onclick="createOrganization()">
                     <i class="fas fa-plus"></i> Add Organization
                 </button>
             </div>
 
             <!-- CSV Upload -->
-            <div class="form-inline" style="margin-top:20px;">
+            <div class="form-inline mt-3">
                 <div class="form-group" style="flex-grow: 1;">
                     <div class="file-input-wrapper">
                         <button class="file-input-btn">
@@ -45,31 +39,53 @@
                 </button>
             </div>
 
-            <div class="table-responsive" style="margin-top: 20px;">
-                <!-- GLOBAL SEARCH ORGANIZATIONS -->
-                <div class="form-inline" style="margin-bottom:10px;">
-                    <input type="text" id="orgGlobalSearch" class="form-control" placeholder="🔍 Search all columns"
-                        style="flex-grow:1;">
+            <div class="table-responsive mt-3">
+                <!-- Search and Filter -->
+                <div class="form-inline mb-3">
+                    <div class="form-group" style="flex-grow: 1;">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="orgGlobalSearch" class="form-control"
+                                placeholder="Search organizations...">
+                        </div>
+                    </div>
 
-                    <!-- STATUS FILTER -->
-                    <div class="dropdown" style="margin-left:10px; position:relative;">
-                        <button class="btn btn-secondary" onclick="toggleDropdown('orgStatusDropdown')">
-                            Filter Status
+                    <div class="dropdown ml-2">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="orgStatusDropdown"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-filter"></i> Filter Status
                         </button>
-                        <div id="orgStatusDropdown" class="dropdown-content"
-                            style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:10px; z-index:1000;">
-                            <label><input type="checkbox" class="org-status-filter" value="APPROVED">
-                                APPROVED</label><br>
-                            <label><input type="checkbox" class="org-status-filter" value="PENDING">
-                                PENDING</label><br>
-                            <label><input type="checkbox" class="org-status-filter" value="REJECTED">
-                                REJECTED</label>
+                        <div class="dropdown-menu" aria-labelledby="orgStatusDropdown">
+                            <a class="dropdown-item" href="#">
+                                <div class="form-check">
+                                    <input class="form-check-input org-status-filter" type="checkbox" value="APPROVED"
+                                        id="filterApproved" checked>
+                                    <label class="form-check-label" for="filterApproved">APPROVED</label>
+                                </div>
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <div class="form-check">
+                                    <input class="form-check-input org-status-filter" type="checkbox" value="PENDING"
+                                        id="filterPending" checked>
+                                    <label class="form-check-label" for="filterPending">PENDING</label>
+                                </div>
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <div class="form-check">
+                                    <input class="form-check-input org-status-filter" type="checkbox" value="REJECTED"
+                                        id="filterRejected" checked>
+                                    <label class="form-check-label" for="filterRejected">REJECTED</label>
+                                </div>
+                            </a>
                         </div>
                     </div>
                 </div>
 
-                <table id="orgTable">
-                    <thead>
+                <!-- Organizations Table -->
+                <table id="orgTable" class="table table-hover">
+                    <thead class="thead-light">
                         <tr>
                             <th>Name</th>
                             <th>City</th>
@@ -82,10 +98,106 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted" id="orgPaginationInfo"></div>
+                    <nav aria-label="Organizations pagination">
+                        <ul class="pagination mb-0" id="orgPaginationControls">
+                            <!-- Pagination controls will be inserted here by JavaScript -->
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .badge-approved {
+        background-color: #4cc9f0;
+        color: white;
+    }
+
+    .badge-pending {
+        background-color: #f8961e;
+        color: white;
+    }
+
+    .badge-rejected {
+        background-color: #f72585;
+        color: white;
+    }
+
+    /* File input styles */
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    .file-input-wrapper input[type=file] {
+        font-size: 100px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+    }
+
+    .file-input-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background-color: #e9ecef;
+        border-radius: 0.375rem;
+        cursor: pointer;
+    }
+
+    .file-input-btn:hover {
+        background-color: #d1d7e0;
+    }
+
+    .file-name {
+        margin-left: 10px;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    /* Pagination styles */
+    .pagination {
+        margin: 0;
+    }
+
+    .page-item.active .page-link {
+        background-color: #4361ee;
+        border-color: #4361ee;
+    }
+
+    .page-link {
+        color: #4361ee;
+    }
+
+    .page-link:hover {
+        color: #3f37c9;
+    }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+    }
+
+    #orgPaginationInfo {
+        font-size: 0.9rem;
+    }
+
+    /* Table styles */
+    .table-hover tbody tr:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+    }
+
+    .actions {
+        white-space: nowrap;
+    }
+</style>
 
 <script>
     function getCookie(name) {
@@ -176,7 +288,7 @@
             const data = await res.json();
             const tbody = document.querySelector('#orgTable tbody');
 
-            orgsList = data;
+            window.orgsList = data;
 
             tbody.innerHTML = '';
 
@@ -208,7 +320,7 @@
                 tbody.appendChild(tr);
             });
 
-            enableEditableCells('.editable', 'organization', orgsList);
+            enableEditableCells('.editable', 'organization', window.orgsList);
         } catch (err) {
             console.error("fetchOrganizations error:", err);
         }
@@ -519,5 +631,213 @@
     });
 
     checkCredentials();
+
+    async function fetchOrganizations() {
+        try {
+            const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
+            });
+            window.allOrgs = await res.json();
+            window.orgsList = window.allOrgs;
+
+            renderTable();
+            renderPaginationControls();
+        } catch (err) {
+            console.error("fetchOrganizations error:", err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load organizations'
+            });
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.querySelector('#orgTable tbody');
+        tbody.innerHTML = '';
+
+        // Filter by status first
+        const checkedStatuses = Array.from(document.querySelectorAll('.org-status-filter:checked')).map(cb => cb.value);
+        let filteredOrgs = window.allOrgs;
+
+        if (checkedStatuses.length > 0) {
+            filteredOrgs = window.allOrgs.filter(org => checkedStatuses.includes(org.status));
+        }
+
+        // Apply search filter
+        const searchTerm = document.getElementById('orgGlobalSearch').value.toLowerCase();
+        if (searchTerm) {
+            filteredOrgs = filteredOrgs.filter(org =>
+                org.name.toLowerCase().includes(searchTerm) ||
+                org.city.toLowerCase().includes(searchTerm) ||
+                org.state.toLowerCase().includes(searchTerm) ||
+                (org.website && org.website.toLowerCase().includes(searchTerm)) ||
+                org.status.toLowerCase().includes(searchTerm) ||
+                (org.rejectedReason && org.rejectedReason.toLowerCase().includes(searchTerm))
+            );
+        }
+
+        // Calculate pagination
+        const startIndex = (window.currentPageOrg - 1) * window.itemsPerPageOrg;
+        const endIndex = Math.min(startIndex + window.itemsPerPageOrg, filteredOrgs.length);
+        const paginatedOrgs = filteredOrgs.slice(startIndex, endIndex);
+
+        // Update pagination info
+        document.getElementById('orgPaginationInfo').textContent =
+            `Showing ${startIndex + 1} to ${endIndex} of ${filteredOrgs.length} organizations`;
+
+        // Render table rows
+        paginatedOrgs.forEach(org => {
+            const tr = document.createElement('tr');
+
+            let statusBadge;
+            if (org.status === 'APPROVED') {
+                statusBadge = `<span class="badge badge-approved">${org.status}</span>`;
+            } else if (org.status === 'PENDING') {
+                statusBadge = `<span class="badge badge-pending">${org.status}</span>`;
+            } else {
+                statusBadge = `<span class="badge badge-rejected">${org.status}</span>`;
+            }
+
+            tr.innerHTML = `
+                <td class="editable" data-field="name" data-id="${org.id}">${org.name}</td>
+                <td class="editable" data-field="city" data-id="${org.id}">${org.city}</td>
+                <td class="editable" data-field="state" data-id="${org.id}">${org.state}</td>
+                <td class="editable" data-field="website" data-id="${org.id}">${org.website || '-'}</td>
+                <td class="editable" data-field="status" data-id="${org.id}">${statusBadge}</td>
+                <td>${org.rejectedReason || '-'}</td>
+                <td class="actions">
+                    <button class="btn btn-danger btn-sm" onclick="deleteOrganization('${org.id}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        enableEditableCells('.editable', 'organization', window.orgsList);
+    }
+
+    function renderPaginationControls() {
+        // Calculate total items after filtering
+        const checkedStatuses = Array.from(document.querySelectorAll('.org-status-filter:checked')).map(cb => cb.value);
+        let filteredOrgs = window.allOrgs;
+
+        if (checkedStatuses.length > 0) {
+            filteredOrgs = window.allOrgs.filter(org => checkedStatuses.includes(org.status));
+        }
+
+        const searchTerm = document.getElementById('orgGlobalSearch').value.toLowerCase();
+        if (searchTerm) {
+            filteredOrgs = filteredOrgs.filter(org =>
+                org.name.toLowerCase().includes(searchTerm) ||
+                org.city.toLowerCase().includes(searchTerm) ||
+                org.state.toLowerCase().includes(searchTerm) ||
+                (org.website && org.website.toLowerCase().includes(searchTerm)) ||
+                org.status.toLowerCase().includes(searchTerm) ||
+                (org.rejectedReason && org.rejectedReason.toLowerCase().includes(searchTerm))
+            );
+        }
+
+        const totalPages = Math.ceil(filteredOrgs.length / window.itemsPerPageOrg);
+        const paginationControls = document.getElementById('orgPaginationControls');
+        paginationControls.innerHTML = '';
+
+        // Previous button
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${window.currentPageOrg === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `
+            <a class="page-link" href="#" onclick="changePage(${window.currentPageOrg - 1})" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        `;
+        paginationControls.appendChild(prevLi);
+
+        // Page numbers
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, window.currentPageOrg - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        if (startPage > 1) {
+            const firstLi = document.createElement('li');
+            firstLi.className = 'page-item';
+            firstLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(1)">1</a>`;
+            paginationControls.appendChild(firstLi);
+
+            if (startPage > 2) {
+                const ellipsisLi = document.createElement('li');
+                ellipsisLi.className = 'page-item disabled';
+                ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                paginationControls.appendChild(ellipsisLi);
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageLi = document.createElement('li');
+            pageLi.className = `page-item ${i === window.currentPageOrg ? 'active' : ''}`;
+            pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+            paginationControls.appendChild(pageLi);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsisLi = document.createElement('li');
+                ellipsisLi.className = 'page-item disabled';
+                ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                paginationControls.appendChild(ellipsisLi);
+            }
+
+            const lastLi = document.createElement('li');
+            lastLi.className = 'page-item';
+            lastLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a>`;
+            paginationControls.appendChild(lastLi);
+        }
+
+        // Next button
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${window.currentPageOrg === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `
+            <a class="page-link" href="#" onclick="changePage(${window.currentPageOrg + 1})" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        `;
+        paginationControls.appendChild(nextLi);
+    }
+
+    function changePage(page) {
+        if (page < 1 || page > Math.ceil(window.allOrgs.length / window.itemsPerPageOrg)) return;
+        window.currentPageOrg = page;
+        renderTable();
+        renderPaginationControls();
+    }
+
+    // Event listeners
+    document.getElementById('orgGlobalSearch').addEventListener('input', function () {
+        window.currentPageOrg = 1;
+        renderTable();
+        renderPaginationControls();
+    });
+
+    document.querySelectorAll('.org-status-filter').forEach(cb => {
+        cb.addEventListener('change', function () {
+            window.currentPageOrg = 1;
+            renderTable();
+            renderPaginationControls();
+        });
+    });
+
+    // File input display
+    document.getElementById('orgCsvFile').addEventListener('change', function (e) {
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
+        document.getElementById('orgCsvFileName').textContent = fileName;
+    });
+
+    // Keep all other functions (createOrganization, deleteOrganization, uploadOrgCsv, enableEditableCells, etc.)
+    // exactly the same as in your original code
 
 </script>

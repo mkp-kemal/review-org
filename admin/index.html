@@ -342,16 +342,29 @@
         <script>
             // review.js
             (function (global) {
-                // state tunggal global
+                // reviews
                 global.reviewState = global.reviewState || {
                     currentReviewId: null,
                     currentResponse: null,
                     currentPage: 1,
                     itemsPerPage: 10,
                     allReviews: [],
-                    filteredReviews: []
+                    filteredReviews: [],
+
+                    // orgs
+                    currentPageOrg: 1,
+                    itemsPerPageOrg: 2,
+                    allOrgs: [],
+                    orgsList: [],
+
+                    // teams
+                    currentPageTeam: 1,
+                    itemsPerPageTeam: 2,
+                    allTeams: [],
+                    teamsList: []
                 };
 
+                // review
                 global.currentReviewId = global.reviewState.currentReviewId;
                 global.currentResponse = global.reviewState.currentResponse;
                 global.currentPage = global.reviewState.currentPage;
@@ -359,8 +372,17 @@
                 global.allReviews = global.reviewState.allReviews;
                 global.filteredReviews = global.reviewState.filteredReviews;
 
+                // org
+                global.currentPageOrg = global.reviewState.currentPageOrg;
+                global.itemsPerPageOrg = global.reviewState.itemsPerPageOrg;
+                global.allOrgs = global.reviewState.allOrgs;
+                global.orgsList = global.reviewState.orgsList;
 
-
+                 // team
+                global.currentPageTeam = global.reviewState.currentPageTeam;
+                global.itemsPerPageTeam = global.reviewState.itemsPerPageTeam;
+                global.allTeams = global.reviewState.allTeams;
+                global.teamsList = global.reviewState.TeamsList;
             })(window);
 
             function loadSidebar() {

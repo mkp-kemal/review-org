@@ -1,9 +1,10 @@
 <div>
     <div class="card">
-        <div class="card-header">
-            <h2><i class="fas fa-users"></i> Teams</h2>
+        <div class="card-header bg-primary text-white">
+            <h2><i class="fas fa-users mr-2"></i> Teams</h2>
         </div>
         <div class="card-body">
+            <!-- Add Team Form -->
             <div class="form-inline">
                 <div class="form-group">
                     <select id="teamOrgSelect" class="form-control">
@@ -25,20 +26,13 @@
                 <div class="form-group">
                     <input type="text" id="teamState" class="form-control" placeholder="State">
                 </div>
-                <!-- <div class="form-group">
-                            <select id="teamStatus" class="form-control">
-                                <option value="PENDING">PENDING</option>
-                                <option value="APPROVED">APPROVED</option>
-                                <option value="REJECTED">REJECTED</option>
-                            </select>
-                        </div> -->
                 <button class="btn btn-primary" onclick="createTeam()">
                     <i class="fas fa-plus"></i> Add Team
                 </button>
             </div>
 
             <!-- CSV Upload -->
-            <div class="form-inline" style="margin-top:20px;">
+            <div class="form-inline mt-3">
                 <div class="form-group">
                     <select id="teamCsvOrgSelect" class="form-control">
                         <option value="">Select Organization</option>
@@ -58,30 +52,48 @@
                 </button>
             </div>
 
-            <div class="table-responsive" style="margin-top: 20px;">
-                <!-- GLOBAL SEARCH TEAMS -->
-                <div class="form-inline" style="margin-bottom:10px; margin-top:20px;">
-                    <input type="text" id="teamGlobalSearch" class="form-control" placeholder="🔍 Search all columns"
-                        style="flex-grow:1;">
+            <div class="table-responsive mt-3">
+                <!-- Search and Filter -->
+                <div class="form-inline mb-3">
+                    <div class="form-group" style="flex-grow: 1;">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="teamGlobalSearch" class="form-control" placeholder="Search teams...">
+                        </div>
+                    </div>
 
-                    <!-- STATUS FILTER -->
-                    <div class="dropdown" style="margin-left:10px; position:relative;">
-                        <button class="btn btn-secondary" onclick="toggleDropdown('teamStatusDropdown')">
-                            Filter Status
+                    <div class="dropdown ml-2">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="teamStatusDropdown"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-filter"></i> Filter Status
                         </button>
-                        <div id="teamStatusDropdown" class="dropdown-content"
-                            style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:10px; z-index:1000;">
-                            <label><input type="checkbox" class="team-status-filter" value="APPROVED">
-                                APPROVED</label><br>
-                            <label><input type="checkbox" class="team-status-filter" value="PENDING">
-                                PENDING</label><br>
-                            <label><input type="checkbox" class="team-status-filter" value="REJECTED">
-                                REJECTED</label>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="teamStatusDropdown">
+                            <div class="px-3 py-2">
+                                <div class="form-check">
+                                    <input class="form-check-input team-status-filter" type="checkbox" value="APPROVED"
+                                        id="filterTeamApproved" checked>
+                                    <label class="form-check-label" for="filterTeamApproved">APPROVED</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input team-status-filter" type="checkbox" value="PENDING"
+                                        id="filterTeamPending" checked>
+                                    <label class="form-check-label" for="filterTeamPending">PENDING</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input team-status-filter" type="checkbox" value="REJECTED"
+                                        id="filterTeamRejected" checked>
+                                    <label class="form-check-label" for="filterTeamRejected">REJECTED</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <table id="teamTable">
-                    <thead>
+
+                <!-- Teams Table -->
+                <table id="teamTable" class="table table-hover">
+                    <thead class="thead-light">
                         <tr>
                             <th>Organization</th>
                             <th>Name</th>
@@ -96,53 +108,25 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted" id="teamPaginationInfo"></div>
+                    <nav aria-label="Teams pagination">
+                        <ul class="pagination mb-0" id="teamPaginationControls">
+                            <!-- Pagination controls will be inserted here by JavaScript -->
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
 <script>
-    async function fetchTeams() {
-        const res = await fetch(`${window.APP_CONFIG.API_URL}/teams`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
-        });
-        const data = await res.json();
-        const tbody = document.querySelector('#teamTable tbody');
-        tbody.innerHTML = '';
-
-        data.forEach(team => {
-            // Create status badge
-            let statusBadge;
-            if (team.status === 'APPROVED') {
-                statusBadge = `<span class="badge badge-approved">${team.status}</span>`;
-            } else if (team.status === 'PENDING') {
-                statusBadge = `<span class="badge badge-pending">${team.status}</span>`;
-            } else {
-                statusBadge = `<span class="badge badge-rejected">${team.status}</span>`;
-            }
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                        <td class="editable" data-field="organizationId" data-id="${team.id}">${team.organization.name}</td>
-                        <td class="editable" data-field="name" data-id="${team.id}">${team.name}</td>
-                        <td class="editable" data-field="ageLevel" data-id="${team.id}">${team.ageLevel || '-'}</td>
-                        <td class="editable" data-field="division" data-id="${team.id}">${team.division || '-'}</td>
-                        <td class="editable" data-field="city" data-id="${team.id}">${team.city || '-'}</td>
-                        <td class="editable" data-field="state" data-id="${team.id}">${team.state || '-'}</td>
-                        <td class="editable" data-field="status" data-id="${team.id}">${statusBadge}</td>
-                        <td >${team.rejectedReason || '-'}</td>
-                        <td class="actions">
-                            <button class="btn btn-danger btn-sm" onclick="deleteTeam('${team.id}')">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </td>
-                    `;
-            tbody.appendChild(tr);
-        });
-
-        enableEditableCells('.editable', 'team', orgsList);
-    }
+    //   let window.currentPageTeam = 1;
+    // const window.itemsPerPageTeam = 10;
+    // let window.allTeams = [];
+    // let window.teamsList = [];
 
     function enableEditableCells(selector, type, orgs = []) {
         const cells = document.querySelectorAll(selector);
@@ -287,34 +271,241 @@
         });
     }
 
+    async function fetchTeams() {
+        try {
+            const res = await fetch(`${window.APP_CONFIG.API_URL}/teams`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
+            });
+            window.allTeams = await res.json();
+
+            renderTable();
+            renderPaginationControls();
+        } catch (err) {
+            console.error("Error fetching teams:", err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load teams'
+            });
+        }
+    }
+
     async function fetchOrganizations() {
-          const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
-          });
-          const data = await res.json();
-          const orgSelect = document.getElementById('teamOrgSelect');
-          const orgCsvSelect = document.getElementById('teamCsvOrgSelect');
+        try {
+            const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
+            });
+            window.teamsList = await res.json();
 
-          orgsList = data;
+            // Populate organization dropdowns
+            const orgSelect = document.getElementById('teamOrgSelect');
+            const orgCsvSelect = document.getElementById('teamCsvOrgSelect');
 
-          orgSelect.innerHTML = '<option value="">Select Organization</option>';
-          orgCsvSelect.innerHTML = '<option value="">Select Organization</option>';
+            orgSelect.innerHTML = '<option value="">Select Organization</option>';
+            orgCsvSelect.innerHTML = '<option value="">Select Organization</option>';
 
-          data.forEach(org => {
-            const tr = document.createElement('tr');
+            window.teamsList.forEach(org => {
+                orgSelect.innerHTML += `<option value="${org.id}">${org.name}</option>`;
+                orgCsvSelect.innerHTML += `<option value="${org.id}">${org.name}</option>`;
+            });
+        } catch (err) {
+            console.error("Error fetching organizations:", err);
+        }
+    }
 
-            orgSelect.innerHTML += `<option value="${org.id}">${org.name}</option>`;
-            orgCsvSelect.innerHTML += `<option value="${org.id}">${org.name}</option>`;
-          });
+    function renderTable() {
+        const tbody = document.querySelector('#teamTable tbody');
+        tbody.innerHTML = '';
 
+        // Filter by status first
+        const checkedStatuses = Array.from(document.querySelectorAll('.team-status-filter:checked')).map(cb => cb.value);
+        let filteredTeams = window.allTeams;
+
+        if (checkedStatuses.length > 0) {
+            filteredTeams = window.allTeams.filter(team => checkedStatuses.includes(team.status));
         }
 
+        // Apply search filter
+        const searchTerm = document.getElementById('teamGlobalSearch').value.toLowerCase();
+        if (searchTerm) {
+            filteredTeams = filteredTeams.filter(team =>
+                (team.organization?.name && team.organization.name.toLowerCase().includes(searchTerm)) ||
+                (team.name && team.name.toLowerCase().includes(searchTerm)) ||
+                (team.ageLevel && team.ageLevel.toLowerCase().includes(searchTerm)) ||
+                (team.division && team.division.toLowerCase().includes(searchTerm)) ||
+                (team.city && team.city.toLowerCase().includes(searchTerm)) ||
+                (team.state && team.state.toLowerCase().includes(searchTerm)) ||
+                (team.status && team.status.toLowerCase().includes(searchTerm)) ||
+                (team.rejectedReason && team.rejectedReason.toLowerCase().includes(searchTerm))
+            );
+        }
 
-    function toggleDropdown(id) {
-        const el = document.getElementById(id);
-        el.style.display = el.style.display === "block" ? "none" : "block";
+        // Calculate pagination
+        const startIndex = (window.currentPageTeam - 1) * window.itemsPerPageTeam;
+        const endIndex = Math.min(startIndex + window.itemsPerPageTeam, filteredTeams.length);
+        const paginatedTeams = filteredTeams.slice(startIndex, endIndex);
+
+        // Update pagination info
+        document.getElementById('teamPaginationInfo').textContent =
+            `Showing ${startIndex + 1} to ${endIndex} of ${filteredTeams.length} teams`;
+
+        // Render table rows
+        paginatedTeams.forEach(team => {
+            const tr = document.createElement('tr');
+
+            let statusBadge;
+            if (team.status === 'APPROVED') {
+                statusBadge = `<span class="badge badge-approved">${team.status}</span>`;
+            } else if (team.status === 'PENDING') {
+                statusBadge = `<span class="badge badge-pending">${team.status}</span>`;
+            } else {
+                statusBadge = `<span class="badge badge-rejected">${team.status}</span>`;
+            }
+
+            tr.innerHTML = `
+                <td class="editable" data-field="organizationId" data-id="${team.id}">${team.organization?.name || '-'}</td>
+                <td class="editable" data-field="name" data-id="${team.id}">${team.name || '-'}</td>
+                <td class="editable" data-field="ageLevel" data-id="${team.id}">${team.ageLevel || '-'}</td>
+                <td class="editable" data-field="division" data-id="${team.id}">${team.division || '-'}</td>
+                <td class="editable" data-field="city" data-id="${team.id}">${team.city || '-'}</td>
+                <td class="editable" data-field="state" data-id="${team.id}">${team.state || '-'}</td>
+                <td class="editable" data-field="status" data-id="${team.id}">${statusBadge}</td>
+                <td>${team.rejectedReason || '-'}</td>
+                <td class="actions">
+                    <button class="btn btn-danger btn-sm" onclick="deleteTeam('${team.id}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        enableEditableCells('.editable', 'team', window.teamsList);
     }
+
+    function renderPaginationControls() {
+        // Calculate total items after filtering
+        const checkedStatuses = Array.from(document.querySelectorAll('.team-status-filter:checked')).map(cb => cb.value);
+        let filteredTeams = window.allTeams;
+
+        if (checkedStatuses.length > 0) {
+            filteredTeams = window.allTeams.filter(team => checkedStatuses.includes(team.status));
+        }
+
+        const searchTerm = document.getElementById('teamGlobalSearch').value.toLowerCase();
+        if (searchTerm) {
+            filteredTeams = filteredTeams.filter(team =>
+                (team.organization?.name && team.organization.name.toLowerCase().includes(searchTerm)) ||
+                (team.name && team.name.toLowerCase().includes(searchTerm)) ||
+                (team.ageLevel && team.ageLevel.toLowerCase().includes(searchTerm)) ||
+                (team.division && team.division.toLowerCase().includes(searchTerm)) ||
+                (team.city && team.city.toLowerCase().includes(searchTerm)) ||
+                (team.state && team.state.toLowerCase().includes(searchTerm)) ||
+                (team.status && team.status.toLowerCase().includes(searchTerm)) ||
+                (team.rejectedReason && team.rejectedReason.toLowerCase().includes(searchTerm))
+            );
+        }
+
+        const totalPages = Math.ceil(filteredTeams.length / window.itemsPerPageTeam);
+        const paginationControls = document.getElementById('teamPaginationControls');
+        paginationControls.innerHTML = '';
+
+        // Previous button
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${window.currentPageTeam === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `
+            <a class="page-link" href="#" onclick="changePage(${window.currentPageTeam - 1})" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        `;
+        paginationControls.appendChild(prevLi);
+
+        // Page numbers
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, window.currentPageTeam - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        if (startPage > 1) {
+            const firstLi = document.createElement('li');
+            firstLi.className = 'page-item';
+            firstLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(1)">1</a>`;
+            paginationControls.appendChild(firstLi);
+
+            if (startPage > 2) {
+                const ellipsisLi = document.createElement('li');
+                ellipsisLi.className = 'page-item disabled';
+                ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                paginationControls.appendChild(ellipsisLi);
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageLi = document.createElement('li');
+            pageLi.className = `page-item ${i === window.currentPageTeam ? 'active' : ''}`;
+            pageLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+            paginationControls.appendChild(pageLi);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsisLi = document.createElement('li');
+                ellipsisLi.className = 'page-item disabled';
+                ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                paginationControls.appendChild(ellipsisLi);
+            }
+
+            const lastLi = document.createElement('li');
+            lastLi.className = 'page-item';
+            lastLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a>`;
+            paginationControls.appendChild(lastLi);
+        }
+
+        // Next button
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${window.currentPageTeam === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `
+            <a class="page-link" href="#" onclick="changePage(${window.currentPageTeam + 1})" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        `;
+        paginationControls.appendChild(nextLi);
+    }
+
+    function changePage(page) {
+        if (page < 1 || page > Math.ceil(window.allTeams.length / window.itemsPerPageTeam)) return;
+        window.currentPageTeam = page;
+        renderTable();
+        renderPaginationControls();
+    }
+
+    fetchOrganizations();
+    fetchTeams();
+
+    document.getElementById('teamGlobalSearch').addEventListener('input', function () {
+        window.currentPageTeam = 1;
+        renderTable();
+        renderPaginationControls();
+    });
+
+    document.querySelectorAll('.team-status-filter').forEach(cb => {
+        cb.addEventListener('change', function () {
+            window.currentPageTeam = 1;
+            renderTable();
+            renderPaginationControls();
+        });
+    });
+
+    // File input display
+    document.getElementById('teamCsvFile').addEventListener('change', function (e) {
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
+        document.getElementById('teamCsvFileName').textContent = fileName;
+    });
 
     // General filtering function
     function filterTableGlobalAndStatus(tableId, searchInputId, statusClass, statusIndex) {
