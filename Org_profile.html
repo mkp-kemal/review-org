@@ -8,6 +8,7 @@
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="functions/config.js"></script>
+    <script src="functions/auth.js"></script>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,6 +23,10 @@
 
         .star-rating .fa-star {
             color: #ffc107;
+        }
+
+        .admin-buttons {
+            display: none;
         }
     </style>
 </head>
@@ -48,28 +53,50 @@
 
     <!-- Main Content -->
     <main class="bg-white">
+        <!-- Admin Buttons (hidden by default) -->
+        <div id="admin-buttons" class="admin-buttons container mx-auto px-6 pt-6">
+            <div class="flex flex-wrap gap-2">
+                <button id="edit-team-btn"
+                    class="bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-edit mr-2"></i>Edit Team
+                </button>
+                <button id="delete-team-btn"
+                    class="bg-red-600 text-white font-semibold py-2 px-4 rounded hover:bg-red-700 transition-colors">
+                    <i class="fas fa-trash mr-2"></i>Delete Team
+                </button>
+                <button id="add-review-btn"
+                    class="bg-green-600 text-white font-semibold py-2 px-4 rounded hover:bg-green-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Add Review
+                </button>
+                <button id="respond-review-btn"
+                    class="bg-purple-600 text-white font-semibold py-2 px-4 rounded hover:bg-purple-700 transition-colors">
+                    <i class="fas fa-reply mr-2"></i>Respond to Review
+                </button>
+                <button id="manage-members-btn"
+                    class="bg-yellow-600 text-white font-semibold py-2 px-4 rounded hover:bg-yellow-700 transition-colors">
+                    <i class="fas fa-users mr-2"></i>Manage Members
+                </button>
+            </div>
+        </div>
+
         <!-- Profile Header -->
         <div class="container mx-auto px-6 py-12">
             <div class="md:flex justify-between items-start">
                 <div>
-                    <h1 class="text-4xl md:text-5xl font-extrabold">Dallas Tigers</h1>
-                    <p class="text-xl text-gray-500 mt-2"><i class="fas fa-map-marker-alt mr-2"></i>Dallas, TX</p>
-                    <div class="mt-4 flex space-x-2">
-                        <span
-                            class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">12U</span>
-                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">14U
-                            AAA</span>
-                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">16U
-                            Major</span>
+                    <h1 id="org-name" class="text-4xl md:text-5xl font-extrabold">Loading...</h1>
+                    <p id="org-location" class="text-xl text-gray-500 mt-2"><i
+                            class="fas fa-map-marker-alt mr-2"></i>Loading...</p>
+                    <div id="team-tags" class="mt-4 flex space-x-2">
+                        <!-- Team tags will be inserted here -->
                     </div>
                 </div>
                 <div class="text-center mt-6 md:mt-0 bg-gray-50 p-6 rounded-xl">
                     <p class="text-lg font-semibold text-gray-600">Overall Curveball Score</p>
-                    <div class="text-7xl font-bold text-blue-600">4.5</div>
-                    <div class="star-rating text-2xl"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                            class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    <div id="overall-rating" class="text-7xl font-bold text-blue-600">0.0</div>
+                    <div id="star-rating" class="star-rating text-2xl">
+                        <!-- Stars will be inserted here -->
                     </div>
-                    <p class="text-gray-600 mt-2">Based on 18 reviews</p>
+                    <p id="review-count" class="text-gray-600 mt-2">Based on 0 reviews</p>
                 </div>
             </div>
         </div>
@@ -101,46 +128,51 @@
                                 <div>
                                     <div class="flex justify-between mb-1">
                                         <span class="font-semibold">Coaching Quality</span>
-                                        <span class="font-bold">4.7</span>
+                                        <span id="coaching-rating" class="font-bold">0.0</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 94%"></div>
+                                        <div id="coaching-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%">
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="flex justify-between mb-1">
                                         <span class="font-semibold">Player Development</span>
-                                        <span class="font-bold">4.8</span>
+                                        <span id="development-rating" class="font-bold">0.0</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 96%"></div>
+                                        <div id="development-bar" class="bg-blue-600 h-2.5 rounded-full"
+                                            style="width: 0%"></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="flex justify-between mb-1">
                                         <span class="font-semibold">Financial Transparency</span>
-                                        <span class="font-bold">3.5</span>
+                                        <span id="transparency-rating" class="font-bold">0.0</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                        <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 70%"></div>
+                                        <div id="transparency-bar" class="bg-yellow-500 h-2.5 rounded-full"
+                                            style="width: 0%"></div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="flex justify-between mb-1">
                                         <span class="font-semibold">Team Culture</span>
-                                        <span class="font-bold">4.2</span>
+                                        <span id="culture-rating" class="font-bold">0.0</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 84%"></div>
+                                        <div id="culture-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%">
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="flex justify-between mb-1">
                                         <span class="font-semibold">Safety & Health</span>
-                                        <span class="font-bold">4.9</span>
+                                        <span id="safety-rating" class="font-bold">0.0</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                        <div class="bg-green-500 h-2.5 rounded-full" style="width: 98%"></div>
+                                        <div id="safety-bar" class="bg-green-500 h-2.5 rounded-full" style="width: 0%">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -157,81 +189,23 @@
                 <div class="lg:col-span-8">
                     <!-- Reviews Section -->
                     <section id="reviews">
-                        <h3 class="text-2xl font-bold mb-6">Parent & Player Reviews (18)</h3>
-                        <div class="space-y-8">
-
-                            <!-- Highlighted Review (Elite Tier Feature) -->
-                            <div class="p-6 border-2 border-yellow-400 rounded-lg bg-yellow-50">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h4 class="text-lg font-bold">"Best development in the state!"</h4>
-                                    <div class="star-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                            class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                            class="fas fa-star"></i></div>
+                        <h3 id="reviews-title" class="text-2xl font-bold mb-6">Parent & Player Reviews (0)</h3>
+                        <div id="reviews-container" class="space-y-8">
+                            <!-- Reviews will be inserted here -->
+                            <div class="text-center py-8">
+                                <div
+                                    class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500">
                                 </div>
-                                <div class="flex items-center text-yellow-600 font-semibold mb-4">
-                                    <i class="fas fa-star mr-2"></i> Highlighted by the Organization
-                                </div>
-                                <p class="text-gray-700 mb-2"><b>Pros:</b> The coaching staff is second to none. They
-                                    break down mechanics in a way that kids understand and build confidence. The
-                                    practice plans are structured and effective.</p>
-                                <p class="text-gray-700 mb-4"><b>Cons:</b> It's a significant time commitment, but
-                                    completely worth it if your child is serious about baseball.</p>
-                                <p class="text-sm text-gray-500">Reviewed August 2025</p>
-                            </div>
-
-                            <!-- Review with Org Response (Pro/Elite Tier Feature) -->
-                            <div class="p-6 border rounded-lg">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h4 class="text-lg font-bold">"Top-notch development, but pricey"</h4>
-                                    <div class="star-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                            class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                            class="far fa-star"></i></div>
-                                </div>
-                                <p class="text-gray-700 mb-2"><b>Pros:</b> The coaching staff is incredible. My son's
-                                    skills improved dramatically in one season. They know how to teach the game.</p>
-                                <p class="text-gray-700 mb-4"><b>Cons:</b> The costs add up quickly with travel and
-                                    mandatory gear. Be prepared for a significant financial commitment.</p>
-                                <p class="text-sm text-gray-500">Reviewed August 2025</p>
-
-                                <div class="mt-6 p-4 border-t">
-                                    <h5 class="text-md font-bold text-gray-800 mb-2"><i
-                                            class="fas fa-building mr-2"></i>Response from Dallas Tigers</h5>
-                                    <p class="text-gray-600">Thank you for the feedback. We pride ourselves on our elite
-                                        coaching staff and are thrilled to hear about your son's development. We strive
-                                        for transparency in our costs, which reflect the premier tournaments we attend
-                                        to maximize player exposure. We appreciate you being part of the Tigers family.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- Standard Review -->
-                            <div class="p-6 border rounded-lg">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h4 class="text-lg font-bold">"Good program, some communication issues"</h4>
-                                    <div class="star-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                                            class="fas fa-star"></i><i class="far fa-star"></i><i
-                                            class="far fa-star"></i></div>
-                                </div>
-                                <p class="text-gray-700 mb-2"><b>Pros:</b> My son had fun and made some great friends.
-                                    The team culture was positive.</p>
-                                <p class="text-gray-700 mb-4"><b>Cons:</b> Communication about schedule changes was
-                                    sometimes last-minute, which was frustrating for planning.</p>
-                                <p class="text-sm text-gray-500">Reviewed July 2025</p>
+                                <p class="mt-2 text-gray-500">Loading reviews...</p>
                             </div>
                         </div>
                     </section>
 
                     <!-- About Section -->
                     <section id="about" class="mt-16">
-                        <h3 class="text-2xl font-bold mb-6">About Dallas Tigers</h3>
-                        <div class="prose max-w-none text-gray-700">
-                            <p>Welcome to the Dallas Tigers Baseball Club, one of the premier youth baseball
-                                organizations in the country. Our mission is to provide a platform for young athletes to
-                                develop their skills, compete at the highest level, and learn life lessons through the
-                                game of baseball.</p>
-                            <p>Our professional coaching staff is dedicated to creating a positive and challenging
-                                environment where players can reach their full potential. We focus on fundamentals,
-                                discipline, and sportsmanship.</p>
+                        <h3 class="text-2xl font-bold mb-6">About <span id="about-org-name">Organization</span></h3>
+                        <div id="about-content" class="prose max-w-none text-gray-700">
+                            <p>Loading organization information...</p>
                         </div>
                         <div class="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4">
                             <img src="https://placehold.co/400x300/1E40AF/FFFFFF?text=Team+Photo" alt="Team Photo"
@@ -276,101 +250,285 @@
     <script>
         function getJwtFromCookie() {
             const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]+)/);
-
             return match ? decodeURIComponent(match[1]) : null;
         }
 
+        function renderStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let starsHtml = '';
+
+            for (let i = 0; i < 5; i++) {
+                if (i < fullStars) {
+                    starsHtml += '<i class="fas fa-star"></i>';
+                } else if (i === fullStars && hasHalfStar) {
+                    starsHtml += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    starsHtml += '<i class="far fa-star"></i>';
+                }
+            }
+
+            return starsHtml;
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        function getSeasonDisplay(term, year) {
+            const seasonMap = {
+                'SPRING': 'Spring',
+                'SUMMER': 'Summer',
+                'FALL': 'Fall',
+                'WINTER': 'Winter'
+            };
+            return `${seasonMap[term] || term} ${year}`;
+        }
+
+        function showAdminButtons(roles, teamData) {
+            const adminButtons = document.getElementById('admin-buttons');
+            if (!adminButtons) return;
+
+            const isSiteAdmin = roles.role.includes('SITE_ADMIN');
+            const isOrgAdmin = roles.role.includes('ORG_ADMIN');
+            const isTeamAdmin = roles.role.includes('TEAM_ADMIN');
+
+            if (isSiteAdmin || isOrgAdmin || isTeamAdmin) {
+                adminButtons.style.display = 'block';
+
+                // Show/hide specific buttons based on role
+                document.getElementById('edit-team-btn').style.display =
+                    (isSiteAdmin || isOrgAdmin || isTeamAdmin) ? 'block' : 'none';
+
+                document.getElementById('delete-team-btn').style.display =
+                    (isSiteAdmin || isOrgAdmin) ? 'block' : 'none';
+
+                document.getElementById('add-review-btn').style.display =
+                    (isSiteAdmin || isOrgAdmin || isTeamAdmin) ? 'block' : 'none';
+
+                document.getElementById('respond-review-btn').style.display =
+                    (isSiteAdmin || isOrgAdmin || isTeamAdmin) ? 'block' : 'none';
+
+                document.getElementById('manage-members-btn').style.display =
+                    (isSiteAdmin || isOrgAdmin || isTeamAdmin) ? 'block' : 'none';
+
+                    document.getElementById('reviewer-name').style.display =
+                    (isSiteAdmin || isOrgAdmin || isTeamAdmin) ? 'block' : 'none';
+
+
+                // Add event listeners
+                document.getElementById('edit-team-btn').addEventListener('click', () => {
+                    alert(`Edit team: ${teamData.name}`);
+                    // window.location.href = `/edit-team?id=${teamData.id}`;
+                });
+
+                document.getElementById('delete-team-btn').addEventListener('click', () => {
+                    if (confirm(`Are you sure you want to delete ${teamData.name}?`)) {
+                        alert(`Team ${teamData.name} would be deleted`);
+                        // Implement delete functionality
+                    }
+                });
+
+                document.getElementById('add-review-btn').addEventListener('click', () => {
+                    alert('Add review for this team');
+                    // window.location.href = `/add-review?teamId=${teamData.id}`;
+                });
+
+                document.getElementById('respond-review-btn').addEventListener('click', () => {
+                    alert('Respond to a review for this team');
+                    // window.location.href = `/respond-review?teamId=${teamData.id}`;
+                });
+
+                document.getElementById('manage-members-btn').addEventListener('click', () => {
+                    alert('Manage team members');
+                    // window.location.href = `/manage-members?teamId=${teamData.id}`;
+                });
+            }
+        }
+
         async function loadOrgProfile() {
-            // Ambil id dari URL ?id=...
+            // Get id from URL ?id=...
             const params = new URLSearchParams(window.location.search);
             const orgId = params.get('id');
-            if (!orgId) return;
+            if (!orgId) {
+                console.error('No organization ID in URL');
+                return;
+            }
 
             try {
-                const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs/${orgId}`, {
+                const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/${orgId}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${getJwtFromCookie()}`
                     }
                 });
-                if (!res.ok) throw new Error('Failed to fetch organization data');
-                const org = await res.json();
+
+                if (!res.ok) throw new Error(`Failed to fetch organization data: ${res.status}`);
+
+                const data = await res.json();
+
+                const storedUser = JSON.parse(sessionStorage.getItem("user"));
+
 
                 // Update Profile Header
-                const headerName = document.querySelector('main h1');
-                const headerLocation = document.querySelector('main p.text-xl');
-                headerName.textContent = org.name;
-                headerLocation.innerHTML = `<i class="fas fa-map-marker-alt mr-2"></i>${org.city}, ${org.state}`;
+                document.getElementById('org-name').textContent = data.name || 'Unknown Team';
+                document.getElementById('org-location').innerHTML = `<i class="fas fa-map-marker-alt mr-2"></i>${data.city || 'Unknown'}, ${data.state || 'Unknown'}`;
 
-                // Update About Section
-                const aboutSection = document.querySelector('#about .prose');
-                aboutSection.innerHTML = `
-            <p>Welcome to ${org.name}, one of the premier youth baseball organizations in the country. Located in ${org.city}, ${org.state}, we strive to provide excellent coaching and development opportunities for young athletes.</p>
-            <p>Website: <a href="https://${org.website}" target="_blank" class="text-blue-600 hover:underline">${org.website}</a></p>
-        `;
+                // Update Team Tags
+                const tagsContainer = document.getElementById('team-tags');
+                if (data.ageLevel) {
+                    const tag = document.createElement('span');
+                    tag.className = 'bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded';
+                    tag.textContent = data.ageLevel;
+                    tagsContainer.appendChild(tag);
+                }
+                if (data.division) {
+                    const tag = document.createElement('span');
+                    tag.className = 'bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded';
+                    tag.textContent = data.division;
+                    tagsContainer.appendChild(tag);
+                }
 
-                // Teams & Reviews Section
-                const reviewsContainer = document.querySelector('#reviews .space-y-8');
-                reviewsContainer.innerHTML = ''; // Clear placeholder reviews
+                // Update Ratings
+                const accum = data.accumulation || {};
+                document.getElementById('overall-rating').textContent = accum.overall?.toFixed(1) || '0.0';
+                document.getElementById('star-rating').innerHTML = renderStars(accum.overall || 0);
 
-                org.teams.forEach(team => {
-                    // Team Header
-                    const teamHeader = document.createElement('h4');
-                    teamHeader.className = 'text-xl font-bold mt-6';
-                    teamHeader.textContent = `${team.name} (${team.ageLevel}, ${team.division}) - ${team.city}, ${team.state}`;
-                    reviewsContainer.appendChild(teamHeader);
+                // Update detailed ratings
+                const ratingFields = [
+                    { id: 'coaching', value: accum.coaching },
+                    { id: 'development', value: accum.development },
+                    { id: 'transparency', value: accum.transparency },
+                    { id: 'culture', value: accum.culture },
+                    { id: 'safety', value: accum.safety }
+                ];
 
-                    if (team.reviews && team.reviews.length > 0) {
-                        team.reviews.forEach(review => {
-                            const div = document.createElement('div');
-                            div.className = 'p-6 border rounded-lg mt-4 bg-white';
+                ratingFields.forEach(field => {
+                    const value = field.value || 0;
+                    const percentage = (value / 5) * 100;
 
-                            // User Email or Anonymous
-                            const reviewer = review.user?.email || 'Anonymous';
-
-                            // Stars
-                            const starsHtml = Array.from({ length: 5 }).map((_, i) => {
-                                return (i < Math.round(review.rating.overall)) ? '<i class="fas fa-star text-yellow-400"></i>' : '<i class="far fa-star text-yellow-400"></i>';
-                            }).join('');
-
-                            div.innerHTML = `
-                        <div class="flex justify-between items-center mb-2">
-                            <h5 class="font-semibold text-lg">${review.title}</h5>
-                            <div class="star-rating text-yellow-400 text-lg">${starsHtml}</div>
-                        </div>
-                        <p class="text-gray-700 mb-1"><b>By:</b> ${reviewer}</p>
-                        <p class="text-gray-700 mb-2">${review.body}</p>
-                        <p class="text-sm text-gray-500">Season: ${review.season} | Reviewed: ${new Date(review.createdAt).toLocaleDateString()}</p>
-                    `;
-
-                            // Org Response
-                            if (review.orgResponse) {
-                                const responseDiv = document.createElement('div');
-                                responseDiv.className = 'mt-3 p-3 border-t text-gray-600';
-                                responseDiv.innerHTML = `<b>Organization Response:</b> ${review.orgResponse}`;
-                                div.appendChild(responseDiv);
-                            }
-
-                            reviewsContainer.appendChild(div);
-                        });
-                    } else {
-                        const noReview = document.createElement('p');
-                        noReview.className = 'text-gray-500 mt-2';
-                        noReview.textContent = 'No reviews yet for this team.';
-                        reviewsContainer.appendChild(noReview);
-                    }
+                    document.getElementById(`${field.id}-rating`).textContent = value.toFixed(1);
+                    document.getElementById(`${field.id}-bar`).style.width = `${percentage}%`;
                 });
 
+                // Update review count
+                const reviewCount = data.reviews?.length || 0;
+                document.getElementById('review-count').textContent = `Based on ${reviewCount} reviews`;
+                document.getElementById('reviews-title').textContent = `Parent & Player Reviews (${reviewCount})`;
+
+                // Update About Section
+                document.getElementById('about-org-name').textContent = data.name || 'Organization';
+
+                const aboutContent = document.getElementById('about-content');
+                aboutContent.innerHTML = `
+                    <p>Welcome to ${data.name || 'this team'}, located in ${data.city || 'Unknown'}, ${data.state || 'Unknown'}.</p>
+                    ${data.organization?.website ? `<p>Website: <a href="https://${data.organization.website}" target="_blank" class="text-blue-600 hover:underline">${data.organization.website}</a></p>` : ''}
+                    <p>This team competes in ${data.ageLevel || 'unknown age level'} and plays in the ${data.division || 'unknown division'}.</p>
+                `;
+
+                // Update Reviews Section
+                const reviewsContainer = document.getElementById('reviews-container');
+                reviewsContainer.innerHTML = ''; // Clear loading message
+
+                if (data.reviews && data.reviews.length > 0) {
+                    data.reviews.forEach(review => {
+                        const reviewDiv = document.createElement('div');
+                        reviewDiv.className = 'p-6 border rounded-lg';
+
+                        const rating = review.rating?.overall || 0;
+                        const starsHtml = renderStars(rating);
+                        const reviewer = review.user?.email ? review.user.email.split('@')[0] : 'Anonymous';
+                        const seasonDisplay = getSeasonDisplay(review.season_term, review.season_year);
+
+                        reviewDiv.innerHTML = `
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="text-lg font-bold">${review.title || 'No title'}</h4>
+                                <div class="star-rating">${starsHtml}</div>
+                            </div>
+                            <p style="display:none" id="reviewer-name" class="text-gray-700 mb-2"><b>By:</b> ${reviewer}</p>
+                            <p class="text-gray-700 mb-2">${review.body || 'No review content'}</p>
+                            <p class="text-sm text-gray-500">Season: ${seasonDisplay} | Reviewed: ${formatDate(review.createdAt)}</p>
+                        `;
+
+                        // Add organization response if available
+                        if (review.orgResponse) {
+                            const responseDiv = document.createElement('div');
+                            responseDiv.className = 'mt-4 p-4 bg-gray-50 rounded-lg border-t';
+                            responseDiv.innerHTML = `
+                                <h5 class="text-md font-bold text-gray-800 mb-2"><i class="fas fa-building mr-2"></i>Response from ${data.name}</h5>
+                                <p class="text-gray-600">${review.orgResponse.body}</p>
+                                <p class="text-xs text-gray-500 mt-2">Responded on ${formatDate(review.orgResponse.createdAt)}</p>
+                            `;
+                            reviewDiv.appendChild(responseDiv);
+                        }
+
+                        // Add admin buttons for each review if user is admin
+                        if (storedUser?.role?.includes('SITE_ADMIN') || storedUser?.role?.includes('ORG_ADMIN') || storedUser?.role?.includes('TEAM_ADMIN')) {
+                            const adminActions = document.createElement('div');
+                            adminActions.className = 'mt-3 flex justify-end space-x-2';
+                            adminActions.innerHTML = `
+                                <button class="edit-review-btn bg-blue-100 text-blue-800 text-sm font-semibold py-1 px-3 rounded hover:bg-blue-200">
+                                    <i class="fas fa-edit mr-1"></i>Edit
+                                </button>
+                                <button class="delete-review-btn bg-red-100 text-red-800 text-sm font-semibold py-1 px-3 rounded hover:bg-red-200">
+                                    <i class="fas fa-trash mr-1"></i>Delete
+                                </button>
+                                ${!review.orgResponse ? `
+                                <button class="respond-review-btn bg-purple-100 text-purple-800 text-sm font-semibold py-1 px-3 rounded hover:bg-purple-200">
+                                    <i class="fas fa-reply mr-1"></i>Respond
+                                </button>
+                                ` : ''}
+                            `;
+                            reviewDiv.appendChild(adminActions);
+
+                            // Add event listeners for review admin buttons
+                            adminActions.querySelector('.edit-review-btn')?.addEventListener('click', () => {
+                                alert(`Edit review: ${review.id}`);
+                            });
+
+                            adminActions.querySelector('.delete-review-btn')?.addEventListener('click', () => {
+                                if (confirm('Are you sure you want to delete this review?')) {
+                                    alert(`Review ${review.id} would be deleted`);
+                                }
+                            });
+
+                            adminActions.querySelector('.respond-review-btn')?.addEventListener('click', () => {
+                                alert(`Respond to review: ${review.id}`);
+                            });
+                        }
+
+                        reviewsContainer.appendChild(reviewDiv);
+                        if (storedUser) {
+                            showAdminButtons(storedUser, data);
+                        }
+                    });
+                } else {
+                    reviewsContainer.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-info-circle text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-500">No reviews yet for this team.</p>
+                        </div>
+                    `;
+                }
+
             } catch (err) {
-                console.error(err);
+                console.error('Error loading organization profile:', err);
+
+                // Show error message
+                const reviewsContainer = document.getElementById('reviews-container');
+                reviewsContainer.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-2"></i>
+                        <p class="text-red-500">Failed to load team data. Please try again later.</p>
+                    </div>
+                `;
             }
         }
 
-        // Jalankan saat halaman siap
+        // Run when page is ready
         document.addEventListener('DOMContentLoaded', loadOrgProfile);
     </script>
-
-
 </body>
 
 </html>

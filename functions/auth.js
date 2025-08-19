@@ -3,30 +3,31 @@ async function checkAuth() {
         const res = await fetchWithAuth(`${window.APP_CONFIG.API_URL}/auth/me`);
         const loginLink = document.getElementById('login-link');
 
-        if (!loginLink) {
-            console.warn("Element #login-link not found.");
-            return;
-        }
+        if (!loginLink) return;
 
         if (!res || !res.ok) {
+            sessionStorage.removeItem("user");
             showLogoutButton(loginLink);
             return;
         }
 
         const user = await res.json();
-        // console.log('User:', user);
 
         if (user && user.email) {
-            const username = user.email.split('@')[0];
+            sessionStorage.setItem("user", JSON.stringify(user));
+
+            // const username = user.email.split('@')[0];
             loginLink.textContent = 'Logout';
             loginLink.href = '#';
             loginLink.onclick = showLogoutConfirmation;
         } else {
+            sessionStorage.removeItem("user");
             showLogoutButton(loginLink);
         }
 
     } catch (err) {
         console.error('You are not logged in - ANONYMOUS', err);
+        sessionStorage.removeItem("user");
         const loginLink = document.getElementById('login-link');
         if (loginLink) {
             showLogoutButton(loginLink);
@@ -34,7 +35,6 @@ async function checkAuth() {
     }
 }
 
-// versi lebih aman untuk tombol logout/login
 function showLogoutButton(linkEl) {
     linkEl.textContent = "Login";
     linkEl.href = "Login.html";
