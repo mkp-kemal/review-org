@@ -1,0 +1,492 @@
+<div>
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-users"></i> Teams</h2>
+        </div>
+        <div class="card-body">
+            <div class="form-inline">
+                <div class="form-group">
+                    <select id="teamOrgSelect" class="form-control">
+                        <option value="">Select Organization</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="teamName" class="form-control" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="teamAgeLevel" class="form-control" placeholder="Age Level">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="teamDivision" class="form-control" placeholder="Division">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="teamCity" class="form-control" placeholder="City">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="teamState" class="form-control" placeholder="State">
+                </div>
+                <!-- <div class="form-group">
+                            <select id="teamStatus" class="form-control">
+                                <option value="PENDING">PENDING</option>
+                                <option value="APPROVED">APPROVED</option>
+                                <option value="REJECTED">REJECTED</option>
+                            </select>
+                        </div> -->
+                <button class="btn btn-primary" onclick="createTeam()">
+                    <i class="fas fa-plus"></i> Add Team
+                </button>
+            </div>
+
+            <!-- CSV Upload -->
+            <div class="form-inline" style="margin-top:20px;">
+                <div class="form-group">
+                    <select id="teamCsvOrgSelect" class="form-control">
+                        <option value="">Select Organization</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex-grow: 1;">
+                    <div class="file-input-wrapper">
+                        <button class="file-input-btn">
+                            <i class="fas fa-file-csv"></i> Choose CSV File
+                        </button>
+                        <input type="file" id="teamCsvFile" accept=".csv">
+                        <span id="teamCsvFileName" class="file-name">No file chosen</span>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="uploadTeamCsv()">
+                    <i class="fas fa-upload"></i> Upload CSV
+                </button>
+            </div>
+
+            <div class="table-responsive" style="margin-top: 20px;">
+                <!-- GLOBAL SEARCH TEAMS -->
+                <div class="form-inline" style="margin-bottom:10px; margin-top:20px;">
+                    <input type="text" id="teamGlobalSearch" class="form-control" placeholder="🔍 Search all columns"
+                        style="flex-grow:1;">
+
+                    <!-- STATUS FILTER -->
+                    <div class="dropdown" style="margin-left:10px; position:relative;">
+                        <button class="btn btn-secondary" onclick="toggleDropdown('teamStatusDropdown')">
+                            Filter Status
+                        </button>
+                        <div id="teamStatusDropdown" class="dropdown-content"
+                            style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:10px; z-index:1000;">
+                            <label><input type="checkbox" class="team-status-filter" value="APPROVED">
+                                APPROVED</label><br>
+                            <label><input type="checkbox" class="team-status-filter" value="PENDING">
+                                PENDING</label><br>
+                            <label><input type="checkbox" class="team-status-filter" value="REJECTED">
+                                REJECTED</label>
+                        </div>
+                    </div>
+                </div>
+                <table id="teamTable">
+                    <thead>
+                        <tr>
+                            <th>Organization</th>
+                            <th>Name</th>
+                            <th>Age Level</th>
+                            <th>Division</th>
+                            <th>City</th>
+                            <th>State</th>
+                            <th>Status</th>
+                            <th>Reason Reject</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function fetchTeams() {
+        const res = await fetch(`${window.APP_CONFIG.API_URL}/teams`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
+        });
+        const data = await res.json();
+        const tbody = document.querySelector('#teamTable tbody');
+        tbody.innerHTML = '';
+
+        data.forEach(team => {
+            // Create status badge
+            let statusBadge;
+            if (team.status === 'APPROVED') {
+                statusBadge = `<span class="badge badge-approved">${team.status}</span>`;
+            } else if (team.status === 'PENDING') {
+                statusBadge = `<span class="badge badge-pending">${team.status}</span>`;
+            } else {
+                statusBadge = `<span class="badge badge-rejected">${team.status}</span>`;
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                        <td class="editable" data-field="organizationId" data-id="${team.id}">${team.organization.name}</td>
+                        <td class="editable" data-field="name" data-id="${team.id}">${team.name}</td>
+                        <td class="editable" data-field="ageLevel" data-id="${team.id}">${team.ageLevel || '-'}</td>
+                        <td class="editable" data-field="division" data-id="${team.id}">${team.division || '-'}</td>
+                        <td class="editable" data-field="city" data-id="${team.id}">${team.city || '-'}</td>
+                        <td class="editable" data-field="state" data-id="${team.id}">${team.state || '-'}</td>
+                        <td class="editable" data-field="status" data-id="${team.id}">${statusBadge}</td>
+                        <td >${team.rejectedReason || '-'}</td>
+                        <td class="actions">
+                            <button class="btn btn-danger btn-sm" onclick="deleteTeam('${team.id}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    `;
+            tbody.appendChild(tr);
+        });
+
+        enableEditableCells('.editable', 'team', orgsList);
+    }
+
+    function enableEditableCells(selector, type, orgs = []) {
+        const cells = document.querySelectorAll(selector);
+        cells.forEach(cell => {
+            if (cell.dataset.editableAttached) return;
+            cell.dataset.editableAttached = 'true';
+
+            cell.addEventListener('dblclick', () => {
+                if (cell.querySelector('input') || cell.querySelector('select')) return;
+
+                const currentValue = cell.textContent.trim();
+                const id = cell.dataset.id;
+                const field = cell.dataset.field;
+                let editableElement;
+
+                if (field === 'status') {
+                    editableElement = document.createElement('select');
+                    editableElement.className = 'status-select';
+                    ['PENDING', 'APPROVED', 'REJECTED'].forEach(val => {
+                        const option = document.createElement('option');
+                        option.value = val; option.textContent = val;
+                        if (val === currentValue) option.selected = true;
+                        editableElement.appendChild(option);
+                    });
+                } else if (field === 'organizationId') {
+                    editableElement = document.createElement('select');
+                    editableElement.className = 'form-control';
+                    orgs.forEach(org => {
+                        const option = document.createElement('option');
+                        option.value = org.id; option.textContent = org.name;
+                        if (org.name === currentValue) option.selected = true;
+                        editableElement.appendChild(option);
+                    });
+                } else {
+                    editableElement = document.createElement('input');
+                    editableElement.className = 'form-control';
+                    editableElement.value = currentValue === '-' ? '' : currentValue;
+                }
+
+                cell.innerHTML = '';
+                cell.appendChild(editableElement);
+                editableElement.focus();
+                cell.style.backgroundColor = 'var(--primary-light)';
+
+                const saveChange = async () => {
+                    let newValue = (field === 'status' || field === 'organizationId') ? editableElement.value : editableElement.value.trim();
+
+                    // Jangan simpan kalau tidak berubah
+                    if (newValue === currentValue || (currentValue === '-' && !newValue)) {
+                        renderCell(currentValue);
+                        return;
+                    }
+
+                    let bodyData = { [field]: newValue };
+
+                    // Jika REJECTED, minta alasan
+                    if (field === 'status' && newValue === 'REJECTED') {
+                        const { value: reason, isConfirmed } = await Swal.fire({
+                            title: 'Rejected Reason',
+                            input: 'text',
+                            inputPlaceholder: 'Enter reason...',
+                            showCancelButton: true,
+                            confirmButtonText: 'Save',
+                            cancelButtonText: 'Cancel',
+                            inputValidator: (value) => {
+                                if (!value) return 'Please enter a reason!';
+                            }
+                        });
+
+                        if (!isConfirmed) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Failed to save changes (reason required)',
+                            });
+                            renderCell(currentValue);
+                            return;
+                        }
+
+                        bodyData.rejectedReason = reason;
+                    }
+
+                    if (newValue || field === 'status' || field === 'organizationId') {
+                        const url = `${window.APP_CONFIG.API_URL}/teams/${id}`;
+                        try {
+                            await fetch(url, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: `Bearer ${getCookie('accessToken')}`
+                                },
+                                body: JSON.stringify(bodyData)
+                            });
+                        } catch (err) {
+                            console.error('Failed to save:', err);
+                            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to save changes' });
+                            renderCell(currentValue);
+                            return;
+                        }
+                    }
+
+                    renderCell(newValue);
+                    if (type === 'organization') fetchTeams();
+                };
+
+
+                const renderCell = (newValue) => {
+                    if (!newValue) return;
+
+                    if (field === 'organizationId') {
+                        const selectedOrg = orgs.find(o => o.id === newValue);
+                        cell.textContent = selectedOrg ? selectedOrg.name : currentValue;
+                    } else if (field === 'status') {
+                        let statusBadge;
+                        if (newValue === 'APPROVED') {
+                            statusBadge = `<span class="badge badge-approved">${newValue}</span>`;
+                        } else if (newValue === 'PENDING') {
+                            statusBadge = `<span class="badge badge-pending">${newValue}</span>`;
+                        } else {
+                            statusBadge = `<span class="badge badge-rejected">${newValue}</span>`;
+                        }
+                        cell.innerHTML = statusBadge;
+                    } else {
+                        cell.textContent = newValue || '-';
+                    }
+                    cell.style.backgroundColor = '';
+                };
+
+                editableElement.addEventListener('blur', saveChange);
+                editableElement.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') editableElement.blur();
+                    if (e.key === 'Escape') {
+                        if (field === 'status') {
+                            cell.innerHTML = currentValue;
+                        } else {
+                            cell.textContent = currentValue;
+                        }
+                        cell.style.backgroundColor = '';
+                    }
+                });
+            });
+        });
+    }
+
+    async function fetchOrganizations() {
+          const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
+          });
+          const data = await res.json();
+          const orgSelect = document.getElementById('teamOrgSelect');
+          const orgCsvSelect = document.getElementById('teamCsvOrgSelect');
+
+          orgsList = data;
+
+          orgSelect.innerHTML = '<option value="">Select Organization</option>';
+          orgCsvSelect.innerHTML = '<option value="">Select Organization</option>';
+
+          data.forEach(org => {
+            const tr = document.createElement('tr');
+
+            orgSelect.innerHTML += `<option value="${org.id}">${org.name}</option>`;
+            orgCsvSelect.innerHTML += `<option value="${org.id}">${org.name}</option>`;
+          });
+
+        }
+
+
+    function toggleDropdown(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === "block" ? "none" : "block";
+    }
+
+    // General filtering function
+    function filterTableGlobalAndStatus(tableId, searchInputId, statusClass, statusIndex) {
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+        const searchValue = document.getElementById(searchInputId).value.toLowerCase();
+
+        // Get checked status filters
+        const checkedStatuses = Array.from(document.querySelectorAll(`.${statusClass}:checked`)).map(cb => cb.value);
+
+        rows.forEach(row => {
+            let textMatch = false;
+            let statusMatch = false;
+
+            // Check global search (any column)
+            const cells = row.querySelectorAll("td");
+            for (let cell of cells) {
+                if (cell.textContent.toLowerCase().includes(searchValue)) {
+                    textMatch = true;
+                    break;
+                }
+            }
+            if (!searchValue) textMatch = true; // no search = match all
+
+            // Check status filter
+            const statusText = row.cells[statusIndex]?.textContent.trim();
+            if (checkedStatuses.length === 0 || checkedStatuses.includes(statusText)) {
+                statusMatch = true;
+            }
+
+            // Show/Hide row
+            row.style.display = (textMatch && statusMatch) ? "" : "none";
+        });
+    }
+
+    async function createTeam() {
+        const organizationId = document.getElementById('teamOrgSelect').value;
+        const name = document.getElementById('teamName').value;
+        const ageLevel = document.getElementById('teamAgeLevel').value;
+        const division = document.getElementById('teamDivision').value;
+        const city = document.getElementById('teamCity').value;
+        const state = document.getElementById('teamState').value;
+        // const status = document.getElementById('teamStatus').value;
+
+        if (!organizationId) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Please select an organization' });
+            return;
+        }
+
+        if (!name) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Team name is required' });
+            return;
+        }
+
+        try {
+            const response = await fetch(`${window.APP_CONFIG.API_URL}/teams`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` },
+                body: JSON.stringify({ organizationId, name, ageLevel, division, city, state })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create team');
+            }
+
+            // Clear form fields
+            document.getElementById('teamName').value = '';
+            document.getElementById('teamAgeLevel').value = '';
+            document.getElementById('teamDivision').value = '';
+            document.getElementById('teamCity').value = '';
+            document.getElementById('teamState').value = '';
+
+            Swal.fire({ icon: 'success', title: 'Success', text: 'Team created successfully' });
+            fetchTeams();
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+        }
+    }
+
+    async function deleteTeam(id) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${getCookie('accessToken')}` }
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || 'Delete failed');
+            }
+
+            Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Team has been deleted.' });
+            fetchTeams();
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'Error', text: err.message });
+        }
+    }
+
+    async function uploadTeamCsv() {
+        const fileInput = document.getElementById('teamCsvFile');
+        const orgId = document.getElementById('teamCsvOrgSelect').value;
+
+        if (!fileInput.files.length) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Please select a CSV file' });
+            return;
+        }
+
+        if (!orgId) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Please select an organization' });
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('organizationId', orgId);
+
+        try {
+            const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/upload-csv`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${getCookie('accessToken')}` },
+                body: formData
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || 'Upload failed');
+            }
+
+            const data = await res.json();
+            Swal.fire({
+                icon: 'success',
+                title: 'Upload Complete',
+                html: `
+                            <p><i class="fas fa-check-circle" style="color: #4cc9f0;"></i> Created: ${data.data.created.length}</p>
+                            <p><i class="fas fa-exclamation-circle" style="color: #f8961e;"></i> Skipped: ${data.data.skipped.length > 0 ? data.data.skipped.join(', ') : 'None'}</p>
+                        `
+            });
+
+            // Reset file input
+            fileInput.value = '';
+            document.getElementById('teamCsvFileName').textContent = 'No file chosen';
+
+            fetchTeams();
+        } catch (err) {
+            console.error('Upload failed:', err);
+            Swal.fire({ icon: 'error', title: 'Upload Failed', text: err.message });
+        }
+    }
+
+    // Event listeners TEAMS
+    document.getElementById("teamGlobalSearch").addEventListener("input", () => {
+        filterTableGlobalAndStatus("teamTable", "teamGlobalSearch", "team-status-filter", 6);
+    });
+
+    document.querySelectorAll(".team-status-filter").forEach(cb => {
+        cb.addEventListener("change", () => {
+            filterTableGlobalAndStatus("teamTable", "teamGlobalSearch", "team-status-filter", 6);
+        });
+    });
+
+    fetchOrganizations();
+    fetchTeams();
+</script>

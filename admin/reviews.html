@@ -1,0 +1,664 @@
+<!-- REVIEW MODAL -->
+<div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-quote-left mr-2"></i>Review Details</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Review Header -->
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h4 id="modalTitle" class="mb-1 text-dark font-weight-bold"></h4>
+                        <div id="ratingStars" class="mb-2" style="color: #FFC107; font-size: 18px;"></div>
+                    </div>
+                    <span id="modalDate" class="badge badge-light text-muted"></span>
+                </div>
+
+                <!-- Review Content -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-body">
+                        <p id="modalBody" class="mb-0 font-italic" style="font-size: 1.1rem; line-height: 1.6;"></p>
+                    </div>
+                </div>
+
+                <!-- Review Metadata -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="detail-item mb-3">
+                            <h6 class="text-muted mb-1"><i class="fas fa-users mr-2 text-primary"></i>Team</h6>
+                            <p id="modalTeam" class="mb-0 font-weight-bold"></p>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <h6 class="text-muted mb-1"><i class="fas fa-user mr-2 text-primary"></i>Reviewer</h6>
+                            <p id="modalReviewer" class="mb-0 font-weight-bold"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-item mb-3">
+                            <h6 class="text-muted mb-1"><i class="fas fa-calendar-alt mr-2 text-primary"></i>Season</h6>
+                            <p id="modalSeason" class="mb-0 font-weight-bold"></p>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <h6 class="text-muted mb-1"><i class="fas fa-child mr-2 text-primary"></i>Age Level</h6>
+                            <p id="modalAge" class="mb-0 font-weight-bold"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ratings Section -->
+                <h5 class="mb-3 text-primary"><i class="fas fa-star mr-2"></i>Ratings</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="rating-item mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Coaching</span>
+                                <span id="ratingCoaching" class="font-weight-bold text-primary"></span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div id="progressCoaching" class="progress-bar bg-warning" role="progressbar"></div>
+                            </div>
+                        </div>
+                        <div class="rating-item mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Development</span>
+                                <span id="ratingDevelopment" class="font-weight-bold text-primary"></span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div id="progressDevelopment" class="progress-bar bg-warning" role="progressbar"></div>
+                            </div>
+                        </div>
+                        <div class="rating-item mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Transparency</span>
+                                <span id="ratingTransparency" class="font-weight-bold text-primary"></span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div id="progressTransparency" class="progress-bar bg-warning" role="progressbar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="rating-item mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Culture</span>
+                                <span id="ratingCulture" class="font-weight-bold text-primary"></span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div id="progressCulture" class="progress-bar bg-warning" role="progressbar"></div>
+                            </div>
+                        </div>
+                        <div class="rating-item mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Safety</span>
+                                <span id="ratingSafety" class="font-weight-bold text-primary"></span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div id="progressSafety" class="progress-bar bg-warning" role="progressbar"></div>
+                            </div>
+                        </div>
+                        <div class="rating-item mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="font-weight-bold">Overall</span>
+                                <span id="ratingOverall" class="font-weight-bold text-primary"
+                                    style="font-size: 1.2rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Response Section -->
+                <div id="adminResponseSection" class="mb-4" style="display: none;">
+                    <h5 class="mb-3 text-primary"><i class="fas fa-reply mr-2"></i>Admin Response</h5>
+                    <div class="card border-primary">
+                        <div class="card-body">
+                            <p id="adminResponseText" class="mb-2"></p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted" id="adminResponseDate"></small>
+                                <small class="text-muted" id="adminResponseBy"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reply Form -->
+                <div id="replyForm">
+                    <h5 class="mb-3 text-primary"><i class="fas fa-reply mr-2"></i>Reply to Review</h5>
+                    <div class="form-group">
+                        <textarea id="replyText" class="form-control" rows="3"
+                            placeholder="Write your response here..."></textarea>
+                    </div>
+                    <button id="submitReplyBtn" class="btn btn-primary">Submit Response</button>
+                    <button id="updateReplyBtn" class="btn btn-success" style="display: none;">Update Response</button>
+                    <!-- <button id="cancelReplyBtn" class="btn btn-outline-secondary ml-2">Cancel</button> -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h2><i class="fas fa-quote-left mr-2"></i> Reviews</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <!-- GLOBAL SEARCH REVIEW -->
+                <div class="form-inline" style="margin-bottom:20px; margin-top:10px;">
+                    <div class="form-group" style="flex-grow:1;">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="reviewGlobalSearch" class="form-control"
+                                placeholder="Search all reviews...">
+                        </div>
+                    </div>
+
+                    <!-- STATUS FILTER -->
+                    <div class="dropdown ml-2">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="reviewSortDropdown"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-sort"></i> Sort By
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="reviewSortDropdown">
+                            <a class="dropdown-item" href="#" onclick="fetchReviews('rating')"><i
+                                    class="fas fa-star mr-2"></i>Rating</a>
+                            <a class="dropdown-item" href="#" onclick="fetchReviews('recent')"><i
+                                    class="fas fa-clock mr-2"></i>Recent</a>
+                        </div>
+                    </div>
+                </div>
+
+                <table id="reviewTable" class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Team</th>
+                            <th>Reviewer</th>
+                            <th>Title</th>
+                            <th>Preview</th>
+                            <th>Status</th>
+                            <th>Response</th>
+                            <th>Age</th>
+                            <th>Rating</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted" id="paginationInfo"></div>
+                    <nav aria-label="Reviews pagination">
+                        <ul class="pagination mb-0" id="paginationControls">
+                            <!-- Pagination controls will be inserted here by JavaScript -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+     async function fetchReviews(sort = "recent", page = 1) {
+        try {
+            const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/reviews?sort=${sort}`);
+            window.allReviews = await res.json();
+            window.filteredReviews = [...window.allReviews]; // awalnya sama
+            window.currentPage = page;
+
+            renderTable();
+            renderPaginationControls();
+        } catch (err) {
+            console.error("Error fetching reviews:", err);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load reviews' });
+        }
+    }
+
+    // Render table berdasarkan filteredReviews
+    function renderTable() {
+        const tbody = document.querySelector("#reviewTable tbody");
+        tbody.innerHTML = "";
+
+        const reviews = window.filteredReviews;
+        const startIndex = (window.currentPage - 1) * window.itemsPerPage;
+        const endIndex = Math.min(startIndex + window.itemsPerPage, reviews.length);
+        const paginatedReviews = reviews.slice(startIndex, endIndex);
+
+        document.getElementById('paginationInfo').textContent =
+            `Showing ${startIndex + 1} to ${endIndex} of ${reviews.length} reviews`;
+
+        paginatedReviews.forEach(r => {
+            const tr = document.createElement("tr");
+            const overallRating = r.rating?.overall ?? 0;
+            const stars = getStarRating(overallRating);
+            const hasResponse = r.orgResponse !== null;
+
+            tr.innerHTML = `
+                <td>${r.team?.name || "-"}</td>
+                <td>${r.user?.email || "ANONYMOUS"}</td>
+                <td>${r.title}</td>
+                <td><span class="table-preview" title="${r.body}">${r.body}</span></td>
+                <td><span class="status-badge ${r.isPublic ? 'status-public' : 'status-private'}">
+                    ${r.isPublic ? 'Public' : 'Private'}
+                </span></td>
+                <td style="text-align: center;"><span class="response-badge ${hasResponse ? 'response-exists' : 'response-none'}">
+                    ${hasResponse ? '<i class="fas fa-check"></i>' : '<i class="fas fa-close"></i>'}
+                </span></td>
+                <td>${r.age_level_at_review} - ${r.season_term} ${r.season_year}</td>
+                <td style="font-size: 10px; text-align: center; vertical-align: middle;">${stars}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick='window.showReview(${JSON.stringify(r)})'>
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Render pagination controls
+    function renderPaginationControls() {
+        const reviews = window.filteredReviews;
+        const totalPages = Math.ceil(reviews.length / window.itemsPerPage);
+        const paginationControls = document.getElementById('paginationControls');
+        paginationControls.innerHTML = '';
+
+        // Previous
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${window.currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="window.changePage(${window.currentPage - 1})">&laquo;</a>`;
+        paginationControls.appendChild(prevLi);
+
+        // Pages
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, window.currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        if (endPage - startPage + 1 < maxVisiblePages) startPage = Math.max(1, endPage - maxVisiblePages + 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageLi = document.createElement('li');
+            pageLi.className = `page-item ${i === window.currentPage ? 'active' : ''}`;
+            pageLi.innerHTML = `<a class="page-link" href="#" onclick="window.changePage(${i})">${i}</a>`;
+            paginationControls.appendChild(pageLi);
+        }
+
+        // Next
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${window.currentPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="window.changePage(${window.currentPage + 1})">&raquo;</a>`;
+        paginationControls.appendChild(nextLi);
+    }
+
+    // Change page
+    function changePage(page) {
+        const reviews = window.filteredReviews;
+        if (page < 1 || page > Math.ceil(reviews.length / window.itemsPerPage)) return;
+        window.currentPage = page;
+        renderTable();
+        renderPaginationControls();
+    }
+
+    // Search input
+    document.getElementById('reviewGlobalSearch').addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        window.filteredReviews = window.allReviews.filter(r => {
+            const text = `${r.team?.name || ""} ${r.user?.email || r.userId || ""} ${r.title} ${r.body}`.toLowerCase();
+            return text.includes(term);
+        });
+        window.currentPage = 1;
+        renderTable();
+        renderPaginationControls();
+    });
+
+
+    function changePage(page) {
+        if (page < 1 || page > Math.ceil(window.allReviews.length / window.itemsPerPage)) return;
+        window.currentPage = page;
+        renderTable();
+        renderPaginationControls();
+    }
+
+    function getStarRating(rating) {
+        const fullStars = Math.floor(rating);
+        const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+        const emptyStars = 5 - fullStars - halfStar;
+
+        let stars = '';
+        for (let i = 0; i < fullStars; i++) stars += '<i class="fas fa-star text-warning"></i>';
+        if (halfStar) stars += '<i class="fas fa-star-half-alt text-warning"></i>';
+        for (let i = 0; i < emptyStars; i++) stars += '<i class="far fa-star text-warning"></i>';
+
+        return stars + ` <small>${rating.toFixed(1)}</small>`;
+    }
+
+    function showReview(r) {
+        window.currentReviewId = r.id;
+        window.currentResponse = r.orgResponse || null;
+
+        // Basic Info
+        $('#modalTitle').text(r.title);
+        $('#modalBody').text(r.body);
+        $('#modalTeam').text(r.team?.name || "-");
+        $('#modalReviewer').text(r.user?.email || r.userId || "-");
+        $('#modalAge').text(r.age_level_at_review);
+        $('#modalSeason').text(`${r.season_term} ${r.season_year}`);
+        $('#modalDate').text(new Date(r.createdAt).toLocaleDateString());
+
+        // Public/Private status
+        const publicBadge = r.isPublic ?
+            '<span class="badge-public">Public</span>' :
+            '<span class="badge-private">Private</span>';
+        $('#modalPublic').html(publicBadge);
+
+        // Ratings
+        const coaching = r.rating?.coaching ?? 0;
+        const development = r.rating?.development ?? 0;
+        const transparency = r.rating?.transparency ?? 0;
+        const culture = r.rating?.culture ?? 0;
+        const safety = r.rating?.safety ?? 0;
+        const overall = r.rating?.overall ?? 0;
+
+        $('#ratingCoaching').text(coaching.toFixed(1) + '/5');
+        $('#ratingDevelopment').text(development.toFixed(1) + '/5');
+        $('#ratingTransparency').text(transparency.toFixed(1) + '/5');
+        $('#ratingCulture').text(culture.toFixed(1) + '/5');
+        $('#ratingSafety').text(safety.toFixed(1) + '/5');
+        $('#ratingOverall').text(overall.toFixed(1) + '/5');
+
+        // Progress bars
+        $('#progressCoaching').css('width', (coaching / 5 * 100) + '%');
+        $('#progressDevelopment').css('width', (development / 5 * 100) + '%');
+        $('#progressTransparency').css('width', (transparency / 5 * 100) + '%');
+        $('#progressCulture').css('width', (culture / 5 * 100) + '%');
+        $('#progressSafety').css('width', (safety / 5 * 100) + '%');
+
+        // Star ratings
+        $('#ratingStars').html(getStarRating(overall));
+
+        // Handle admin response
+        if (window.currentResponse) {
+            $('#adminResponseText').text(window.currentResponse.body);
+            $('#adminResponseDate').text('Posted: ' + new Date(window.currentResponse.createdAt).toLocaleDateString());
+            $('#adminResponseBy').text('By: ' + (window.currentResponse.user?.email || 'Admin'));
+            $('#adminResponseSection').show();
+
+            // Set up edit mode
+            $('#replyText').val(window.currentResponse.body);
+            $('#submitReplyBtn').hide();
+            $('#updateReplyBtn').show();
+        } else {
+            $('#adminResponseSection').hide();
+            $('#replyText').val('');
+            $('#submitReplyBtn').show();
+            $('#updateReplyBtn').hide();
+        }
+
+        $('#reviewModal').modal('show');
+    }
+
+    // Handle reply submission
+    document.getElementById('submitReplyBtn').addEventListener('click', async function () {
+        const responseText = $('#replyText').val().trim();
+
+        if (!responseText) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Please enter a response'
+            });
+            return;
+        }
+
+        try {
+            const res = await fetch(`${window.APP_CONFIG.API_URL}/reviews/${window.currentReviewId}/response`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getCookie('accessToken')}`
+                },
+                body: JSON.stringify({
+                    body: responseText
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to submit response');
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Response submitted successfully'
+            });
+
+            // Refresh the review to show the new response
+            fetchReviews();
+            $('#reviewModal').modal('hide');
+        } catch (err) {
+            console.error('Error submitting response:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to submit response'
+            });
+        }
+    });
+
+    // Handle reply update
+    document.getElementById('updateReplyBtn').addEventListener('click', async function () {
+        const responseText = $('#replyText').val().trim();
+
+        if (!responseText) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Please enter a response'
+            });
+            return;
+        }
+
+        try {
+            const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/${window.currentReviewId}/respond`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getCookie('accessToken')}`
+                },
+                body: JSON.stringify({
+                    body: responseText
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to update response');
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Response updated successfully'
+            });
+
+            // Refresh the review to show the updated response
+            fetchReviews();
+            $('#reviewModal').modal('hide');
+        } catch (err) {
+            console.error('Error updating response:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to update response'
+            });
+        }
+    });
+
+    // Initialize
+    fetchReviews("recent");
+
+    // Add search functionality
+    document.getElementById('reviewGlobalSearch').addEventListener('input', function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#reviewTable tbody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Helper function to get cookie
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+</script>
+<style>
+    /* Custom Table Styling */
+    #reviewTable {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    #reviewTable thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+        z-index: 10;
+    }
+
+    #reviewTable tbody tr:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+    }
+
+    /* Custom Modal Styling */
+    #reviewModal .modal-content {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    #reviewModal .modal-header {
+        border-radius: 10px 10px 0 0;
+        padding: 1rem 1.5rem;
+    }
+
+    #reviewModal .modal-body {
+        padding: 1.5rem;
+    }
+
+    #reviewModal .detail-item {
+        background: #f8f9fa;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+    }
+
+    #reviewModal .rating-item {
+        background: #f8f9fa;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+    }
+
+    #reviewModal .progress {
+        background-color: #e9ecef;
+        border-radius: 4px;
+    }
+
+    #reviewModal .badge-pill {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .badge-public {
+        background-color: #4cc9f0;
+        color: white;
+    }
+
+    .badge-private {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .status-badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status-public {
+        background-color: #e6f7ff;
+        color: #1890ff;
+    }
+
+    .status-private {
+        background-color: #fff2e8;
+        color: #fa8c16;
+    }
+
+    .response-badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .response-exists {
+        background-color: #e6f7e6;
+        color: #52c41a;
+    }
+
+    .response-none {
+        background-color: #fff1f0;
+        color: #ff4d4f;
+    }
+
+    .table-preview {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+    }
+
+    #adminResponseSection .card {
+        border-left: 4px solid #4361ee;
+    }
+
+    /* Pagination styles */
+    .pagination {
+        margin: 0;
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .page-link {
+        color: var(--primary);
+    }
+
+    .page-link:hover {
+        color: var(--secondary);
+    }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+    }
+
+    #paginationInfo {
+        font-size: 0.9rem;
+    }
+</style>

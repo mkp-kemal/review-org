@@ -13,7 +13,7 @@
     <script src="functions/auth.js"></script>
     <script src="functions/teams.js"></script>
     <script src="functions/reviews.js"></script>
-     <!-- SweetAlert2 JS -->
+    <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- JWT DECODE -->
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
@@ -72,12 +72,13 @@
         }
 
         .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
 
@@ -86,7 +87,7 @@
     <!-- Header / Navigation -->
     <header class="bg-gray-900 text-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="/Admin.html" class="text-2xl font-extrabold text-white">
+            <a href="/admin" class="text-2xl font-extrabold text-white">
                 <i class="fas fa-baseball-ball mr-2"></i>CurveballCritiques
             </a>
             <div class="hidden md:flex items-center space-x-6">
@@ -96,8 +97,7 @@
                 <a href="#for-organizations" class="text-white hover:text-blue-300 transition-colors duration-300">For
                     Organizations</a>
                 <a href="#blog" class="text-white hover:text-blue-300 transition-colors duration-300">Blog</a>
-                <a id="login-link"
-                    class="text-white hover:text-blue-300 transition-colors duration-300">Log In</a>
+                <a id="login-link" class="text-white hover:text-blue-300 transition-colors duration-300">Log In</a>
                 <a href="Review.html"
                     class="bg-yellow-500 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition-all duration-300">Write
                     a Review</a>
@@ -244,131 +244,160 @@
 
         <!-- Review Submission Form (Example) -->
         <section id="review-form" class="py-20 bg-gray-100">
-    <div class="container mx-auto px-6 max-w-3xl">
-        <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Write Your Review</h2>
-        <form id="reviewForm" class="bg-white p-8 rounded-xl shadow-lg space-y-6">
-            <!-- Team/Organization Search Field -->
-            <div class="relative">
-                <label for="team-search" class="block text-lg font-semibold mb-2">Team / Organization Name</label>
-                <input type="text" id="team-search" name="teamSearch"
-                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Search for team or organization..." 
-                    autocomplete="off"
-                    required>
-                <input type="hidden" id="team-id" name="teamId">
-                <input type="hidden" id="organization-id" name="organizationId">
-                
-                <!-- Suggestions Dropdown -->
-                <div id="suggestions" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-                    <div class="sticky top-0 bg-gray-100 p-2 font-semibold">Teams</div>
-                    <div id="team-suggestions" class="overflow-x-auto whitespace-nowrap scrollbar-hide">
-                        <!-- Team suggestions will be inserted here -->
-                    </div>
-                    
-                    <!-- <div class="sticky top-0 bg-gray-100 p-2 font-semibold border-t">Organizations</div> -->
-                    <!-- <div id="org-suggestions" class="overflow-x-auto whitespace-nowrap scrollbar-hide"> -->
-                        <!-- Organization suggestions will be inserted here -->
-                    <!-- </div> -->
-                </div>
-            </div>
+            <div class="container mx-auto px-6 max-w-3xl">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Write Your Review</h2>
+                <form id="reviewForm" class="bg-white p-8 rounded-xl shadow-lg space-y-6">
+                    <!-- Team/Organization Search Field -->
+                    <div class="relative">
+                        <label for="team-search" class="block text-lg font-semibold mb-2">Team / Organization
+                            Name</label>
+                        <input type="text" id="team-search" name="teamSearch"
+                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="Search for team or organization..." autocomplete="off" required>
+                        <input type="hidden" id="team-id" name="teamId">
+                        <input type="hidden" id="organization-id" name="organizationId">
 
-            <div>
-                <label for="season" class="block text-lg font-semibold mb-2">Season</label>
-                <select id="season" name="season" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none" required>
-                    <option value="">Select a season</option>
-                    <option value="WINTER">Winter</option>
-                    <option value="SPRING">Spring</option>
-                    <option value="SUMMER">Summer</option>
-                    <option value="FALL">Fall</option>
-                </select>
-            </div>
+                        <!-- Suggestions Dropdown -->
+                        <div id="suggestions"
+                            class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                            <div class="sticky top-0 bg-gray-100 p-2 font-semibold">Teams</div>
+                            <div id="team-suggestions" class="overflow-x-auto whitespace-nowrap scrollbar-hide">
+                                <!-- Team suggestions will be inserted here -->
+                            </div>
 
-            <h3 class="text-xl font-semibold border-t pt-6">Rate Your Experience (1-5 Stars)</h3>
+                            <!-- <div class="sticky top-0 bg-gray-100 p-2 font-semibold border-t">Organizations</div> -->
+                            <!-- <div id="org-suggestions" class="overflow-x-auto whitespace-nowrap scrollbar-hide"> -->
+                            <!-- Organization suggestions will be inserted here -->
+                            <!-- </div> -->
+                        </div>
+                    </div>
+                    <div>
+                        <label for="season" class="block text-lg font-semibold mb-2">Season</label>
+                        <select id="season" name="season"
+                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
+                            required>
+                            <option value="">Select a season</option>
+                            <option value="WINTER">Winter</option>
+                            <option value="SPRING">Spring</option>
+                            <option value="SUMMER">Summer</option>
+                            <option value="FALL">Fall</option>
+                        </select>
+                    </div>
 
-            <!-- Star Rating Inputs -->
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block font-semibold mb-2">Coaching Quality</label>
-                    <div class="star-rating" data-category="coaching">
-                        <i class="far fa-star" data-rating="1"></i>
-                        <i class="far fa-star" data-rating="2"></i>
-                        <i class="far fa-star" data-rating="3"></i>
-                        <i class="far fa-star" data-rating="4"></i>
-                        <i class="far fa-star" data-rating="5"></i>
-                        <input type="hidden" name="coaching" value="0" required>
+                    <div>
+                        <label for="season-year" class="block text-lg font-semibold mb-2">Season Year</label>
+                        <select id="season-year" name="seasonYear"
+                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
+                            required>
+                            <option value="">Select year</option>
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                        </select>
                     </div>
-                </div>
-                <div>
-                    <label class="block font-semibold mb-2">Player Development</label>
-                    <div class="star-rating" data-category="development">
-                        <i class="far fa-star" data-rating="1"></i>
-                        <i class="far fa-star" data-rating="2"></i>
-                        <i class="far fa-star" data-rating="3"></i>
-                        <i class="far fa-star" data-rating="4"></i>
-                        <i class="far fa-star" data-rating="5"></i>
-                        <input type="hidden" name="development" value="0" required>
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-semibold mb-2">Financial Transparency</label>
-                    <div class="star-rating" data-category="transparency">
-                        <i class="far fa-star" data-rating="1"></i>
-                        <i class="far fa-star" data-rating="2"></i>
-                        <i class="far fa-star" data-rating="3"></i>
-                        <i class="far fa-star" data-rating="4"></i>
-                        <i class="far fa-star" data-rating="5"></i>
-                        <input type="hidden" name="transparency" value="0" required>
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-semibold mb-2">Team Culture</label>
-                    <div class="star-rating" data-category="culture">
-                        <i class="far fa-star" data-rating="1"></i>
-                        <i class="far fa-star" data-rating="2"></i>
-                        <i class="far fa-star" data-rating="3"></i>
-                        <i class="far fa-star" data-rating="4"></i>
-                        <i class="far fa-star" data-rating="5"></i>
-                        <input type="hidden" name="culture" value="0" required>
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-semibold mb-2">Safety</label>
-                    <div class="star-rating" data-category="safety">
-                        <i class="far fa-star" data-rating="1"></i>
-                        <i class="far fa-star" data-rating="2"></i>
-                        <i class="far fa-star" data-rating="3"></i>
-                        <i class="far fa-star" data-rating="4"></i>
-                        <i class="far fa-star" data-rating="5"></i>
-                        <input type="hidden" name="safety" value="0" required>
-                    </div>
-                </div>
-            </div>
 
-            <div>
-                <label for="review-title" class="block text-lg font-semibold mb-2">Review Title</label>
-                <input type="text" id="review-title" name="title"
-                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., 'Great coaching, but disorganized'" required>
-            </div>
+                    <!-- <div>
+                        <label for="age-level" class="block text-lg font-semibold mb-2">Age Group at Time of
+                            Play</label>
+                        <select id="age-level" name="ageLevelAtReview"
+                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
+                            required>
+                            <option value="">Select age group</option>
+                            <option value="12U">12U</option>
+                            <option value="14U">14U</option>
+                            <option value="16U">16U</option>
+                        </select>
+                    </div> -->
 
-            <div>
-                <label for="review-body" class="block text-lg font-semibold mb-2">Your Detailed Review</label>
-                <textarea id="review-body" name="body" rows="6"
-                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Share specific examples. What were the pros and cons? What should other parents know?" required></textarea>
-            </div>
 
-            <div class="pt-4">
-                <button type="submit"
-                    class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md w-full text-lg">Submit
-                    My Review</button>
-                <p class="text-xs text-center text-gray-500 mt-4">By submitting, you affirm your review is
-                    truthful, based on firsthand experience, and agree to our Terms of Service. Your identity
-                    will remain anonymous.</p>
+                    <h3 class="text-xl font-semibold border-t pt-6">Rate Your Experience (1-5 Stars)</h3>
+
+                    <!-- Star Rating Inputs -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block font-semibold mb-2">Coaching Quality</label>
+                            <div class="star-rating" data-category="coaching">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                                <input type="hidden" name="coaching" value="0" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2">Player Development</label>
+                            <div class="star-rating" data-category="development">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                                <input type="hidden" name="development" value="0" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2">Financial Transparency</label>
+                            <div class="star-rating" data-category="transparency">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                                <input type="hidden" name="transparency" value="0" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2">Team Culture</label>
+                            <div class="star-rating" data-category="culture">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                                <input type="hidden" name="culture" value="0" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-2">Safety</label>
+                            <div class="star-rating" data-category="safety">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                                <input type="hidden" name="safety" value="0" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="review-title" class="block text-lg font-semibold mb-2">Review Title</label>
+                        <input type="text" id="review-title" name="title"
+                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., 'Great coaching, but disorganized'" required>
+                    </div>
+
+                    <div>
+                        <label for="review-body" class="block text-lg font-semibold mb-2">Your Detailed Review</label>
+                        <textarea id="review-body" name="body" rows="6"
+                            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="Share specific examples. What were the pros and cons? What should other parents know?"
+                            required></textarea>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit"
+                            class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md w-full text-lg">Submit
+                            My Review</button>
+                        <p class="text-xs text-center text-gray-500 mt-4">By submitting, you affirm your review is
+                            truthful, based on firsthand experience, and agree to our Terms of Service. Your identity
+                            will remain anonymous.</p>
+                    </div>
+                </form>
             </div>
-        </form>
-    </div>
-</section>
+        </section>
 
     </main>
 
@@ -418,6 +447,84 @@
 
         // LOAD REVIEW FROM TEAMS & ORGANIZATION ===================================================================
         document.addEventListener('DOMContentLoaded', loadReviews());
+
+        function initTeamSearch(inputElement, options = {}) {
+            const { hiddenInput } = options;
+
+            // Buat dropdown container jika belum ada
+            let suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto hidden';
+            inputElement.parentElement.appendChild(suggestionsContainer);
+
+            let debounceTimer;
+
+            inputElement.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                const term = inputElement.value.trim();
+                if (term.length < 2) {
+                    suggestionsContainer.classList.add('hidden');
+                    return;
+                }
+
+                debounceTimer = setTimeout(() => {
+                    fetch(`${window.APP_CONFIG.API_URL}/orgs/with/teams?search=${encodeURIComponent(term)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            suggestionsContainer.innerHTML = '';
+
+                            // Sticky header
+                            const header = document.createElement('div');
+                            header.className = 'sticky top-0 bg-gray-100 p-2 font-semibold border-b text-gray-600';
+                            header.textContent = 'Teams';
+                            suggestionsContainer.appendChild(header);
+
+                            if (data.teams && data.teams.length) {
+                                const teamWrapper = document.createElement('div');
+                                teamWrapper.className = 'overflow-y-auto max-h-80';
+
+                                data.teams.forEach(team => {
+                                    const div = document.createElement('div');
+                                    div.className = 'p-3 cursor-pointer hover:bg-gray-100 border-b last:border-b-0';
+                                    div.innerHTML = `
+                                <div class="font-semibold text-blue-500">${team.organization.name} ${team.ageLevel}</div>
+                                <div class="text-sm text-gray-600">${team.city}, ${team.state}</div>
+                            `;
+                                    div.addEventListener('click', () => {
+                                        if (hiddenInput) hiddenInput.value = team.id;
+                                        window.location.href = `Org_profile.html?id=${team.id}`;
+                                    });
+                                    teamWrapper.appendChild(div);
+                                });
+                                suggestionsContainer.appendChild(teamWrapper);
+                            } else {
+                                const noResult = document.createElement('div');
+                                noResult.className = 'p-3 text-gray-500';
+                                noResult.textContent = 'No teams found';
+                                suggestionsContainer.appendChild(noResult);
+                            }
+
+                            suggestionsContainer.classList.remove('hidden');
+                        })
+                        .catch(err => console.error(err));
+                }, 300);
+            });
+
+            // Hide suggestions if clicking outside
+            document.addEventListener('click', e => {
+                if (!inputElement.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.classList.add('hidden');
+                }
+            });
+        }
+        // --- Inisialisasi search ---
+        // Hero big search
+        const heroInput = document.querySelector('.hero-section input[type="text"]');
+        initTeamSearch(heroInput);
+
+        // Review form search
+        const reviewInput = document.getElementById('team-big-search');
+        const teamIdInput = document.getElementById('team-id');
+        initTeamSearch(reviewInput, { hiddenInput: teamIdInput });
     </script>
 </body>
 

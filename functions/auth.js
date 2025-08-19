@@ -14,7 +14,7 @@ async function checkAuth() {
         }
 
         const user = await res.json();
-        console.log('User:', user);
+        // console.log('User:', user);
 
         if (user && user.email) {
             const username = user.email.split('@')[0];
