@@ -91,6 +91,7 @@
                             <th>City</th>
                             <th>State</th>
                             <th>Website</th>
+                            <th>Plan</th>
                             <th>Status</th>
                             <th>Reason Reject</th>
                             <th>Actions</th>
@@ -126,6 +127,11 @@
 
     .badge-rejected {
         background-color: #f72585;
+        color: white;
+    }
+
+    .badge-plan-basic {
+        background-color: green;
         color: white;
     }
 
@@ -206,79 +212,6 @@
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
-    async function fetchWithAuth(url, options = {}) {
-        let accessToken = getCookie('accessToken');
-        let res = await fetch(url, {
-            ...options,
-            headers: {
-                ...options.headers,
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        // Kalau token expired
-        if (res.status === 401) {
-            const refreshToken = getCookie('refreshToken');
-            if (!refreshToken) {
-                // window.location.href = 'Login.html';
-                return;
-            }
-
-            // Minta token baru
-            const refreshRes = await fetch(`${window.APP_CONFIG.API_URL}/auth/refresh`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken })
-            });
-
-            if (!refreshRes.ok) {
-                // window.location.href = 'Login.html';
-                return;
-            }
-
-            const data = await refreshRes.json();
-            // Simpan ulang cookie
-            document.cookie = `accessToken=${data.accessToken}; path=/`;
-            document.cookie = `refreshToken=${data.refreshToken}; path=/`;
-
-            // Ulang request dengan token baru
-            res = await fetch(url, {
-                ...options,
-                headers: {
-                    ...options.headers,
-                    'Authorization': `Bearer ${data.accessToken}`
-                }
-            });
-        }
-
-        return res;
-    }
-
-    async function checkCredentials() {
-        try {
-            // Panggil API check pakai fetchWithAuth
-            const res = await fetchWithAuth(`${window.APP_CONFIG.API_URL}/auth/check`, {
-                method: "GET"
-            });
-
-            if (!res || !res.ok) {
-                window.location.replace('/Login.html');
-                return { isAuthenticated: false };
-            }
-
-            await fetchOrganizations();
-
-            // document.getElementById("loading").style.display = "none";
-            // document.getElementById("adminContent").style.display = "block";
-            // document.body.style.display = "block";
-            return { isAuthenticated: true };
-        } catch (err) {
-            console.error("checkCredentials error:", err);
-            window.location.replace('/Login.html');
-            return { isAuthenticated: false };
-        }
-    }
-
     async function fetchOrganizations() {
         try {
             const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs`, {
@@ -309,6 +242,7 @@
                         <td class="editable" data-field="city" data-id="${org.id}">${org.city}</td>
                         <td class="editable" data-field="state" data-id="${org.id}">${org.state}</td>
                         <td class="editable" data-field="website" data-id="${org.id}">${org.website || '-'}</td>
+                        <td ${org?.subscription?.plan ? `class="badge badge-plan-basic"` : ''} data-id="${org.id}">${org?.subscription?.plan || '-'}</td>
                         <td class="editable" data-field="status" data-id="${org.id}">${statusBadge}</td>
                         <td>${org.rejectedReason || '-'}</td>
                         <td class="actions">
@@ -619,19 +553,6 @@
         });
     }
 
-    // Event listeners ORGS
-    document.getElementById("orgGlobalSearch").addEventListener("input", () => {
-        filterTableGlobalAndStatus("orgTable", "orgGlobalSearch", "org-status-filter", 4);
-    });
-
-    document.querySelectorAll(".org-status-filter").forEach(cb => {
-        cb.addEventListener("change", () => {
-            filterTableGlobalAndStatus("orgTable", "orgGlobalSearch", "org-status-filter", 4);
-        });
-    });
-
-    checkCredentials();
-
     async function fetchOrganizations() {
         try {
             const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs`, {
@@ -648,7 +569,7 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to load organizations'
+                text: `Failed to load organizations: ${err.message}`
             });
         }
     }
@@ -705,6 +626,7 @@
                 <td class="editable" data-field="city" data-id="${org.id}">${org.city}</td>
                 <td class="editable" data-field="state" data-id="${org.id}">${org.state}</td>
                 <td class="editable" data-field="website" data-id="${org.id}">${org.website || '-'}</td>
+                <td ${org?.subscription?.plan ? `class="badge badge-plan-basic"` : ''} data-id="${org.id}">${org?.subscription?.plan || '-'}</td>
                 <td class="editable" data-field="status" data-id="${org.id}">${statusBadge}</td>
                 <td>${org.rejectedReason || '-'}</td>
                 <td class="actions">
@@ -816,6 +738,8 @@
         renderPaginationControls();
     }
 
+    fetchOrganizations();
+
     // Event listeners
     document.getElementById('orgGlobalSearch').addEventListener('input', function () {
         window.currentPageOrg = 1;
@@ -837,7 +761,14 @@
         document.getElementById('orgCsvFileName').textContent = fileName;
     });
 
-    // Keep all other functions (createOrganization, deleteOrganization, uploadOrgCsv, enableEditableCells, etc.)
-    // exactly the same as in your original code
+    // Event listeners ORGS
+    document.getElementById("orgGlobalSearch").addEventListener("input", () => {
+        filterTableGlobalAndStatus("orgTable", "orgGlobalSearch", "org-status-filter", 5);
+    });
 
+    document.querySelectorAll(".org-status-filter").forEach(cb => {
+        cb.addEventListener("change", () => {
+            filterTableGlobalAndStatus("orgTable", "orgGlobalSearch", "org-status-filter", 5);
+        });
+    });
 </script>

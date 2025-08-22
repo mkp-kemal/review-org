@@ -248,9 +248,11 @@
                 <td>${r.user?.email || "ANONYMOUS"}</td>
                 <td>${r.title}</td>
                 <td><span class="table-preview" title="${r.body}">${r.body}</span></td>
-                <td><span class="status-badge ${r.isPublic ? 'status-public' : 'status-private'}">
-                    ${r.isPublic ? 'Public' : 'Private'}
-                </span></td>
+               <td class="editable" data-field="isPublic" data-id="${r.id}">
+        <span class="status-badge ${r.isPublic ? 'status-public' : 'status-private'}">
+            ${r.isPublic ? 'Public' : 'Private'}
+        </span>
+    </td>
                 <td style="text-align: center;"><span class="response-badge ${hasResponse ? 'response-exists' : 'response-none'}">
                     ${hasResponse ? '<i class="fas fa-check"></i>' : '<i class="fas fa-close"></i>'}
                 </span></td>
@@ -264,7 +266,80 @@
             `;
             tbody.appendChild(tr);
         });
+        
+        enableEditableCells('.editable');
     }
+
+    function enableEditableCells(selector) {
+    const cells = document.querySelectorAll(selector);
+    cells.forEach(cell => {
+        if (cell.dataset.editableAttached) return;
+        cell.dataset.editableAttached = 'true';
+
+        cell.addEventListener('dblclick', () => {
+            if (cell.querySelector('select')) return;
+
+            const currentValue = cell.textContent.trim();
+            const id = cell.dataset.id;
+            const field = cell.dataset.field;
+
+            let editableElement = document.createElement('select');
+            ['Public', 'Private'].forEach(val => {
+                const option = document.createElement('option');
+                option.value = val.toLowerCase();
+                option.textContent = val;
+                if (val === currentValue) option.selected = true;
+                editableElement.appendChild(option);
+            });
+
+            cell.innerHTML = '';
+            cell.appendChild(editableElement);
+            editableElement.focus();
+            cell.style.backgroundColor = 'var(--primary-light)';
+
+            const saveChange = async () => {
+                const newValue = editableElement.value === 'public'; // true / false
+
+                // kalau tidak berubah, render ulang
+                if ((currentValue === 'Public' && newValue) || (currentValue === 'Private' && !newValue)) {
+                    renderCell(newValue);
+                    return;
+                }
+
+                try {
+                    await fetch(`${window.APP_CONFIG.API_URL}/teams/${id}/reviews/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${getCookie('accessToken')}`
+                        },
+                        body: JSON.stringify({ [field]: newValue })
+                    });
+                    renderCell(newValue);
+                } catch (err) {
+                    console.error('Failed to save:', err);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to save changes' });
+                    renderCell(currentValue === 'Public');
+                }
+            };
+
+            const renderCell = (val) => {
+                let statusBadge = val
+                    ? `<span class="status-badge status-public">Public</span>`
+                    : `<span class="status-badge status-private">Private</span>`;
+                cell.innerHTML = statusBadge;
+                cell.style.backgroundColor = '';
+            };
+
+            editableElement.addEventListener('blur', saveChange);
+            editableElement.addEventListener('keydown', e => {
+                if (e.key === 'Enter') editableElement.blur();
+                if (e.key === 'Escape') renderCell(currentValue === 'Public');
+            });
+        });
+    });
+}
+
 
     // Render pagination controls
     function renderPaginationControls() {
@@ -420,7 +495,7 @@
         }
 
         try {
-            const res = await fetch(`${window.APP_CONFIG.API_URL}/reviews/${window.currentReviewId}/response`, {
+            const res = await fetch(`${window.APP_CONFIG.API_URL}/reviews/${window.currentReviewId}/respond`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

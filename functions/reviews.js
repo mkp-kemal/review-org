@@ -65,11 +65,11 @@ async function loadReviews() {
                 const teamElement = document.createElement('div');
                 teamElement.className = 'inline-block p-3 m-2 border rounded-lg cursor-pointer hover:bg-gray-100';
                 teamElement.innerHTML = `
-                    <div class="font-semibold">${team.organization.name} ${team.ageLevel}</div>
-                    <div class="text-sm text-gray-600">${team.city}, ${team.state}</div>
+                    <div class="font-semibold">${team.name} ${team.ageLevel}</div>
+                    <div class="text-sm text-gray-600">${team.organization.name}-${team.city}</div>
                 `;
                 teamElement.addEventListener('click', () => {
-                    teamSearch.value = `${team.organization.name} ${team.ageLevel}`;
+                    teamSearch.value = `${team.name} ${team.ageLevel}`;
                     teamIdInput.value = team.id;
                     suggestions.classList.add('hidden');
                 });

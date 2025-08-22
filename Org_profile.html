@@ -15,6 +15,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -54,7 +56,7 @@
     <!-- Main Content -->
     <main class="bg-white">
         <!-- Admin Buttons (hidden by default) -->
-        <div id="admin-buttons" class="admin-buttons container mx-auto px-6 pt-6">
+        <!-- <div id="admin-buttons" class="admin-buttons container mx-auto px-6 pt-6">
             <div class="flex flex-wrap gap-2">
                 <button id="edit-team-btn"
                     class="bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition-colors">
@@ -77,7 +79,7 @@
                     <i class="fas fa-users mr-2"></i>Manage Members
                 </button>
             </div>
-        </div>
+        </div> -->
 
         <!-- Profile Header -->
         <div class="container mx-auto px-6 py-12">
@@ -313,9 +315,8 @@
                 document.getElementById('manage-members-btn').style.display =
                     (isSiteAdmin || isOrgAdmin || isTeamAdmin) ? 'block' : 'none';
 
-                    document.getElementById('reviewer-name').style.display =
+                document.getElementById('reviewer-name').style.display =
                     (isSiteAdmin || isOrgAdmin || isTeamAdmin) ? 'block' : 'none';
-
 
                 // Add event listeners
                 document.getElementById('edit-team-btn').addEventListener('click', () => {
@@ -347,6 +348,158 @@
             }
         }
 
+        // Function to show respond modal
+        function showRespondModal(reviewId, teamId, currentResponse = '') {
+            Swal.fire({
+                title: 'Respond to Review',
+                input: 'textarea',
+                inputValue: currentResponse,
+                inputPlaceholder: 'Type your response here...',
+                showCancelButton: true,
+                confirmButtonText: 'Submit Response',
+                showLoaderOnConfirm: true,
+                preConfirm: (response) => {
+                    if (!response) {
+                        Swal.showValidationMessage('Response cannot be empty');
+                        return false;
+                    }
+
+                    // Determine if we're creating or updating a response
+                    const url = currentResponse
+                        ? `${window.APP_CONFIG.API_URL}/teams/${teamId}/respond`
+                        : `${window.APP_CONFIG.API_URL}/reviews/${reviewId}/respond`;
+
+                    const method = currentResponse ? 'PATCH' : 'POST';
+
+                    return fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getJwtFromCookie()}`
+                        },
+                        body: JSON.stringify({ body: response })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Request failed: ${error}`);
+                        });
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Response submitted successfully',
+                        icon: 'success'
+                    }).then(() => {
+                        // Reload the page to see the changes
+                        location.reload();
+                    });
+                }
+            });
+        }
+
+        // Function to toggle review visibility
+        function toggleReviewVisibility(reviewId, isCurrentlyPublic) {
+            const newStatus = !isCurrentlyPublic;
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `This will ${newStatus ? 'show' : 'hide'} this review from public view`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: `Yes, ${newStatus ? 'show' : 'hide'} it!`,
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`${window.APP_CONFIG.API_URL}/teams/${reviewId}/reviews/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getJwtFromCookie()}`
+                        },
+                        body: JSON.stringify({ isPublic: newStatus })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Failed to update review status');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            Swal.fire(
+                                'Updated!',
+                                `Review has been ${newStatus ? 'shown' : 'hidden'}.`,
+                                'success'
+                            ).then(() => {
+                                // Reload the page to see the changes
+                                location.reload();
+                            });
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Error!',
+                                'Failed to update review status.',
+                                'error'
+                            );
+                        });
+                }
+            });
+        }
+
+        // Function to delete a response
+        function deleteResponse(respondId) {
+            console.log('respondId', respondId);
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`${window.APP_CONFIG.API_URL}/respond/${respondId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getJwtFromCookie()}`
+                        },
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Failed to delete response');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            Swal.fire(
+                                'Deleted!',
+                                'Response has been deleted.',
+                                'success'
+                            ).then(() => {
+                                // Reload the page to see the changes
+                                location.reload();
+                            });
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Error!',
+                                'Failed to delete response.',
+                                'error'
+                            );
+                        });
+                }
+            });
+        }
+
         async function loadOrgProfile() {
             // Get id from URL ?id=...
             const params = new URLSearchParams(window.location.search);
@@ -367,9 +520,9 @@
                 if (!res.ok) throw new Error(`Failed to fetch organization data: ${res.status}`);
 
                 const data = await res.json();
-
+                console.log(data);
+                
                 const storedUser = JSON.parse(sessionStorage.getItem("user"));
-
 
                 // Update Profile Header
                 document.getElementById('org-name').textContent = data.name || 'Unknown Team';
@@ -422,10 +575,10 @@
 
                 const aboutContent = document.getElementById('about-content');
                 aboutContent.innerHTML = `
-                    <p>Welcome to ${data.name || 'this team'}, located in ${data.city || 'Unknown'}, ${data.state || 'Unknown'}.</p>
-                    ${data.organization?.website ? `<p>Website: <a href="https://${data.organization.website}" target="_blank" class="text-blue-600 hover:underline">${data.organization.website}</a></p>` : ''}
-                    <p>This team competes in ${data.ageLevel || 'unknown age level'} and plays in the ${data.division || 'unknown division'}.</p>
-                `;
+                <p>Welcome to ${data.name || 'this team'}, located in ${data.city || 'Unknown'}, ${data.state || 'Unknown'}.</p>
+                ${data.organization?.website ? `<p>Website: <a href="https://${data.organization.website}" target="_blank" class="text-blue-600 hover:underline">${data.organization.website}</a></p>` : ''}
+                <p>This team competes in ${data.ageLevel || 'unknown age level'} and plays in the ${data.division || 'unknown division'}.</p>
+            `;
 
                 // Update Reviews Section
                 const reviewsContainer = document.getElementById('reviews-container');
@@ -440,26 +593,27 @@
                         const starsHtml = renderStars(rating);
                         const reviewer = review.user?.email ? review.user.email.split('@')[0] : 'Anonymous';
                         const seasonDisplay = getSeasonDisplay(review.season_term, review.season_year);
+                        const hasResponse = !!review.orgResponse;
 
                         reviewDiv.innerHTML = `
-                            <div class="flex justify-between items-center mb-3">
-                                <h4 class="text-lg font-bold">${review.title || 'No title'}</h4>
-                                <div class="star-rating">${starsHtml}</div>
-                            </div>
-                            <p style="display:none" id="reviewer-name" class="text-gray-700 mb-2"><b>By:</b> ${reviewer}</p>
-                            <p class="text-gray-700 mb-2">${review.body || 'No review content'}</p>
-                            <p class="text-sm text-gray-500">Season: ${seasonDisplay} | Reviewed: ${formatDate(review.createdAt)}</p>
-                        `;
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="text-lg font-bold">${review.title || 'No title'}</h4>
+                            <div class="star-rating">${starsHtml}</div>
+                        </div>
+                        <p style="display:none" id="reviewer-name" class="text-gray-700 mb-2"><b>By:</b> ${reviewer}</p>
+                        <p class="text-gray-700 mb-2">${review.body || 'No review content'}</p>
+                        <p class="text-sm text-gray-500">Season: ${seasonDisplay} | Reviewed: ${formatDate(review.createdAt)}</p>
+                    `;
 
                         // Add organization response if available
-                        if (review.orgResponse) {
+                        if (hasResponse) {
                             const responseDiv = document.createElement('div');
                             responseDiv.className = 'mt-4 p-4 bg-gray-50 rounded-lg border-t';
                             responseDiv.innerHTML = `
-                                <h5 class="text-md font-bold text-gray-800 mb-2"><i class="fas fa-building mr-2"></i>Response from ${data.name}</h5>
-                                <p class="text-gray-600">${review.orgResponse.body}</p>
-                                <p class="text-xs text-gray-500 mt-2">Responded on ${formatDate(review.orgResponse.createdAt)}</p>
-                            `;
+                            <h5 class="text-md font-bold text-gray-800 mb-2"><i class="fas fa-building mr-2"></i>Response from ${data.name}</h5>
+                            <p class="text-gray-600">${review.orgResponse.body}</p>
+                            <p class="text-xs text-gray-500 mt-2">Responded on ${formatDate(review.orgResponse.createdAt)}</p>
+                        `;
                             reviewDiv.appendChild(responseDiv);
                         }
 
@@ -467,35 +621,53 @@
                         if (storedUser?.role?.includes('SITE_ADMIN') || storedUser?.role?.includes('ORG_ADMIN') || storedUser?.role?.includes('TEAM_ADMIN')) {
                             const adminActions = document.createElement('div');
                             adminActions.className = 'mt-3 flex justify-end space-x-2';
+
+                            // Always show hide/unhide button
                             adminActions.innerHTML = `
-                                <button class="edit-review-btn bg-blue-100 text-blue-800 text-sm font-semibold py-1 px-3 rounded hover:bg-blue-200">
+                            <button class="hide-review-btn bg-gray-100 text-gray-800 text-sm font-semibold py-1 px-3 rounded hover:bg-gray-200">
+                                <i class="fas ${review.isPublic ? 'fa-eye-slash' : 'fa-eye'} mr-1"></i>${review.isPublic ? 'Hide' : 'Unhide'}
+                            </button>
+                        `;
+
+                            // Only show edit/delete buttons if there's a response
+                            if (hasResponse) {
+                                adminActions.innerHTML += `
+                                <button class="edit-response-btn bg-blue-100 text-blue-800 text-sm font-semibold py-1 px-3 rounded hover:bg-blue-200">
                                     <i class="fas fa-edit mr-1"></i>Edit
                                 </button>
-                                <button class="delete-review-btn bg-red-100 text-red-800 text-sm font-semibold py-1 px-3 rounded hover:bg-red-200">
+                                <button class="delete-response-btn bg-red-100 text-red-800 text-sm font-semibold py-1 px-3 rounded hover:bg-red-200">
                                     <i class="fas fa-trash mr-1"></i>Delete
                                 </button>
-                                ${!review.orgResponse ? `
+                            `;
+                            } else {
+                                // Show respond button if no response exists
+                                adminActions.innerHTML += `
                                 <button class="respond-review-btn bg-purple-100 text-purple-800 text-sm font-semibold py-1 px-3 rounded hover:bg-purple-200">
                                     <i class="fas fa-reply mr-1"></i>Respond
                                 </button>
-                                ` : ''}
                             `;
+                            }
+
                             reviewDiv.appendChild(adminActions);
 
                             // Add event listeners for review admin buttons
-                            adminActions.querySelector('.edit-review-btn')?.addEventListener('click', () => {
-                                alert(`Edit review: ${review.id}`);
+                            adminActions.querySelector('.hide-review-btn')?.addEventListener('click', () => {
+                                toggleReviewVisibility(review.id, review.isPublic);
                             });
 
-                            adminActions.querySelector('.delete-review-btn')?.addEventListener('click', () => {
-                                if (confirm('Are you sure you want to delete this review?')) {
-                                    alert(`Review ${review.id} would be deleted`);
-                                }
-                            });
+                            if (hasResponse) {
+                                adminActions.querySelector('.edit-response-btn')?.addEventListener('click', () => {
+                                    showRespondModal(review.id, orgId, review.orgResponse.body);
+                                });
 
-                            adminActions.querySelector('.respond-review-btn')?.addEventListener('click', () => {
-                                alert(`Respond to review: ${review.id}`);
-                            });
+                                adminActions.querySelector('.delete-response-btn')?.addEventListener('click', () => {
+                                    deleteResponse(review.orgResponse.id);
+                                });
+                            } else {
+                                adminActions.querySelector('.respond-review-btn')?.addEventListener('click', () => {
+                                    showRespondModal(review.id, orgId);
+                                });
+                            }
                         }
 
                         reviewsContainer.appendChild(reviewDiv);
@@ -505,11 +677,11 @@
                     });
                 } else {
                     reviewsContainer.innerHTML = `
-                        <div class="text-center py-8">
-                            <i class="fas fa-info-circle text-4xl text-gray-400 mb-2"></i>
-                            <p class="text-gray-500">No reviews yet for this team.</p>
-                        </div>
-                    `;
+                    <div class="text-center py-8">
+                        <i class="fas fa-info-circle text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500">No reviews yet for this team.</p>
+                    </div>
+                `;
                 }
 
             } catch (err) {
@@ -518,11 +690,11 @@
                 // Show error message
                 const reviewsContainer = document.getElementById('reviews-container');
                 reviewsContainer.innerHTML = `
-                    <div class="text-center py-8">
-                        <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-2"></i>
-                        <p class="text-red-500">Failed to load team data. Please try again later.</p>
-                    </div>
-                `;
+                <div class="text-center py-8">
+                    <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-2"></i>
+                    <p class="text-red-500">Failed to load team data. Please try again later.</p>
+                </div>
+            `;
             }
         }
 

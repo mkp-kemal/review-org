@@ -130,7 +130,7 @@ function renderTeamProfile(teamData) {
                     <h4 class="text-lg font-bold text-gray-800 mb-2">
                         <i class="fas fa-building mr-2"></i>Response from ${organization.name}
                     </h4>
-                    <p class="text-gray-600 mb-4">${r.orgResponse}</p>
+                    <p class="text-gray-600 mb-4">${r.orgResponse.body}</p>
                     <p class="text-sm text-gray-500">Posted ${new Date(r.editedAt || r.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}</p>
                 </div>
             ` : ''}
