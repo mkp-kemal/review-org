@@ -1,0 +1,638 @@
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+        background-color: #f5f5f5;
+        color: #333;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    h1 {
+        color: #2c3e50;
+        font-size: 24px;
+    }
+
+    .controls {
+        display: flex;
+        gap: 10px;
+    }
+
+    button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    #refreshBtn {
+        background-color: #3498db;
+        color: white;
+    }
+
+    #refreshBtn:hover {
+        background-color: #2980b9;
+    }
+
+    #deleteAllBtn {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    #deleteAllBtn:hover {
+        background-color: #c0392b;
+    }
+
+    .charts-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .chart-box {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+    }
+
+    .chart-title {
+        font-size: 16px;
+        margin-bottom: 15px;
+        color: #2c3e50;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th,
+    td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #2c3e50;
+        position: sticky;
+        top: 0;
+    }
+
+    tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #7f8c8d;
+    }
+
+    .error {
+        color: #e74c3c;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #7f8c8d;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-success {
+        background-color: #2ecc71;
+        color: white;
+    }
+
+    .badge-info {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .badge-warning {
+        background-color: #f39c12;
+        color: white;
+    }
+
+    .badge-danger {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    .actor-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .actor-email {
+        font-weight: 500;
+    }
+
+    .actor-role {
+        font-size: 12px;
+        color: #7f8c8d;
+    }
+
+    .truncate {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        color: #3498db;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 14px;
+    }
+
+    .action-btn:hover {
+        text-decoration: underline;
+    }
+
+    /* Pagination Styles */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        gap: 10px;
+    }
+
+    .pagination-btn {
+        padding: 6px 12px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        background-color: #e9ecef;
+    }
+
+    .pagination-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .pagination-info {
+        margin: 0 15px;
+        color: #6c757d;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow: auto;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #7f8c8d;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .json-view {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 15px;
+        overflow: auto;
+        max-height: 50vh;
+        font-family: monospace;
+        white-space: pre-wrap;
+    }
+
+    @media (max-width: 768px) {
+        .charts-container {
+            grid-template-columns: 1fr;
+        }
+
+        header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .controls {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .pagination {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+<div>
+    <div class="container">
+        <header>
+            <h1>Log Aktivitas Sistem</h1>
+            <div class="controls">
+                <button id="refreshBtn">Refresh Data</button>
+                <button id="deleteAllBtn">Hapus Semua Logs</button>
+            </div>
+        </header>
+
+        <div class="charts-container">
+            <div class="chart-box">
+                <div class="chart-title">Distribusi Jenis Aksi</div>
+                <canvas id="actionChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <div class="chart-title">Aktivitas per Jam</div>
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loading" class="loading">Memuat data logs...</div>
+            <div id="error" class="error" style="display: none;"></div>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                Tidak ada data logs yang tersedia.
+            </div>
+
+            <!-- 🔍 Search bar -->
+            <div class="search-container" style="margin: 10px 0; display:none;" id="searchBoxWrapper">
+                <input type="text" id="searchInput" placeholder="Cari email, action, atau path..."
+                    style="padding:6px; width: 300px;">
+            </div>
+
+            <table id="logsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Aksi</th>
+                        <th>Tipe Target</th>
+                        <th>Aktor</th>
+                        <th>Method</th>
+                        <th>Path</th>
+                        <th>Response</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="logsTableBody">
+                    <!-- Data logs akan diisi oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination" style="display: none;">
+            <button class="pagination-btn" id="firstPage">First</button>
+            <button class="pagination-btn" id="prevPage">Previous</button>
+            <span class="pagination-info" id="pageInfo">Page 1 of 1</span>
+            <button class="pagination-btn" id="nextPage">Next</button>
+            <button class="pagination-btn" id="lastPage">Last</button>
+        </div>
+    </div>
+
+    <!-- Modal untuk melihat detail -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Detail Log</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent" class="json-view"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const logsTable = document.getElementById('logsTable');
+        const logsTableBody = document.getElementById('logsTableBody');
+        const loadingElement = document.getElementById('loading');
+        const errorElement = document.getElementById('error');
+        const emptyStateElement = document.getElementById('emptyState');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const deleteAllBtn = document.getElementById('deleteAllBtn');
+        const paginationElement = document.getElementById('pagination');
+        const firstPageBtn = document.getElementById('firstPage');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const lastPageBtn = document.getElementById('lastPage');
+        const pageInfoElement = document.getElementById('pageInfo');
+        const modal = document.getElementById('detailModal');
+        const modalContent = document.getElementById('modalContent');
+        const closeModalBtn = document.getElementById('closeModal');
+        const searchInput = document.getElementById('searchInput');
+        const searchBoxWrapper = document.getElementById('searchBoxWrapper');
+
+        let actionChartInstance = null;
+        let activityChartInstance = null;
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let allLogs = [];
+        let filteredLogs = []; // hasil filter/search
+
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('id-ID', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            }).format(date);
+        }
+
+        function truncateText(text, maxLength = 30) {
+            if (typeof text !== 'string') text = JSON.stringify(text);
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+
+        function showError(message) {
+            loadingElement.style.display = 'none';
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            logsTable.style.display = 'none';
+            emptyStateElement.style.display = 'none';
+            paginationElement.style.display = 'none';
+            searchBoxWrapper.style.display = 'none';
+        }
+
+        async function fetchLogs() {
+            try {
+                loadingElement.style.display = 'block';
+                errorElement.style.display = 'none';
+                logsTable.style.display = 'none';
+                emptyStateElement.style.display = 'none';
+                paginationElement.style.display = 'none';
+                searchBoxWrapper.style.display = 'none';
+
+                const response = await fetch(`${window.APP_CONFIG.API_URL}/admin/audit-logs`, {
+                    headers: { 'Authorization': `Bearer ${getCookie('accessToken')}` }
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                allLogs = await response.json();
+                loadingElement.style.display = 'none';
+
+                if (allLogs.length === 0) {
+                    emptyStateElement.style.display = 'block';
+                    return;
+                }
+
+                filteredLogs = allLogs; // default tanpa filter
+                currentPage = 1;
+                logsTable.style.display = 'table';
+                paginationElement.style.display = 'flex';
+                searchBoxWrapper.style.display = 'block';
+
+                renderTable();
+                renderCharts(filteredLogs);
+                updatePagination();
+
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+                showError(`Gagal memuat data: ${error.message}`);
+            }
+        }
+
+        function renderCharts(logs) {
+            if (actionChartInstance) actionChartInstance.destroy();
+            if (activityChartInstance) activityChartInstance.destroy();
+
+            const actionCounts = {};
+            logs.forEach(log => {
+                actionCounts[log.action] = (actionCounts[log.action] || 0) + 1;
+            });
+
+            const actionCtx = document.getElementById('actionChart').getContext('2d');
+            actionChartInstance = new Chart(actionCtx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(actionCounts),
+                    datasets: [{
+                        data: Object.values(actionCounts),
+                        backgroundColor: ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            const hourlyActivity = {};
+            for (let i = 0; i < 24; i++) hourlyActivity[i] = 0;
+            logs.forEach(log => {
+                const hour = new Date(log.createdAt).getHours();
+                hourlyActivity[hour]++;
+            });
+
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            activityChartInstance = new Chart(activityCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(hourlyActivity).map(h => `${h}:00`),
+                    datasets: [{ label: 'Jumlah Aktivitas', data: Object.values(hourlyActivity), backgroundColor: '#3498db' }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        }
+
+        function applySearch() {
+            const query = searchInput.value.toLowerCase();
+            if (!query) {
+                filteredLogs = allLogs;
+            } else {
+                filteredLogs = allLogs.filter(log => {
+                    return (
+                        (log.actor?.email || '').toLowerCase().includes(query) ||
+                        (log.action || '').toLowerCase().includes(query) ||
+                        (log.metadata?.path || '').toLowerCase().includes(query)
+                    );
+                });
+            }
+            currentPage = 1;
+            renderTable();
+            updatePagination();
+        }
+
+        function renderTable() {
+            logsTableBody.innerHTML = '';
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredLogs.length);
+            const currentLogs = filteredLogs.slice(startIndex, endIndex);
+
+            currentLogs.forEach(log => {
+                const row = document.createElement('tr');
+                let badgeClass = 'badge-info';
+                if (log.action === 'CREATE') badgeClass = 'badge-success';
+                if (log.action === 'DELETE') badgeClass = 'badge-danger';
+                if (log.action === 'UPDATE') badgeClass = 'badge-warning';
+
+                row.innerHTML = `
+                <td>${formatDateTime(log.createdAt)}</td>
+                <td><span class="badge ${badgeClass}">${log.action}</span></td>
+                <td>${log.targetType}</td>
+                <td class="actor-info">
+                    <span class="actor-email">${log.actor.email}</span>
+                    <span class="actor-role">${log.actor.role}</span>
+                </td>
+                <td>${log.metadata.method}</td>
+                <td>${truncateText(log.metadata.path, 25)}</td>
+                <td class="truncate" title="${JSON.stringify(log.metadata.responseSummary)}">
+                    ${truncateText(JSON.stringify(log.metadata.responseSummary), 40)}
+                </td>
+                <td>
+                    <button class="action-btn view-detail" data-log='${JSON.stringify(log)}'>View</button>
+                </td>
+            `;
+                logsTableBody.appendChild(row);
+            });
+
+            document.querySelectorAll('.view-detail').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const logData = JSON.parse(this.getAttribute('data-log'));
+                    modalContent.textContent = JSON.stringify(logData, null, 2);
+                    modal.style.display = 'flex';
+                });
+            });
+        }
+
+        function updatePagination() {
+            const totalPages = Math.max(1, Math.ceil(filteredLogs.length / itemsPerPage));
+            pageInfoElement.textContent = `Page ${currentPage} of ${totalPages}`;
+            firstPageBtn.disabled = currentPage === 1;
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages;
+            lastPageBtn.disabled = currentPage === totalPages;
+        }
+
+        function goToPage(page) {
+            const totalPages = Math.max(1, Math.ceil(filteredLogs.length / itemsPerPage));
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            currentPage = page;
+            renderTable();
+            updatePagination();
+        }
+
+        async function deleteAllLogs() {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete all logs!'
+            });
+            if (!result.isConfirmed) return;
+            try {
+                const response = await fetch(`${window.APP_CONFIG.API_URL}/admin/audit-logs`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getCookie('accessToken')}` }
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                Swal.fire({ icon: 'success', title: 'Success', text: 'All logs have been deleted.' });
+                fetchLogs();
+            } catch (error) {
+                console.error('Error deleting logs:', error);
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message });
+            }
+        }
+
+        // Event Listeners
+        refreshBtn.addEventListener('click', fetchLogs);
+        deleteAllBtn.addEventListener('click', deleteAllLogs);
+        firstPageBtn.addEventListener('click', () => goToPage(1));
+        prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
+        nextPageBtn.addEventListener('click', () => goToPage(currentPage + 1));
+        lastPageBtn.addEventListener('click', () => goToPage(Math.ceil(filteredLogs.length / itemsPerPage)));
+        closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+        searchInput.addEventListener('input', applySearch);
+
+        // Init
+        fetchLogs();
+    })();
+</script>
