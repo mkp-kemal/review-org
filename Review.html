@@ -175,13 +175,25 @@
                                     <input type="hidden" id="team-id" name="teamId">
                                 </div>
                                 <div>
-                                    <label for="team-season" class="block text-lg font-semibold mb-2">Season</label>
-                                    <select id="team-season" name="season"
-                                        class="w-full p-4 border rounded-lg bg-white">
-                                        <option>Summer 2025</option>
-                                        <option>Fall 2024</option>
-                                        <option>Summer 2024</option>
-                                        <option>Fall 2023</option>
+                                    <label for="season" class="block text-lg font-semibold mb-2">Season</label>
+                                    <select id="season" name="season"
+                                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
+                                        required>
+                                        <option value="">Select a season</option>
+                                        <option value="WINTER">Winter</option>
+                                        <option value="SPRING">Spring</option>
+                                        <option value="SUMMER">Summer</option>
+                                        <option value="FALL">Fall</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="season-year" class="block text-lg font-semibold mb-2">Season
+                                        Year</label>
+                                    <select id="season-year" name="seasonYear"
+                                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
+                                        required>
+                                        <option value="">Select year</option>
                                     </select>
                                 </div>
                             </div>
@@ -326,7 +338,7 @@
                                 </label>
                             </div>
                             <div class="flex justify-center gap-4">
-                               <div onclick="goToStep(3)"
+                                <div onclick="goToStep(3)"
                                     class="bg-gray-200 cursor-pointer text-gray-800 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-all duration-300 text-lg">
                                     Back
                                 </div>
@@ -334,7 +346,7 @@
                                     class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700">Submit
                                     My
                                     Review</button>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -399,8 +411,68 @@
             });
         });
 
+        async function loadSeasonYears() {
+            try {
+                const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/years`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${getCookie('accessToken')}`
+                    }
+                });
+                if (!res.ok) throw new Error("Failed to load years");
+
+                const data = await res.json();
+
+                const select = document.getElementById('season-year');
+
+                data.years.forEach(year => {
+                    const opt = document.createElement('option');
+                    opt.value = year;
+                    opt.textContent = year;
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                console.error("loadSeasonYears error:", err);
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                const res = await fetchWithAuth(`${window.APP_CONFIG.API_URL}/auth/me`);
+
+                const user = await res.json();
+
+
+
+                console.log(user, 'sdsd');
+                if (user && user.email) {
+                    sessionStorage.setItem("user", JSON.stringify(user));
+
+                    return user;
+                } else {
+                    sessionStorage.removeItem("user");
+                }
+
+            } catch (err) {
+                console.error('You are not logged in - ANONYMOUS', err);
+                sessionStorage.removeItem("user");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            let user = await checkAuth();
+
+            if (["SITE_ADMIN", "ORG_ADMIN", "TEAM_ADMIN"].includes(user.role)) {
+                window.location.href = '/';
+            }
+        });
+
         // LOAD REVIEW FROM TEAMS & ORGANIZATION ===================================================================
         document.addEventListener('DOMContentLoaded', loadReviews());
+
+        document.addEventListener('DOMContentLoaded', loadSeasonYears);
+
     </script>
 
 </body>

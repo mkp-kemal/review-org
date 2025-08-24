@@ -1,6 +1,6 @@
 async function loadTeams() {
     try {
-        const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/reviews?sort=rating`);
+        const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/reviews/public?sort=rating`);
         if (!res.ok) throw new Error('Gagal mengambil data tim');
 
         const reviews = await res.json();
@@ -22,37 +22,57 @@ async function loadTeams() {
         const container = document.getElementById('teams-container');
         container.innerHTML = '';
 
-        // Render tiap team hanya sekali
+        // Kalau kosong semua
+        if (!reviews.length || Object.keys(teamsMap).length === 0) {
+                    document.getElementById('no-available-data').innerHTML = '<p class="text-red-500">Not yet available review</p>';
+            return;
+        }
+
+        // Render tiap team
         Object.values(teamsMap).forEach(({ reviews, team, organization }) => {
-            // Hitung rata-rata overall (ambil dari rating.overall)
-            const avgOverall = reviews.reduce((acc, cur) => acc + cur.rating.overall, 0) / reviews.length;
-
-            // Cari review dengan rating overall tertinggi
-            const bestReview = reviews.reduce((best, cur) =>
-                (cur.rating.overall > best.rating.overall ? cur : best),
-                reviews[0]
-            );
-
-            // Bintang rating
-            const fullStars = Math.floor(avgOverall);
-            const halfStar = avgOverall % 1 >= 0.5;
+            let avgOverall = 0;
+            let bestReview = null;
             let starsHtml = '';
-            for (let i = 0; i < fullStars; i++) starsHtml += '<i class="fas fa-star"></i>';
-            if (halfStar) starsHtml += '<i class="fas fa-star-half-alt"></i>';
-            for (let i = starsHtml.match(/fa-star/g)?.length || 0; i < 5; i++) starsHtml += '<i class="far fa-star"></i>';
+
+            if (reviews.length > 0) {
+                // Hitung rata-rata overall
+                avgOverall = reviews.reduce((acc, cur) => acc + cur.rating.overall, 0) / reviews.length;
+
+                // Cari review terbaik
+                bestReview = reviews.reduce((best, cur) =>
+                    (cur.rating.overall > best.rating.overall ? cur : best),
+                    reviews[0]
+                );
+
+                // Bintang rating
+                const fullStars = Math.floor(avgOverall);
+                const halfStar = avgOverall % 1 >= 0.5;
+                for (let i = 0; i < fullStars; i++) starsHtml += '<i class="fas fa-star"></i>';
+                if (halfStar) starsHtml += '<i class="fas fa-star-half-alt"></i>';
+                for (let i = starsHtml.match(/fa-star/g)?.length || 0; i < 5; i++) starsHtml += '<i class="far fa-star"></i>';
+            }
 
             const card = `
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105">
                     <div class="p-6">
-                        <h3 class="text-2xl font-bold mb-2">${organization.name}</h3>
-                        <p class="text-gray-500 mb-4">${team.city}, ${team.state} | ${team.ageLevel} ${team.division}</p>
-                        <div class="flex items-center mb-4">
-                            <div class="text-2xl font-bold text-blue-600 mr-3">${avgOverall.toFixed(1)}</div>
-                            <div class="star-rating">${starsHtml}</div>
-                            <div class="text-gray-500 ml-3">(${reviews.length} Reviews)</div>
-                        </div>
-                        <p class="text-gray-700 mb-4 italic">"${bestReview.body}"</p>
-                        <a href="#team-profile" class="font-bold text-blue-600 hover:underline view-profile-btn" data-teamid="${team.id}">View Full Profile &rarr;</a>
+                        <h3 class="text-2xl font-bold mb-2">${team.name}</h3>
+                        <p class="text-gray-500 mb-4">${organization.name} - ${team.city} | ${team.ageLevel}</p>
+                        
+                        ${
+                            reviews.length > 0
+                            ? `
+                                <div class="flex items-center mb-4">
+                                    <div class="text-2xl font-bold text-blue-600 mr-3">${avgOverall.toFixed(1)}</div>
+                                    <div class="star-rating">${starsHtml}</div>
+                                    <div class="text-gray-500 ml-3">(${reviews.length} Reviews)</div>
+                                </div>
+                                <p class="text-gray-700 mb-4 italic">"${bestReview.body}"</p>
+                                <a href="#team-profile" class="font-bold text-blue-600 hover:underline view-profile-btn" data-teamid="${team.id}">View Full Profile &rarr;</a>
+                            `
+                            : `
+                                <p class="text-gray-500 italic">Not yet review</p>
+                            `
+                        }
                     </div>
                 </div>
             `;
@@ -80,6 +100,7 @@ function setupViewProfileButtons(teamsMap) {
         });
     });
 }
+
 
 function renderTeamProfile(teamData) {
     const { reviews, team, organization } = teamData;
@@ -141,8 +162,8 @@ function renderTeamProfile(teamData) {
         <div class="container mx-auto px-6">
             <div class="md:flex justify-between items-start mb-12">
                 <div>
-                    <h1 class="text-4xl md:text-5xl font-extrabold">${team.title || organization.name}</h1>
-                    <p class="text-xl text-gray-500">${team.city}, ${team.state} | ${team.ageLevel} ${team.division}</p>
+                    <h1 class="text-4xl md:text-5xl font-extrabold">${team.name || organization.name}</h1>
+                    <p class="text-xl text-gray-500">${organization.name} - ${team.city}, ${team.state} | ${team.ageLevel} ${team.division}</p>
                 </div>
                 <div class="text-center mt-6 md:mt-0">
                     <div class="text-6xl font-bold text-blue-600">${avgOverall}</div>

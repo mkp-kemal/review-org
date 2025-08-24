@@ -455,7 +455,7 @@
         // Function to delete a response
         function deleteResponse(respondId) {
             console.log('respondId', respondId);
-            
+
             Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
@@ -521,7 +521,7 @@
 
                 const data = await res.json();
                 console.log(data);
-                
+
                 const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
                 // Update Profile Header
@@ -609,11 +609,29 @@
                         if (hasResponse) {
                             const responseDiv = document.createElement('div');
                             responseDiv.className = 'mt-4 p-4 bg-gray-50 rounded-lg border-t';
+
+                            let responseFrom = '';
+                            switch (review.orgResponse.user.role) {
+                                case 'TEAM_ADMIN':
+                                    responseFrom = 'Team';
+                                    break;
+                                case 'SITE_ADMIN':
+                                    responseFrom = 'Admin';
+                                    break;
+                                case 'ORG_ADMIN':
+                                    responseFrom = 'Organization';
+                                    break;
+                                default:
+                                    responseFrom = 'Unknown';
+                            }
+
                             responseDiv.innerHTML = `
-                            <h5 class="text-md font-bold text-gray-800 mb-2"><i class="fas fa-building mr-2"></i>Response from ${data.name}</h5>
-                            <p class="text-gray-600">${review.orgResponse.body}</p>
-                            <p class="text-xs text-gray-500 mt-2">Responded on ${formatDate(review.orgResponse.createdAt)}</p>
-                        `;
+        <h5 class="text-md font-bold text-gray-800 mb-2">
+            <i class="fas fa-building mr-2"></i>Response from ${responseFrom}
+        </h5>
+        <p class="text-gray-600">${review.orgResponse.body}</p>
+        <p class="text-xs text-gray-500 mt-2">Responded on ${formatDate(review.orgResponse.createdAt)}</p>
+    `;
                             reviewDiv.appendChild(responseDiv);
                         }
 

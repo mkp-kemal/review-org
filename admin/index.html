@@ -565,27 +565,31 @@
                     if (!res || !res.ok) {
                         window.location.replace('/Login.html');
                         return { isAuthenticated: false };
-                    }
+                    } else {
+                        let data = await res.json();
 
-                    let data = await res.json();
-
-                    window.user = data.user;
-
-                    // Setelah mendapatkan data user, setup sidebar
-                    setTimeout(() => {
-                        if (typeof setupSidebarByRole === 'function') {
-                            setupSidebarByRole();
-                        }
-
-                        // Default page berdasarkan role
-                        if (window.user.role === 'TEAM_ADMIN') {
-                            loadPage('teams');
+                        if (data.user.role === 'REVIEWER') {
+                            window.location.href = '/';
+                            return { isAuthenticated: false };
                         } else {
-                            loadPage('organizations');
-                        }
-                    }, 100);
+                            window.user = data.user;
 
-                    return { data };
+                            setTimeout(() => {
+                                if (typeof setupSidebarByRole === 'function') {
+                                    setupSidebarByRole();
+                                }
+
+                                // Default page berdasarkan role
+                                if (window.user.role === 'TEAM_ADMIN') {
+                                    loadPage('teams');
+                                } else {
+                                    loadPage('organizations');
+                                }
+                            }, 100);
+
+                            return { data };
+                        }
+                    }
                 } catch (err) {
                     console.error("checkCredentials error:", err);
                     return { isAuthenticated: false };

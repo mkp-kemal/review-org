@@ -249,10 +249,10 @@
                 <td>${r.title}</td>
                 <td><span class="table-preview" title="${r.body}">${r.body}</span></td>
                <td class="editable" data-field="isPublic" data-id="${r.id}">
-        <span class="status-badge ${r.isPublic ? 'status-public' : 'status-private'}">
-            ${r.isPublic ? 'Public' : 'Private'}
-        </span>
-    </td>
+                    <span class="status-badge ${r.isPublic ? 'status-public' : 'status-private'}">
+                        ${r.isPublic ? 'Public' : 'Private'}
+                    </span>
+                </td>
                 <td style="text-align: center;"><span class="response-badge ${hasResponse ? 'response-exists' : 'response-none'}">
                     ${hasResponse ? '<i class="fas fa-check"></i>' : '<i class="fas fa-close"></i>'}
                 </span></td>

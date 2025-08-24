@@ -79,6 +79,29 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        .overlay-block {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(2px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 0.75rem;
+            /* sama kayak rounded-xl form */
+            z-index: 1;
+            /* pastikan di atas form */
+        }
+
+        .overlay-block i {
+            font-size: 3rem;
+            color: #dc2626;
+            /* merah */
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 
@@ -166,6 +189,9 @@
             <div class="container mx-auto px-6">
                 <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Featured Organizations</h2>
                 <div id="teams-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!--  generate in JS -->
+                </div>
+                <div id="no-available-data" class="flex justify-center">
                     <!--  generate in JS -->
                 </div>
             </div>
@@ -290,10 +316,6 @@
                             class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
                             required>
                             <option value="">Select year</option>
-                            <option value="2023">2023</option>
-                            <option value="2024">2024</option>
-                            <option value="2025">2025</option>
-                            <option value="2026">2026</option>
                         </select>
                     </div>
 
@@ -442,11 +464,36 @@
     </footer>
 
     <script>
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            let user = await checkAuth();
+
+            if (["SITE_ADMIN", "ORG_ADMIN", "TEAM_ADMIN"].includes(user.role)) {
+                const formEl = document.querySelector("#review-form form");
+                if (formEl) {
+                    formEl.classList.add("relative");
+
+                    const overlay = document.createElement("div");
+                    overlay.className = "overlay-block";
+                    overlay.innerHTML = `
+                    <i class="fas fa-ban"></i>
+                    <p class="font-bold text-red-600 text-lg">You are not allowed to submit a review</p>
+                `;
+
+                    formEl.appendChild(overlay);
+                }
+            }
+        });
+
         // LOAD REVIEW FROM TEAMS & ORGANIZATION ===================================================================
         document.addEventListener('DOMContentLoaded', loadTeams());
 
         // LOAD REVIEW FROM TEAMS & ORGANIZATION ===================================================================
         document.addEventListener('DOMContentLoaded', loadReviews());
+
+
+        document.addEventListener('DOMContentLoaded', loadSeasonYears);
+
 
         function initTeamSearch(inputElement, options = {}) {
             const { hiddenInput } = options;
@@ -486,8 +533,8 @@
                                     const div = document.createElement('div');
                                     div.className = 'p-3 cursor-pointer hover:bg-gray-100 border-b last:border-b-0';
                                     div.innerHTML = `
-                                <div class="font-semibold text-blue-500">${team.organization.name} ${team.ageLevel}</div>
-                                <div class="text-sm text-gray-600">${team.city}, ${team.state}</div>
+                                <div class="font-semibold text-blue-500">${team.name} ${team.ageLevel}</div>
+                                <div class="text-sm text-gray-600">${team.organization.name}, ${team.state}</div>
                             `;
                                     div.addEventListener('click', () => {
                                         if (hiddenInput) hiddenInput.value = team.id;
@@ -516,6 +563,33 @@
                 }
             });
         }
+
+        async function loadSeasonYears() {
+            try {
+                const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/years`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${getCookie('accessToken')}`
+                    }
+                });
+                if (!res.ok) throw new Error("Failed to load years");
+
+                const data = await res.json();
+
+                const select = document.getElementById('season-year');
+
+                data.years.forEach(year => {
+                    const opt = document.createElement('option');
+                    opt.value = year;
+                    opt.textContent = year;
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                console.error("loadSeasonYears error:", err);
+            }
+        }
+
         // --- Inisialisasi search ---
         // Hero big search
         const heroInput = document.querySelector('.hero-section input[type="text"]');

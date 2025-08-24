@@ -12,7 +12,7 @@ async function checkAuth() {
         }
 
         const user = await res.json();
-
+        
         if (user && user.email) {
             sessionStorage.setItem("user", JSON.stringify(user));
 
@@ -20,6 +20,8 @@ async function checkAuth() {
             loginLink.textContent = 'Logout';
             loginLink.href = '#';
             loginLink.onclick = showLogoutConfirmation;
+
+            return user;
         } else {
             sessionStorage.removeItem("user");
             showLogoutButton(loginLink);
@@ -40,12 +42,6 @@ function showLogoutButton(linkEl) {
     linkEl.href = "Login.html";
     linkEl.onclick = null;
 }
-
-// Pastikan dipanggil setelah DOM siap
-document.addEventListener("DOMContentLoaded", () => {
-    checkAuth();
-});
-
 
 function showLogoutConfirmation(event) {
     event.preventDefault();
