@@ -455,6 +455,7 @@
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
                 allLogs = await response.json();
+                
                 loadingElement.style.display = 'none';
 
                 if (allLogs.length === 0) {
@@ -526,6 +527,7 @@
                 filteredLogs = allLogs.filter(log => {
                     return (
                         (log.actor?.email || '').toLowerCase().includes(query) ||
+                        (log.actor?.id || '').toLowerCase().includes(query) ||
                         (log.action || '').toLowerCase().includes(query) ||
                         (log.metadata?.path || '').toLowerCase().includes(query)
                     );
@@ -554,13 +556,13 @@
                 <td><span class="badge ${badgeClass}">${log.action}</span></td>
                 <td>${log.targetType}</td>
                 <td class="actor-info">
-                    <span class="actor-email">${log.actor.email}</span>
+                    <span class="actor-email">${log.actor.email || '-'}</span>
                     <span class="actor-role">${log.actor.role}</span>
                 </td>
-                <td>${log.metadata.method}</td>
-                <td>${truncateText(log.metadata.path, 25)}</td>
-                <td class="truncate" title="${JSON.stringify(log.metadata.responseSummary)}">
-                    ${truncateText(JSON.stringify(log.metadata.responseSummary), 40)}
+                <td>${log.metadata?.method || '-'}</td>
+                <td>${truncateText(log.metadata?.path || '-', 25)}</td>
+                <td class="truncate" title="${log.metadata?.responseSummary ? JSON.stringify(log.metadata.responseSummary) : '-'}">
+                    ${truncateText(log.metadata?.responseSummary ? JSON.stringify(log.metadata.responseSummary) : '-', 40)}
                 </td>
                 <td>
                     <button class="action-btn view-detail" data-log='${JSON.stringify(log)}'>View</button>
