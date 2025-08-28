@@ -14,14 +14,26 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <script src="../functions/config.js"></script>
-    <script src="../functions/auth.js"></script>
-    <!-- Bootstrap & Font Awesome -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../dist/config.js"></script>
+    <script src="../dist/auth.js"></script>
+  <!-- Bootstrap 4.5.2 CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- jQuery (wajib sebelum bootstrap.js) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<!-- Popper.js (dibutuhkan untuk tooltip, dropdown, dsb) -->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
     <style>
         :root {
@@ -347,297 +359,7 @@
             <!-- Main content will be loaded here -->
         </div>
 
-        <script>
-            // review.js
-            (function (global) {
-                global.auth = global.auth || {
-                    role: null
-                };
-
-                // reviews
-                global.reviewState = global.reviewState || {
-                    currentReviewId: null,
-                    currentResponse: null,
-                    currentPage: 1,
-                    itemsPerPage: 10,
-                    allReviews: [],
-                    filteredReviews: [],
-
-                    // orgs
-                    currentPageOrg: 1,
-                    itemsPerPageOrg: 10,
-                    allOrgs: [],
-                    orgsList: [],
-
-                    // teams
-                    currentPageTeam: 1,
-                    itemsPerPageTeam: 10,
-                    allTeams: [],
-                    teamsList: []
-                };
-
-                // review
-                global.currentReviewId = global.reviewState.currentReviewId;
-                global.currentResponse = global.reviewState.currentResponse;
-                global.currentPage = global.reviewState.currentPage;
-                global.itemsPerPage = global.reviewState.itemsPerPage;
-                global.allReviews = global.reviewState.allReviews;
-                global.filteredReviews = global.reviewState.filteredReviews;
-
-                // org
-                global.currentPageOrg = global.reviewState.currentPageOrg;
-                global.itemsPerPageOrg = global.reviewState.itemsPerPageOrg;
-                global.allOrgs = global.reviewState.allOrgs;
-                global.orgsList = global.reviewState.orgsList;
-
-                // team
-                global.currentPageTeam = global.reviewState.currentPageTeam;
-                global.itemsPerPageTeam = global.reviewState.itemsPerPageTeam;
-                global.allTeams = global.reviewState.allTeams;
-                global.teamsList = global.reviewState.TeamsList;
-            })(window);
-
-            function loadSidebar() {
-                fetch('sidebar.html')
-                    .then(response => response.text())
-                    .then(data => {
-                        const container = document.getElementById('sidebar-container');
-                        container.innerHTML = data;
-
-                        container.querySelectorAll("script").forEach(oldScript => {
-                            const newScript = document.createElement("script");
-                            if (oldScript.src) {
-                                newScript.src = oldScript.src;
-                            } else {
-                                newScript.textContent = oldScript.textContent;
-                            }
-                            document.body.appendChild(newScript);
-                        });
-
-                        if (window.user && window.user.role) {
-                            setTimeout(setupSidebarByRole, 50);
-                        }
-                    });
-            }
-
-            // Fungsi untuk memuat halaman berdasarkan menu yang dipilih
-            function loadPage(page) {
-                const menuItems = document.querySelectorAll('.sidebar-menu li a');
-                menuItems.forEach(item => {
-                    item.classList.remove('active');
-                    if (item.getAttribute('onclick').includes(page)) {
-                        item.classList.add('active');
-                    }
-                });
-
-                initPageScripts(page);
-            }
-            let currentPage = null;
-
-            function initPageScripts(page) {
-                if (page === currentPage) {
-                    return;
-                }
-                currentPage = page;
-
-                if (page === 'organizations') {
-                    fetch('organizations.html')
-                        .then(res => res.text())
-                        .then(html => {
-                            const container = document.getElementById('main-content');
-                            container.innerHTML = html;
-
-                            container.querySelectorAll("script").forEach(oldScript => {
-                                const newScript = document.createElement("script");
-                                if (oldScript.src) {
-                                    newScript.src = oldScript.src; // untuk script eksternal
-                                } else {
-                                    newScript.textContent = oldScript.textContent; // untuk inline script
-                                }
-                                document.body.appendChild(newScript);
-                            });
-                        });
-
-                } else if (page === 'teams') {
-                    fetch('teams.html')
-                        .then(res => res.text())
-                        .then(html => {
-                            const container = document.getElementById('main-content');
-                            container.innerHTML = html;
-
-                            container.querySelectorAll("script").forEach(oldScript => {
-                                const newScript = document.createElement("script");
-                                if (oldScript.src) {
-                                    newScript.src = oldScript.src; // untuk script eksternal
-                                } else {
-                                    newScript.textContent = oldScript.textContent; // untuk inline script
-                                }
-                                document.body.appendChild(newScript);
-                            });
-                        });
-                } else if (page === 'reviews') {
-                    fetch('reviews.html')
-                        .then(res => res.text())
-                        .then(html => {
-                            const container = document.getElementById('main-content');
-                            container.innerHTML = html;
-
-                            container.querySelectorAll("script").forEach(oldScript => {
-                                const newScript = document.createElement("script");
-                                if (oldScript.src) {
-                                    newScript.src = oldScript.src; // untuk script eksternal
-                                } else {
-                                    newScript.textContent = oldScript.textContent; // untuk inline script
-                                }
-                                document.body.appendChild(newScript);
-                            });
-                        });
-                } else if (page === "logs") {
-                    fetch('logs.html')
-                        .then(res => res.text())
-                        .then(html => {
-                            const container = document.getElementById('main-content');
-                            container.innerHTML = html;
-
-                            container.querySelectorAll("script").forEach(oldScript => {
-                                const newScript = document.createElement("script");
-                                if (oldScript.src) {
-                                    newScript.src = oldScript.src; // untuk script eksternal
-                                } else {
-                                    newScript.textContent = oldScript.textContent; // untuk inline script
-                                }
-                                document.body.appendChild(newScript);
-                            });
-                        });
-                }
-            }
-
-
-
-            // async function fetchWithAuth(url, options = {}) {
-            //     let accessToken = getCookie('accessToken');
-            //     let res = await fetch(url, {
-            //         ...options,
-            //         headers: {
-            //             ...options.headers,
-            //             'Authorization': `Bearer ${accessToken}`
-            //         }
-            //     });
-
-            //     // Kalau token expired
-            //     if (res.status === 401) {
-            //         const refreshToken = getCookie('refreshToken');
-            //         if (!refreshToken) {
-            //             window.location.href = 'Login.html';
-            //             return;
-            //         }
-
-            //         // Minta token baru
-            //         const refreshRes = await fetch(`${window.APP_CONFIG.API_URL}/auth/refresh`, {
-            //             method: 'POST',
-            //             headers: { 'Content-Type': 'application/json' },
-            //             body: JSON.stringify({ refreshToken })
-            //         });
-
-            //         if (!refreshRes.ok) {
-            //             window.location.href = 'Login.html';
-            //             return;
-            //         }
-
-            //         const data = await refreshRes.json();
-            //         // Simpan ulang cookie
-            //         document.cookie = `accessToken=${data.accessToken}; path=/`;
-            //         document.cookie = `refreshToken=${data.refreshToken}; path=/`;
-
-            //         // Ulang request dengan token baru
-            //         res = await fetch(url, {
-            //             ...options,
-            //             headers: {
-            //                 ...options.headers,
-            //                 'Authorization': `Bearer ${data.accessToken}`
-            //             }
-            //         });
-            //     }
-
-            //     // 🔎 Cek role user kalau responsenya ada data user
-            //     try {
-            //         const json = await res.clone().json(); // clone supaya res asli tetap bisa dipakai
-            //         if (json?.user?.role === 'REVIEWER') {
-            //             window.location.href = 'index.html';
-            //             return;
-            //         }
-            //     } catch (e) {
-            //         // bukan JSON, biarkan saja
-            //     }
-
-            //     return res;
-            // }
-
-            async function checkCredentials() {
-                try {
-                    const res = await fetchWithAuth(`${window.APP_CONFIG.API_URL}/auth/check`, {
-                        method: "GET"
-                    });
-
-                    if (!res || !res.ok) {
-                        window.location.replace('/Login.html');
-                        return { isAuthenticated: false };
-                    } else {
-                        let data = await res.json();
-
-                        if (data.user.role === 'REVIEWER') {
-                            window.location.href = '/';
-                            return { isAuthenticated: false };
-                        } else {
-                            window.user = data.user;
-
-                            setTimeout(() => {
-                                if (typeof setupSidebarByRole === 'function') {
-                                    setupSidebarByRole();
-                                }
-
-                                // Default page berdasarkan role
-                                if (window.user.role === 'TEAM_ADMIN') {
-                                    loadPage('teams');
-                                } else {
-                                    loadPage('organizations');
-                                }
-                            }, 100);
-
-                            return { data };
-                        }
-                    }
-                } catch (err) {
-                    console.error("checkCredentials error:", err);
-                    return { isAuthenticated: false };
-                }
-            }
-
-            // Load sidebar when page loads
-            document.addEventListener('DOMContentLoaded', function () {
-                checkCredentials().then((res) => {
-                    loadSidebar();
-
-                    // loadPage('organizations')
-                    // Load default page (organizations)
-                    // setTimeout(() => loadPage('organizations'), 100);
-
-                    const observer = new MutationObserver(() => {
-                        const orgFileInput = document.getElementById('orgCsvFile');
-                        if (orgFileInput && !orgFileInput.dataset.bound) {
-                            orgFileInput.dataset.bound = true;
-                            orgFileInput.addEventListener('change', (e) => {
-                                const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
-                                document.getElementById('orgCsvFileName').textContent = fileName;
-                            });
-                            console.log("Orgs event bound");
-                        }
-                    });
-
-                    observer.observe(document.getElementById("main-content"), { childList: true, subtree: true });
-                });
-            });
-        </script>
+           <script src="../dist/index_admin.js"></script>
 </body>
 
 </html>

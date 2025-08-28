@@ -138,7 +138,7 @@ function renderTeamProfile(teamData) {
     const reviewsHtml = sortedReviews.map(r => `
         <div class="p-6 border rounded-lg">
             <div class="flex justify-between items-center mb-3">
-                <h4 class="text-lg font-bold">"${r.title || 'Review'}"</h4>
+                <h4 class="text-lg font-bold">"${r.title || 'Review'}" ${window?.user?.email === r.user.email ? '(You)' : ""}</h4>
                 <div class="star-rating">
                     ${renderStars(r.rating?.overall || 0)}
                 </div>

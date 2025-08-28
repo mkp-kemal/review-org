@@ -5,39 +5,41 @@
         </div>
         <div class="card-body">
             <!-- Add Organization Form -->
-            <div class="form-inline">
-                <div class="form-group">
-                    <input type="text" id="orgName" class="form-control" placeholder="Name">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="orgCity" class="form-control" placeholder="City">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="orgState" class="form-control" placeholder="State">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="orgWebsite" class="form-control" placeholder="Website">
-                </div>
-                <button class="btn btn-primary" onclick="createOrganization()">
-                    <i class="fas fa-plus"></i> Add Organization
-                </button>
-            </div>
+             <div id="addOrgForm" style="display: none;">
+                 <div class="form-inline">
+                     <div class="form-group">
+                         <input type="text" id="orgName" class="form-control" placeholder="Name">
+                     </div>
+                     <div class="form-group">
+                         <input type="text" id="orgCity" class="form-control" placeholder="City">
+                     </div>
+                     <div class="form-group">
+                         <input type="text" id="orgState" class="form-control" placeholder="State">
+                     </div>
+                     <div class="form-group">
+                         <input type="text" id="orgWebsite" class="form-control" placeholder="Website">
+                     </div>
+                     <button class="btn btn-primary" onclick="createOrganization()">
+                         <i class="fas fa-plus"></i> Add Organization
+                     </button>
+                 </div>
+                 <!-- CSV Upload -->
+                 <div class="form-inline mt-3">
+                     <div class="form-group" style="flex-grow: 1;">
+                         <div class="file-input-wrapper">
+                             <button class="file-input-btn">
+                                 <i class="fas fa-file-csv"></i> Choose CSV File
+                             </button>
+                             <input type="file" id="orgCsvFile" accept=".csv">
+                             <span id="orgCsvFileName" class="file-name">No file chosen</span>
+                         </div>
+                     </div>
+                     <button class="btn btn-success" onclick="uploadOrgCsv()">
+                         <i class="fas fa-upload"></i> Upload CSV
+                     </button>
+                 </div>
+             </div>
 
-            <!-- CSV Upload -->
-            <div class="form-inline mt-3">
-                <div class="form-group" style="flex-grow: 1;">
-                    <div class="file-input-wrapper">
-                        <button class="file-input-btn">
-                            <i class="fas fa-file-csv"></i> Choose CSV File
-                        </button>
-                        <input type="file" id="orgCsvFile" accept=".csv">
-                        <span id="orgCsvFileName" class="file-name">No file chosen</span>
-                    </div>
-                </div>
-                <button class="btn btn-success" onclick="uploadOrgCsv()">
-                    <i class="fas fa-upload"></i> Upload CSV
-                </button>
-            </div>
 
             <div class="table-responsive mt-3">
                 <!-- Search and Filter -->
@@ -91,10 +93,11 @@
                             <th>City</th>
                             <th>State</th>
                             <th>Website</th>
+                            <th style="display: none;" id="orgClaimByCol">Claim By</th>
                             <th>Plan</th>
                             <th>Status</th>
                             <th>Reason Reject</th>
-                            <th>Actions</th>
+                            <th style="display: none;" id="orgActionsCol">Actions</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -206,59 +209,18 @@
 </style>
 
 <script>
+    if (window.user && window.user.role === 'SITE_ADMIN') {
+        document.getElementById('orgActionsCol').style.display = 'table-cell';
+        document.getElementById('orgClaimByCol').style.display = 'table-cell';
+        document.getElementById('addOrgForm').style.display = 'block';
+    }
+
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
-    async function fetchOrganizations() {
-        try {
-            const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
-            });
-            const data = await res.json();
-            const tbody = document.querySelector('#orgTable tbody');
-
-            window.orgsList = data;
-
-            tbody.innerHTML = '';
-
-            data.forEach(org => {
-                const tr = document.createElement('tr');
-
-                let statusBadge;
-                if (org.status === 'APPROVED') {
-                    statusBadge = `<span class="badge badge-approved">${org.status}</span>`;
-                } else if (org.status === 'PENDING') {
-                    statusBadge = `<span class="badge badge-pending">${org.status}</span>`;
-                } else {
-                    statusBadge = `<span class="badge badge-rejected">${org.status}</span>`;
-                }
-
-                tr.innerHTML = `
-                        <td class="editable" data-field="name" data-id="${org.id}">${org.name}</td>
-                        <td class="editable" data-field="city" data-id="${org.id}">${org.city}</td>
-                        <td class="editable" data-field="state" data-id="${org.id}">${org.state}</td>
-                        <td class="editable" data-field="website" data-id="${org.id}">${org.website || '-'}</td>
-                        <td ${org?.subscription?.plan ? `class="badge badge-plan-basic"` : ''} data-id="${org.id}">${org?.subscription?.plan || '-'}</td>
-                        <td class="editable" data-field="status" data-id="${org.id}">${statusBadge}</td>
-                        <td>${org.rejectedReason || '-'}</td>
-                        <td class="actions">
-                            <button class="btn btn-danger btn-sm" onclick="deleteOrganization('${org.id}')">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </td>
-                    `;
-                tbody.appendChild(tr);
-            });
-
-            enableEditableCells('.editable', 'organization', window.orgsList);
-        } catch (err) {
-            console.error("fetchOrganizations error:", err);
-        }
-    }
 
     function enableEditableCells(selector, type, orgs = []) {
         const cells = document.querySelectorAll(selector);
@@ -555,7 +517,15 @@
 
     async function fetchOrganizations() {
         try {
-            const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs`, {
+            let url;
+
+            if (window?.user?.role === 'SITE_ADMIN') {
+                url = `${window.APP_CONFIG.API_URL}/orgs`;
+            } else {
+                url = `${window.APP_CONFIG.API_URL}/orgs/access/claim`;
+            }
+            
+            const res = await fetch(url, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
             });
@@ -626,14 +596,16 @@
                 <td class="editable" data-field="city" data-id="${org.id}">${org.city}</td>
                 <td class="editable" data-field="state" data-id="${org.id}">${org.state}</td>
                 <td class="editable" data-field="website" data-id="${org.id}">${org.website || '-'}</td>
+                ${window.user.role === 'SITE_ADMIN' ? `<td data-id="${org.id}">${org?.claimedBy?.email || '-'}</td>` : ``}
                 <td ${org?.subscription?.plan ? `class="badge badge-plan-basic"` : ''} data-id="${org.id}">${org?.subscription?.plan || '-'}</td>
-                <td class="editable" data-field="status" data-id="${org.id}">${statusBadge}</td>
+                ${window.user.role === 'SITE_ADMIN' ? ` <td class="editable" data-field="status" data-id="${org.id}">${statusBadge}</td>` : `<td>${statusBadge}</td>`}
                 <td>${org.rejectedReason || '-'}</td>
-                <td class="actions">
-                    <button class="btn btn-danger btn-sm" onclick="deleteOrganization('${org.id}')">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </td>
+                ${window.user.role === 'SITE_ADMIN' ?
+                    `<td class="actions">
+                            <button class="btn btn-danger btn-sm" onclick="deleteOrganization('${org.id}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>`: ''}
             `;
             tbody.appendChild(tr);
         });

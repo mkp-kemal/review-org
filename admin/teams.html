@@ -5,51 +5,53 @@
         </div>
         <div class="card-body">
             <!-- Add Team Form -->
-            <div class="form-inline">
-                <div class="form-group">
-                    <select id="teamOrgSelect" class="form-control">
-                        <option value="">Select Organization</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="teamName" class="form-control" placeholder="Name">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="teamAgeLevel" class="form-control" placeholder="Age Level">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="teamDivision" class="form-control" placeholder="Division">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="teamCity" class="form-control" placeholder="City">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="teamState" class="form-control" placeholder="State">
-                </div>
-                <button class="btn btn-primary" onclick="createTeam()">
-                    <i class="fas fa-plus"></i> Add Team
-                </button>
-            </div>
-
-            <!-- CSV Upload -->
-            <div class="form-inline mt-3">
-                <div class="form-group">
-                    <select id="teamCsvOrgSelect" class="form-control">
-                        <option value="">Select Organization</option>
-                    </select>
-                </div>
-                <div class="form-group" style="flex-grow: 1;">
-                    <div class="file-input-wrapper">
-                        <button class="file-input-btn">
-                            <i class="fas fa-file-csv"></i> Choose CSV File
-                        </button>
-                        <input type="file" id="teamCsvFile" accept=".csv">
-                        <span id="teamCsvFileName" class="file-name">No file chosen</span>
+            <div id="addTeamForm" style="display: none;">
+                <div class="form-inline">
+                    <div class="form-group">
+                        <select id="teamOrgSelect" class="form-control">
+                            <option value="">Select Organization</option>
+                        </select>
                     </div>
+                    <div class="form-group">
+                        <input type="text" id="teamName" class="form-control" placeholder="Name">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="teamAgeLevel" class="form-control" placeholder="Age Level">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="teamDivision" class="form-control" placeholder="Division">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="teamCity" class="form-control" placeholder="City">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="teamState" class="form-control" placeholder="State">
+                    </div>
+                    <button class="btn btn-primary" onclick="createTeam()">
+                        <i class="fas fa-plus"></i> Add Team
+                    </button>
                 </div>
-                <button class="btn btn-success" onclick="uploadTeamCsv()">
-                    <i class="fas fa-upload"></i> Upload CSV
-                </button>
+
+                <!-- CSV Upload -->
+                <div class="form-inline mt-3">
+                    <div class="form-group">
+                        <select id="teamCsvOrgSelect" class="form-control">
+                            <option value="">Select Organization</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex-grow: 1;">
+                        <div class="file-input-wrapper">
+                            <button class="file-input-btn">
+                                <i class="fas fa-file-csv"></i> Choose CSV File
+                            </button>
+                            <input type="file" id="teamCsvFile" accept=".csv">
+                            <span id="teamCsvFileName" class="file-name">No file chosen</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="uploadTeamCsv()">
+                        <i class="fas fa-upload"></i> Upload CSV
+                    </button>
+                </div>
             </div>
 
             <div class="table-responsive mt-3">
@@ -104,7 +106,7 @@
                             <th>Plan</th>
                             <th>Status</th>
                             <th>Reason Reject</th>
-                            <th>Actions</th>
+                            <th style="display: none;" id="isHide">Actions</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -124,10 +126,10 @@
     </div>
 </div>
 <script>
-    //   let window.currentPageTeam = 1;
-    // const window.itemsPerPageTeam = 10;
-    // let window.allTeams = [];
-    // let window.teamsList = [];
+     if (window.user && (window.user.role === 'SITE_ADMIN' || window.user.role === 'ORG_ADMIN')) {
+        document.getElementById('isHide').style.display = 'table-cell';
+        document.getElementById('addTeamForm').style.display = 'block';
+    }
 
     function enableEditableCells(selector, type, orgs = []) {
         const cells = document.querySelectorAll(selector);
@@ -274,7 +276,13 @@
 
     async function fetchTeams() {
         try {
-            const res = await fetch(`${window.APP_CONFIG.API_URL}/teams`, {
+            let url;
+            if (window?.user?.role === 'SITE_ADMIN') {
+                url = `${window.APP_CONFIG.API_URL}/teams`;
+            } else {
+                url = `${window.APP_CONFIG.API_URL}/teams/access/claim`;
+            }
+            const res = await fetch(url, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
             });
@@ -294,7 +302,14 @@
 
     async function fetchOrganizations() {
         try {
-            const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs`, {
+            let url;
+            if (window?.user?.role === 'SITE_ADMIN') {
+                url = `${window.APP_CONFIG.API_URL}/orgs`;
+            }else{
+                url = `${window.APP_CONFIG.API_URL}/orgs/access/claim`;
+            }
+
+            const res = await fetch(url, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
             });
@@ -373,13 +388,13 @@
                 <td class="editable" data-field="city" data-id="${team.id}">${team.city || '-'}</td>
                 <td class="editable" data-field="state" data-id="${team.id}">${team.state || '-'}</td>
                 <td ${team?.subscription?.plan ? `class="badge badge-plan-basic"` : ''} data-id="${team.id}">${team?.subscription?.plan || '-'}</td>
-                <td class="editable" data-field="status" data-id="${team.id}">${statusBadge}</td>
+                ${window.user.role === 'SITE_ADMIN' ? `<td class="editable" data-field="status" data-id="${team.id}">${statusBadge}</td>` : `<td>${statusBadge}</td>`}
                 <td>${team.rejectedReason || '-'}</td>
-                <td class="actions">
+                ${window.user.role === 'SITE_ADMIN' ? ` <td class="actions">
                     <button class="btn btn-danger btn-sm" onclick="deleteTeam('${team.id}')">
                         <i class="fas fa-trash"></i> Delete
                     </button>
-                </td>
+                </td>` : ''}
             `;
             tbody.appendChild(tr);
         });

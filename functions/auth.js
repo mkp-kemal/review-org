@@ -12,7 +12,6 @@ async function checkAuth() {
         }
 
         const user = await res.json();
-        
         if (user && user.email) {
             sessionStorage.setItem("user", JSON.stringify(user));
 
@@ -20,6 +19,9 @@ async function checkAuth() {
             loginLink.textContent = 'Logout';
             loginLink.href = '#';
             loginLink.onclick = showLogoutConfirmation;
+            
+            window.user = user;
+            
 
             return user;
         } else {

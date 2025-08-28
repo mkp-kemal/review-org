@@ -222,7 +222,21 @@
 <script>
     async function fetchReviews(sort = "recent", page = 1) {
         try {
-            const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/reviews?sort=${sort}`);
+            let url;
+
+            console.log(window.user);
+
+
+            if (window?.user?.role === 'SITE_ADMIN') {
+                url = `${window.APP_CONFIG.API_URL}/teams/reviews?sort=${sort}`;
+            } else {
+                url = `${window.APP_CONFIG.API_URL}/teams/reviews/access/claim?sort=${sort}`;
+            }
+
+            const res = await fetch(url, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
+            });
             window.allReviews = await res.json();
             window.filteredReviews = [...window.allReviews]; // awalnya sama
             window.currentPage = page;
@@ -484,8 +498,8 @@
 
                 const flagElement = `
             <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom flag-item">
-               <div class="flag-reason" data-bs-toggle="tooltip" title="Reported by: ${reporterEmail}">
-                ${flag.reason}
+               <div class="flag-reason" data-flag-id="${flag.id}" data-bs-toggle="tooltip" title="Reported by: ${reporterEmail}">
+                ${flag.reason} - ${flag.status}
             </div>
                 <div class="text-muted small">${flagDate}</div>
             </div>
@@ -618,6 +632,65 @@
             });
         }
     });
+
+    // Handle status flag
+    document.addEventListener('click', async function (e) {
+        if (e.target.classList.contains('flag-reason')) {
+            const flagId = e.target.dataset.flagId;
+
+            // Tampilkan modal Swal
+            const { value: selectedStatus } = await Swal.fire({
+                title: 'Update Flag Status',
+                input: 'select',
+                inputOptions: {
+                    INVESTIGATING: 'Investigating',
+                    REJECTED: 'Rejected',
+                    RESOLVED: 'Resolved'
+                },
+                inputPlaceholder: 'Pilih status',
+                showCancelButton: true,
+                confirmButtonText: 'Update',
+                cancelButtonText: 'Batal'
+            });
+
+            if (!selectedStatus) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${window.APP_CONFIG.API_URL}/admin/flag/${flagId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getCookie('accessToken')}`
+                    },
+                    body: JSON.stringify({
+                        status: selectedStatus
+                    })
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to update response');
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Flag status updated successfully'
+                });
+
+                fetchReviews();
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message
+                });
+            }
+        }
+    });
+
+
 
     // Initialize
     fetchReviews("recent");
