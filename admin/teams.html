@@ -13,19 +13,22 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <input type="text" id="teamName" class="form-control" placeholder="Name">
+                        <input type="emailt" id="teamEmail" class="form-control" placeholder="Email for claim">
                     </div>
                     <div class="form-group">
-                        <input type="text" id="teamAgeLevel" class="form-control" placeholder="Age Level">
+                        <input type="text" id="teamName" class="form-control" placeholder="Name" required>
                     </div>
                     <div class="form-group">
-                        <input type="text" id="teamDivision" class="form-control" placeholder="Division">
+                        <input type="text" id="teamAgeLevel" class="form-control" placeholder="Age Level" required>
                     </div>
                     <div class="form-group">
-                        <input type="text" id="teamCity" class="form-control" placeholder="City">
+                        <input type="text" id="teamDivision" class="form-control" placeholder="Division" required>
                     </div>
                     <div class="form-group">
-                        <input type="text" id="teamState" class="form-control" placeholder="State">
+                        <input type="text" id="teamCity" class="form-control" placeholder="City" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="teamState" class="form-control" placeholder="State" required>
                     </div>
                     <button class="btn btn-primary" onclick="createTeam()">
                         <i class="fas fa-plus"></i> Add Team
@@ -126,7 +129,7 @@
     </div>
 </div>
 <script>
-     if (window.user && (window.user.role === 'SITE_ADMIN' || window.user.role === 'ORG_ADMIN')) {
+    if (window.user && (window.user.role === 'SITE_ADMIN' || window.user.role === 'ORG_ADMIN')) {
         document.getElementById('isHide').style.display = 'table-cell';
         document.getElementById('addTeamForm').style.display = 'block';
     }
@@ -304,8 +307,8 @@
         try {
             let url;
             if (window?.user?.role === 'SITE_ADMIN') {
-                url = `${window.APP_CONFIG.API_URL}/orgs`;
-            }else{
+                url = `${window.APP_CONFIG.API_URL}/orgs?isFilterByStatus=APPROVED`;
+            } else {
                 url = `${window.APP_CONFIG.API_URL}/orgs/access/claim`;
             }
 
@@ -392,8 +395,15 @@
                 <td>${team.rejectedReason || '-'}</td>
                 ${window.user.role === 'SITE_ADMIN' ? ` <td class="actions">
                     <button class="btn btn-danger btn-sm" onclick="deleteTeam('${team.id}')">
-                        <i class="fas fa-trash"></i> Delete
+                        <i class="fas fa-trash"></i>
                     </button>
+                   ${team.claimedBy ? `
+                        <button class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="top" title="${team?.claimedBy?.email}">
+                            <i class="fas fa-check"></i>
+                        </button>`
+                        : `<button class="btn btn-primary btn-sm" data-toggle="tooltip" data-placement="top" title="Claim team" onclick="claimTeam('${team.id}')">
+                        <i class="fas fa-bookmark"></i>
+                    </button>`}
                 </td>` : ''}
             `;
             tbody.appendChild(tr);
@@ -559,6 +569,7 @@
 
     async function createTeam() {
         const organizationId = document.getElementById('teamOrgSelect').value;
+        const email = document.getElementById('teamEmail').value;
         const name = document.getElementById('teamName').value;
         const ageLevel = document.getElementById('teamAgeLevel').value;
         const division = document.getElementById('teamDivision').value;
@@ -580,7 +591,7 @@
             const response = await fetch(`${window.APP_CONFIG.API_URL}/teams`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` },
-                body: JSON.stringify({ organizationId, name, ageLevel, division, city, state })
+                body: JSON.stringify({ organizationId, email, name, ageLevel, division, city, state })
             });
 
             if (!response.ok) {
@@ -589,6 +600,7 @@
             }
 
             // Clear form fields
+            document.getElementById('teamEmail').value = '';
             document.getElementById('teamName').value = '';
             document.getElementById('teamAgeLevel').value = '';
             document.getElementById('teamDivision').value = '';
@@ -632,6 +644,75 @@
             Swal.fire({ icon: 'error', title: 'Error', text: err.message });
         }
     }
+
+    async function claimTeam(teamId) {
+        // Cari data team berdasarkan ID
+        const team = window.allTeams.find(t => t.id === teamId);
+
+        if (!team) {
+            Swal.fire('Error', 'Team not found', 'error');
+            return;
+        }
+
+        // Tampilkan Swal dengan input email
+        const { value: email } = await Swal.fire({
+            title: `Claim Team: ${team.name}`,
+            input: 'email',
+            inputLabel: 'Enter your email to claim this team',
+            inputPlaceholder: 'your@email.com',
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocomplete: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            cancelButtonText: 'Cancel',
+            showLoaderOnConfirm: true,
+            preConfirm: (email) => {
+                if (!email) {
+                    Swal.showValidationMessage('Email is required');
+                    return false;
+                }
+                // Bisa juga validasi format email di sini
+                return email;
+            }
+        });
+
+       if (email) {
+    try {
+        const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/claim/${teamId}`, {
+            method: 'PATCH',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getCookie('accessToken')}`,
+            },
+            body: JSON.stringify({ email })
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || `Failed with status ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: `Team "${team.name}" has been claimed with email: ${email}`
+        });
+
+        // Update data lokal (optional)
+        team.claimedBy = { email };
+        renderTable();
+
+    } catch (err) {
+        Swal.fire('Error', err.message || 'Failed to claim team', 'error');
+    }
+}
+
+    }
+
 
     async function uploadTeamCsv() {
         const fileInput = document.getElementById('teamCsvFile');

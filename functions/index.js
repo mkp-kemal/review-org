@@ -16,6 +16,106 @@ document.addEventListener("DOMContentLoaded", async () => {
             formEl.appendChild(overlay);
         }
     }
+
+    const benefits = {
+        PRO: `
+      <ul class="text-left mb-3">
+        <li><i class="fas fa-check-circle text-success mr-2"></i>All Basic features, plus:</li>
+        <li><i class="fas fa-check-circle text-success mr-2"></i>Respond to reviews</li>
+        <li><i class="fas fa-check-circle text-success mr-2"></i>Add photos & videos</li>
+        <li><i class="fas fa-check-circle text-success mr-2"></i>Detailed team description</li>
+      </ul>
+    `,
+        ELITE: `
+      <ul class="text-left mb-3">
+        <li><i class="fas fa-check-circle text-success mr-2"></i>All Pro features, plus:</li>
+        <li><i class="fas fa-check-circle text-success mr-2"></i>Highlight a positive review</li>
+        <li><i class="fas fa-check-circle text-success mr-2"></i>Post tryout listings</li>
+        <li><i class="fas fa-check-circle text-success mr-2"></i>Remove competitor ads</li>
+        <li><i class="fas fa-check-circle text-success mr-2"></i>Access basic analytics</li>
+      </ul>
+    `
+    };
+
+    let currentPlan = null;
+
+    const entityList = document.getElementById("entityList");
+    const upgradeType = document.getElementById("upgradeType");
+
+    // Event tombol PRO
+    document.getElementById("buttonPro")?.addEventListener("click", () => {
+        currentPlan = "PRO";
+        document.getElementById("upgradeTitle").innerText = "Upgrade to PRO";
+        document.getElementById("benefitsList").innerHTML = benefits.PRO;
+        $('#upgradeModal').modal('show');
+
+        // Trigger load default entity list
+        loadEntities(upgradeType.value);
+    });
+
+    // Event tombol ELITE
+    document.getElementById("buttonElite")?.addEventListener("click", () => {
+        currentPlan = "ELITE";
+        document.getElementById("upgradeTitle").innerText = "Upgrade to ELITE";
+        document.getElementById("benefitsList").innerHTML = benefits.ELITE;
+        $('#upgradeModal').modal('show');
+
+        // Trigger load default entity list
+        loadEntities(upgradeType.value);
+    });
+
+    // Ketika ganti tipe upgrade Team / Org
+    upgradeType?.addEventListener("change", (e) => {
+        loadEntities(e.target.value);
+    });
+
+    // Load dropdown list Team / Organization
+    function loadEntities(type) {
+        entityList.innerHTML = `<option value="">-- Select --</option>`; // reset
+
+        if(type){
+            const data = type === "team" ? loadTeamPlan() : loadOrganizationPlan();
+            
+            data.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.id;
+                option.textContent = item.name;
+                entityList.appendChild(option);
+            });
+        }
+
+    }
+
+    // Confirm button
+    document.getElementById("confirmUpgrade")?.addEventListener("click", () => {
+        const selectedId = entityList.value;
+        const type = upgradeType.value;
+        if (!selectedId) {
+            alert("Please select a Team or Organization!");
+            return;
+        }
+        alert(`Upgrading ${type.toUpperCase()} (${selectedId}) to ${currentPlan} plan!`);
+        $('#upgradeModal').modal('hide');
+    });
+
+    // Dummy functions (bisa diganti API call)
+    function loadTeamPlan() {
+        console.log("Loading Team data...");
+        return [
+            { id: 1, name: "Team A" },
+            { id: 2, name: "Team B" },
+            { id: 3, name: "Team C" }
+        ]
+    }
+
+    function loadOrganizationPlan() {
+        console.log("Loading Organization data...");
+        return [
+            { id: 1, name: "Org A" },
+            { id: 2, name: "Org B" },
+            { id: 3, name: "Org C" }
+        ]
+    }
 });
 
 // LOAD REVIEW FROM TEAMS & ORGANIZATION ===================================================================

@@ -72,7 +72,7 @@ async function logout() {
         window.location.href = 'Login.html';
     } catch (err) {
         console.error('Logout error:', err);
-        window.location.href = 'Login.html';
+        window.location.href = '/';
     }
 }
 

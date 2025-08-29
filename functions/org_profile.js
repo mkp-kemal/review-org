@@ -281,7 +281,7 @@ function flagReview(reviewId) {
                 text: 'Report submitted successfully, admin will review your report.',
                 icon: 'success'
             }).then(() => {
-                // location.reload();
+                location.reload();
             });
         }
     });
@@ -350,6 +350,46 @@ async function loadOrgProfile() {
             tag.className = 'bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded';
             tag.textContent = data.division;
             tagsContainer.appendChild(tag);
+        }
+
+        if (window.user) {
+            console.log(data);
+            
+            if (!data?.claimedById && !data?.organization?.claimedById) {
+                const claimButton = document.getElementById('claim-btn');
+                claimButton.className = 'mt-4 cursor-pointer bg-blue-600 text-white font-semibold py-2 px-4 rounded'
+                claimButton.textContent = `Claim ${data?.organization?.name}`;
+
+                claimButton.addEventListener('click', async () => {
+                    const email = window?.user?.email || '';
+                    const domain = email.split('@')[1];
+                    const orgDomain = data.organization?.website;
+
+                    if (domain !== orgDomain) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: `Your email domain (${domain}) is not the same as the organization's website domain (${orgDomain}).`,
+                            icon: 'error',
+                            confirmButtonColor: '#ef4444',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Warning!',
+                            text: `You are about to claim this organization. Are you sure?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes, I am sure!'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                claimOrganization(data.organization.id);
+                            }
+                        });
+                    }
+                })
+            }
         }
 
         // Update Ratings
@@ -445,7 +485,7 @@ async function loadOrgProfile() {
                 }
 
                 // Add admin buttons for each review if user is admin
-                if (storedUser?.role?.includes('SITE_ADMIN') || storedUser?.role?.includes('ORG_ADMIN') || storedUser?.role?.includes('TEAM_ADMIN')) {
+                if (storedUser?.role?.includes('SITE_ADMIN') || data.claimedById == window?.user?.id || data.organization?.claimedById == window?.user?.id) {
                     const adminActions = document.createElement('div');
                     adminActions.className = 'mt-3 flex justify-end space-x-2';
 
@@ -496,20 +536,30 @@ async function loadOrgProfile() {
                         });
                     }
                 } else {
+                    // ambil userId dari login atau dari localStorage
+                    const currentUserId = window?.user?.id || localStorage.getItem("userId");
+
+                    // user tidak boleh flag review sendiri
                     if (window?.user?.email !== review?.user?.email) {
-                        const flagsDiv = document.createElement('div');
-                        flagsDiv.className = 'flex justify-end space-x-2 mt-3';
-                        flagsDiv.innerHTML = `
+                        // cek apakah user sudah pernah nge-flag
+                        const alreadyFlagged = review.flags?.some(f => f.reporterUserId === currentUserId);
+
+                        if (!alreadyFlagged) {
+                            const flagsDiv = document.createElement('div');
+                            flagsDiv.className = 'flex justify-end space-x-2 mt-3';
+                            flagsDiv.innerHTML = `
                                 <button class="flag-review-btn bg-gray-100 text-gray-800 text-sm font-semibold py-1 px-3 rounded hover:bg-gray-200">
                                     <i class="fas fa-flag mr-1"></i>Flag
                                 </button>
                             `;
-                        reviewDiv.appendChild(flagsDiv);
+                            reviewDiv.appendChild(flagsDiv);
 
-                        flagsDiv.querySelector('.flag-review-btn')?.addEventListener('click', () => {
-                            flagReview(review.id);
-                        });
+                            flagsDiv.querySelector('.flag-review-btn')?.addEventListener('click', () => {
+                                flagReview(review.id);
+                            });
+                        }
                     }
+
                 }
 
                 reviewsContainer.appendChild(reviewDiv);
@@ -538,6 +588,38 @@ async function loadOrgProfile() {
                     <p class="text-red-500">Failed to load team data. Please try again later.</p>
                 </div>
             `;
+    }
+}
+
+async function claimOrganization(organizationId) {
+    try {
+        const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs/${organizationId}/claim`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getCookie('accessToken')}`,
+            },
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            const swalPopup = swal.fire({
+                title: 'Success',
+                text: 'Organization claimed successfully',
+                icon: 'success',
+                showConfirmButton: true,
+                allowOutsideClick: false,
+            });
+            await swalPopup.then((result) => {
+                if (result.isConfirmed) {
+                    logout();
+                }
+            });
+        } else {
+            swal.fire('Error', data.message || 'Failed to claim organization', 'error');
+        }
+    } catch (err) {
+        swal.fire('Error', err.message, 'error');
     }
 }
 
