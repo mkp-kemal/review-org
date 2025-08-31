@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Time Configuration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .setting-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .time-option {
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .time-option:hover {
+            background-color: #f9f9f9;
+        }
+
+        .time-option.selected {
+            background-color: #e1f0fa;
+            border-color: #3498db;
+        }
+
+        .apply-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .apply-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .time-display {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Settings</h1>
+
+        <div class="setting-item">
+            <div>
+                <h3>Time Zone</h3>
+                <p>Current time zone: <span id="current-time-zone">UTC+00:00</span></p>
+            </div>
+            <button class="btn" id="change-time-btn">Change Time</button>
+        </div>
+
+        <!-- Other setting items can be added here -->
+        <!-- <div class="setting-item">
+            <div>
+                <h3>Language</h3>
+                <p>English (US)</p>
+            </div>
+            <button class="btn">Change</button>
+        </div>
+
+        <div class="setting-item">
+            <div>
+                <h3>Notifications</h3>
+                <p>Manage your notification preferences</p>
+            </div>
+            <button class="btn">Configure</button>
+        </div> -->
+    </div>
+
+    <!-- Time Zone Modal -->
+    <div class="modal" id="time-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Select Time Zone</h2>
+                <span class="close" id="close-modal">&times;</span>
+            </div>
+
+            <div class="time-option" data-zone="UTC">
+                <strong>UTC (Coordinated Universal Time)</strong>
+                <p>Universal time standard</p>
+            </div>
+
+            <div class="time-option" data-zone="Pacific">
+                <strong>Local Time</strong>
+                <p>Based on your location</p>
+            </div>
+            <button class="apply-btn" id="apply-timezone">Apply Time Zone</button>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi untuk mendapatkan elemen waktu
+        function getTimeElements() {
+            const changeTimeBtn = document.getElementById('change-time-btn');
+            const timeModal = document.getElementById('time-modal');
+            const closeModal = document.getElementById('close-modal');
+            const applyTimezoneBtn = document.getElementById('apply-timezone');
+            const currentTimeZone = document.getElementById('current-time-zone');
+            const timeOptions = document.querySelectorAll('.time-option');
+
+            let selectedZone = localStorage.getItem('selectedZone') || 'UTC'; // Default 'UTC'
+
+            return {
+                changeTimeBtn,
+                timeModal,
+                closeModal,
+                applyTimezoneBtn,
+                currentTimeZone,
+                timeOptions,
+                selectedZone,
+            };
+        }
+
+        window.timeElements = getTimeElements();
+        window.selectedZone = getTimeElements().selectedZone;
+
+        // Fungsi bantu: hitung offset local
+        function getLocalTimeOffset() {
+            const offsetMinutes = new Date().getTimezoneOffset(); // negatif = ahead of UTC
+            const totalMinutes = -offsetMinutes;
+            const hours = String(Math.floor(Math.abs(totalMinutes) / 60)).padStart(2, '0');
+            const minutes = String(Math.abs(totalMinutes) % 60).padStart(2, '0');
+            const sign = totalMinutes >= 0 ? '+' : '-';
+            return `UTC${sign}${hours}:${minutes}`;
+        }
+
+        // Fungsi: update tampilan text timezone
+        function updateTimeZoneText() {
+            let timeZoneText = '';
+
+            switch (window.selectedZone) {
+                case 'UTC':
+                    timeZoneText = 'UTC+00:00';
+                    break;
+                case 'Pacific':
+                    timeZoneText = getLocalTimeOffset();
+                    break;
+            }
+
+            window.timeElements.currentTimeZone.textContent = timeZoneText;
+        }
+
+        // Fungsi: pilih opsi berdasarkan zona yang disimpan
+        function selectSavedZone() {
+            window.timeElements.timeOptions.forEach(option => {
+                if (option.getAttribute('data-zone') === window.selectedZone) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+
+        // Set awal dari localStorage
+        updateTimeZoneText();
+        selectSavedZone(); // Pilih opsi yang disimpan saat halaman dimuat
+
+        // Open modal
+        window.timeElements.changeTimeBtn.addEventListener('click', function () {
+            window.timeElements.timeModal.style.display = 'flex';
+            selectSavedZone(); // Pastikan opsi yang benar terpilih saat modal dibuka
+        });
+
+        // Close modal
+        window.timeElements.closeModal.addEventListener('click', function () {
+            window.timeElements.timeModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function (event) {
+            if (event.target === window.timeElements.timeModal) {
+                window.timeElements.timeModal.style.display = 'none';
+            }
+        });
+
+        // Select option
+        window.timeElements.timeOptions.forEach(option => {
+            option.addEventListener('click', function () {
+                window.timeElements.timeOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                window.selectedZone = this.getAttribute('data-zone');
+            });
+        });
+
+        // Apply selection
+        window.timeElements.applyTimezoneBtn.addEventListener('click', function () {
+            // Simpan ke localStorage
+            localStorage.setItem('selectedZone', window.selectedZone);
+
+            // Update tampilan
+            updateTimeZoneText();
+
+            window.timeElements.timeModal.style.display = 'none';
+            alert(`Time zone changed to ${window.timeElements.currentTimeZone.textContent}`);
+        });
+    </script>
+</body>
+
+</html>

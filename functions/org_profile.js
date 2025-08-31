@@ -353,8 +353,6 @@ async function loadOrgProfile() {
         }
 
         if (window.user) {
-            console.log(data);
-            
             if (!data?.claimedById && !data?.organization?.claimedById) {
                 const claimButton = document.getElementById('claim-btn');
                 claimButton.className = 'mt-4 cursor-pointer bg-blue-600 text-white font-semibold py-2 px-4 rounded'
@@ -485,7 +483,7 @@ async function loadOrgProfile() {
                 }
 
                 // Add admin buttons for each review if user is admin
-                if (storedUser?.role?.includes('SITE_ADMIN') || data.claimedById == window?.user?.id || data.organization?.claimedById == window?.user?.id) {
+                if (storedUser && (storedUser?.role?.includes('SITE_ADMIN') || data.claimedById == window?.user?.id || data.organization?.claimedById == window?.user?.id)) {
                     const adminActions = document.createElement('div');
                     adminActions.className = 'mt-3 flex justify-end space-x-2';
 

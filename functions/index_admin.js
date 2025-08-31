@@ -159,6 +159,23 @@ function initPageScripts(page) {
                     document.body.appendChild(newScript);
                 });
             });
+    } else if (page === "settings") {
+        fetch('settings.html')
+            .then(res => res.text())
+            .then(html => {
+                const container = document.getElementById('main-content');
+                container.innerHTML = html;
+
+                container.querySelectorAll("script").forEach(oldScript => {
+                    const newScript = document.createElement("script");
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src; // untuk script eksternal
+                    } else {
+                        newScript.textContent = oldScript.textContent; // untuk inline script
+                    }
+                    document.body.appendChild(newScript);
+                });
+            });
     }
 }
 
