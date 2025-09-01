@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     let user = await checkAuth();
 
-    if (["SITE_ADMIN", "ORG_ADMIN", "TEAM_ADMIN"].includes(user.role)) {
+    if (["SITE_ADMIN", "ORG_ADMIN", "TEAM_ADMIN"].includes(user?.role)) {
         const formEl = document.querySelector("#review-form form");
         if (formEl) {
             formEl.classList.add("relative");
@@ -43,26 +43,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     const upgradeType = document.getElementById("upgradeType");
 
     // Event tombol PRO
-    document.getElementById("buttonPro")?.addEventListener("click", () => {
-        currentPlan = "PRO";
-        document.getElementById("upgradeTitle").innerText = "Upgrade to PRO";
-        document.getElementById("benefitsList").innerHTML = benefits.PRO;
-        $('#upgradeModal').modal('show');
+    if (!user) {
+        document.getElementById("buttonPro")?.addEventListener("click", () => {
+            window.location.href = "/Login.html";
+        });
 
-        // Trigger load default entity list
-        loadEntities(upgradeType.value);
-    });
+        // Event tombol ELITE
+        document.getElementById("buttonElite")?.addEventListener("click", () => {
+            window.location.href = "/Login.html";
+        });
+    } else {
+        document.getElementById("buttonPro")?.addEventListener("click", () => {
+            currentPlan = "PRO";
 
-    // Event tombol ELITE
-    document.getElementById("buttonElite")?.addEventListener("click", () => {
-        currentPlan = "ELITE";
-        document.getElementById("upgradeTitle").innerText = "Upgrade to ELITE";
-        document.getElementById("benefitsList").innerHTML = benefits.ELITE;
-        $('#upgradeModal').modal('show');
+            document.getElementById("upgradeTitle").innerText = "Upgrade to PRO";
+            document.getElementById("benefitsList").innerHTML = benefits.PRO;
+            $('#upgradeModal').modal('show');
 
-        // Trigger load default entity list
-        loadEntities(upgradeType.value);
-    });
+            // Trigger load default entity list
+            loadEntities(upgradeType.value);
+        });
+
+        // Event tombol ELITE
+        document.getElementById("buttonElite")?.addEventListener("click", () => {
+            currentPlan = "ELITE";
+            document.getElementById("upgradeTitle").innerText = "Upgrade to ELITE";
+            document.getElementById("benefitsList").innerHTML = benefits.ELITE;
+            $('#upgradeModal').modal('show');
+
+            // Trigger load default entity list
+            loadEntities(upgradeType.value);
+        });
+    }
 
     // Ketika ganti tipe upgrade Team / Org
     upgradeType?.addEventListener("change", (e) => {
@@ -71,16 +83,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Load dropdown list Team / Organization
     function loadEntities(type) {
-        entityList.innerHTML = `<option value="">-- Select --</option>`; // reset
+        entityList.innerHTML = `<option value="">-- Select --</option>`;
 
-        if(type){
-            const data = type === "team" ? loadTeamPlan() : loadOrganizationPlan();
-            
-            data.forEach(item => {
-                const option = document.createElement("option");
-                option.value = item.id;
-                option.textContent = item.name;
-                entityList.appendChild(option);
+        if (type) {
+            const func = type === "team" ? loadTeamsClaimed : loadOrganizationsClaimed;
+            func().then(res => {
+                res.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    entityList.appendChild(option);
+                });
             });
         }
 
@@ -99,22 +112,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Dummy functions (bisa diganti API call)
-    function loadTeamPlan() {
-        console.log("Loading Team data...");
-        return [
-            { id: 1, name: "Team A" },
-            { id: 2, name: "Team B" },
-            { id: 3, name: "Team C" }
-        ]
+    async function loadTeamPlan() {
+        let result = await loadTeamsClaimed();
+
+        return result;
     }
 
-    function loadOrganizationPlan() {
-        console.log("Loading Organization data...");
-        return [
-            { id: 1, name: "Org A" },
-            { id: 2, name: "Org B" },
-            { id: 3, name: "Org C" }
-        ]
+    async function loadOrganizationPlan() {
+        let result = await loadTeamsClaimed();
+
+        return result;
     }
 });
 
@@ -220,6 +227,42 @@ async function loadSeasonYears() {
         });
     } catch (err) {
         console.error("loadSeasonYears error:", err);
+    }
+}
+
+async function loadOrganizationsClaimed() {
+    try {
+        const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs/access/claim`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${getCookie('accessToken')}`
+            }
+        });
+        if (!res.ok) throw new Error("Failed to load organizations");
+        const data = await res.json();
+
+        return data
+    } catch (err) {
+        console.error("loadOrganizationsClaimed error:", err);
+    }
+}
+
+async function loadTeamsClaimed() {
+    try {
+        const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/access/claim`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${getCookie('accessToken')}`
+            }
+        });
+        if (!res.ok) throw new Error("Failed to load teams");
+        const data = await res.json();
+
+        return data
+    } catch (err) {
+        console.error("loadTeamsClaimed error:", err);
     }
 }
 
