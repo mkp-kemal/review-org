@@ -17,6 +17,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    if (user?.role === "SITE_ADMIN") {
+        document.getElementById("confirmUpgrade").style.display = "none";
+    }
+
     const benefits = {
         PRO: `
       <ul class="text-left mb-3">
@@ -82,47 +86,124 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Load dropdown list Team / Organization
-    function loadEntities(type) {
-        entityList.innerHTML = `<option value="">-- Select --</option>`;
+    // Load dropdown list Team / Organization
+    async function loadEntities(type) {
+        const parentEntityList = document.getElementById("parent-entity-list");
+
+        // tampilkan loading state
+        parentEntityList.innerHTML = `
+        <label for="entityList">Select:</label>
+        <select id="entityList" class="form-control" disabled>
+            <option>Loading...</option>
+        </select>
+    `;
+
+        const confirmBtn = document.getElementById("confirmUpgrade");
+        if (confirmBtn) confirmBtn.disabled = true; // pastikan awalnya disabled
 
         if (type) {
             const func = type === "team" ? loadTeamsClaimed : loadOrganizationsClaimed;
-            func().then(res => {
+            try {
+                const res = await func();
+
+                if (!res || res.length === 0) {
+                    parentEntityList.innerHTML = `
+                    <p class="text-gray-500 italic">No data available</p>
+                `;
+                    return;
+                }
+
+                // render ulang select normal
+                parentEntityList.innerHTML = `
+                <label for="entityList">Select:</label>
+                <select id="entityList" class="form-control">
+                    <option value="">-- Select --</option>
+                </select>
+            `;
+                const entityList = parentEntityList.querySelector("#entityList");
+
+                // isi option dari API
                 res.forEach(item => {
                     const option = document.createElement("option");
                     option.value = item.id;
                     option.textContent = item.name;
                     entityList.appendChild(option);
                 });
-            });
-        }
 
+                // enable/disable confirmBtn berdasarkan pilihan
+                if (confirmBtn) {
+                    confirmBtn.disabled = true; // default disabled
+                    entityList.addEventListener("change", () => {
+                        confirmBtn.disabled = !entityList.value;
+                    });
+                }
+
+            } catch (err) {
+                parentEntityList.innerHTML = `
+                <p class="text-red-600 font-semibold">
+                    You must claim the ${type} to upgrade
+                </p>
+            `;
+                console.error(err);
+            }
+        } else {
+            parentEntityList.innerHTML = `
+            <p class="text-gray-500 italic">No data available</p>
+        `;
+        }
     }
 
-    // Confirm button
-    document.getElementById("confirmUpgrade")?.addEventListener("click", () => {
-        const selectedId = entityList.value;
-        const type = upgradeType.value;
+
+    document.getElementById("confirmUpgrade")?.addEventListener("click", async () => {
+        const entityList = document.getElementById("entityList");
+        const selectedId = entityList?.value;
+        const type = document.getElementById("upgradeType")?.value;
+
         if (!selectedId) {
             alert("Please select a Team or Organization!");
             return;
         }
-        alert(`Upgrading ${type.toUpperCase()} (${selectedId}) to ${currentPlan} plan!`);
-        $('#upgradeModal').modal('hide');
+
+        try {
+            // Siapkan body request
+            const body = {
+                plan: currentPlan
+            };
+            if (type === "team") {
+                body.teamId = selectedId;
+            } else {
+                body.organizationId = selectedId;
+            }
+
+            // Panggil API checkout session
+            const res = await fetch(`${window.APP_CONFIG.API_URL}/billing/checkout-session`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getCookie("accessToken")}`
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) throw new Error("Failed to create checkout session");
+
+            const data = await res.json();
+
+            if (data?.url) {
+                // Buka Stripe Checkout di tab baru
+                window.open(data.url, "_blank");
+            } else {
+                alert("Checkout session did not return a valid URL");
+            }
+
+            $('#upgradeModal').modal('hide');
+        } catch (err) {
+            console.error("confirmUpgrade error:", err);
+            alert("Failed to start upgrade process. Please try again.");
+        }
     });
 
-    // Dummy functions (bisa diganti API call)
-    async function loadTeamPlan() {
-        let result = await loadTeamsClaimed();
 
-        return result;
-    }
-
-    async function loadOrganizationPlan() {
-        let result = await loadTeamsClaimed();
-
-        return result;
-    }
 });
 
 // LOAD REVIEW FROM TEAMS & ORGANIZATION ===================================================================
@@ -240,11 +321,15 @@ async function loadOrganizationsClaimed() {
             }
         });
         if (!res.ok) throw new Error("Failed to load organizations");
-        const data = await res.json();
 
-        return data
+        // kalau kosong (204 atau body kosong) → return []
+        const text = await res.text();
+        if (!text) return [];
+
+        return JSON.parse(text);
     } catch (err) {
-        console.error("loadOrganizationsClaimed error:", err);
+        swal.fire('Warning', 'You must claim a team first', 'warning');
+        return [];
     }
 }
 
@@ -258,13 +343,17 @@ async function loadTeamsClaimed() {
             }
         });
         if (!res.ok) throw new Error("Failed to load teams");
-        const data = await res.json();
 
-        return data
+        const text = await res.text();
+        if (!text) return [];
+
+        return JSON.parse(text);
     } catch (err) {
-        console.error("loadTeamsClaimed error:", err);
+        swal.fire('Warning', 'You must claim a team first', 'warning');
+        return [];
     }
 }
+
 
 // --- Inisialisasi search ---
 // Hero big search

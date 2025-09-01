@@ -562,9 +562,11 @@ async function loadOrgProfile() {
                 if (storedUser) {
                     showAdminButtons(storedUser, data);
 
-                    document.querySelectorAll('.reviewer-name').forEach(el => {
-                        el.style.display = 'block';
-                    });
+                    if (storedUser.role.includes('SITE_ADMIN', 'ORG_ADMIN', 'TEAM_ADMIN')) {
+                        document.querySelectorAll('.reviewer-name').forEach(el => {
+                            el.style.display = 'block';
+                        });
+                    }
                 }
             });
         } else {
