@@ -580,7 +580,7 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to submit response'
+                text: `Failed: ${err.message}`
             });
         }
     });
@@ -611,7 +611,16 @@
             });
 
             if (!res.ok) {
-                throw new Error('Failed to update response');
+                // Try to get error message from backend JSON response
+                let errorMessage = 'Failed to update response';
+                try {
+                    const errorData = await res.json();
+                    // Check if backend sent { message: '...' } or { error: '...' }
+                    errorMessage = errorData.message || errorData.error || errorMessage;
+                } catch (jsonErr) {
+                    // If response is not JSON, keep the default error message
+                }
+                throw new Error(errorMessage);
             }
 
             Swal.fire({
@@ -628,9 +637,10 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to update response'
+                text: `Failed: ${err instanceof Error ? err.message : String(err)}`
             });
         }
+
     });
 
     // Handle status flag

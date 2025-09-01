@@ -62,9 +62,6 @@ function showAdminButtons(roles, teamData) {
 
         document.getElementById('manage-members-btn').style.display =
             (isSiteAdmin || isOrgAdmin || isTeamAdmin) ? 'block' : 'none';
-
-        document.getElementById('reviewer-name').style.display =
-            (isSiteAdmin || isOrgAdmin || isTeamAdmin) ? 'block' : 'none';
     }
 }
 
@@ -331,7 +328,7 @@ async function loadOrgProfile() {
         const data = await res.json();
         // console.log(data);
 
-        const storedUser = JSON.parse(sessionStorage.getItem("user"));
+        const storedUser = window.user
 
         // Update Profile Header
         document.getElementById('org-name').textContent = data.name || 'Unknown Team';
@@ -447,7 +444,7 @@ async function loadOrgProfile() {
                             <h4 class="text-lg font-bold">${review.title || 'No title'} ${window?.user?.email === review?.user?.email ? '(You)' : ""}</h4>
                             <div class="star-rating">${starsHtml}</div>
                         </div>
-                        <p style="display:none" id="reviewer-name" class="text-gray-700 mb-2"><b>By:</b> ${reviewer}</p>
+                        <p style="display:none" class="reviewer-name text-gray-700 mb-2"><b>By:</b> ${reviewer}</p>
                         <p class="text-gray-700 mb-2">${review.body || 'No review content'}</p>
                         <p class="text-sm text-gray-500">Season: ${seasonDisplay} | Reviewed: ${formatDate(review.createdAt)}</p>
                     `;
@@ -564,6 +561,10 @@ async function loadOrgProfile() {
 
                 if (storedUser) {
                     showAdminButtons(storedUser, data);
+
+                    document.querySelectorAll('.reviewer-name').forEach(el => {
+                        el.style.display = 'block';
+                    });
                 }
             });
         } else {
