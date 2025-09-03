@@ -7,8 +7,8 @@
     <title>Organization Profile - CurveballCritiques.com</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="dist/config.js"></script>
-    <script src="dist/auth.js"></script>
+    <script src="functions/config.js"></script>
+    <script src="functions/auth.js"></script>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -212,13 +212,13 @@
                         <div id="about-content" class="prose max-w-none text-gray-700">
                             <p>Loading organization information...</p>
                         </div>
-                        <div class="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4">
-                            <img src="https://placehold.co/400x300/1E40AF/FFFFFF?text=Team+Photo" alt="Team Photo"
+                        <div id="teamPhotos" class="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <!-- <img src="https://placehold.co/400x300/1E40AF/FFFFFF?text=Team+Photo" alt="Team Photo"
                                 class="rounded-lg">
                             <img src="https://placehold.co/400x300/3B82F6/FFFFFF?text=Action+Shot" alt="Action Shot"
                                 class="rounded-lg">
                             <img src="https://placehold.co/400x300/60A5FA/FFFFFF?text=Facility" alt="Facility"
-                                class="rounded-lg">
+                                class="rounded-lg"> -->
                         </div>
                     </section>
 
@@ -252,7 +252,7 @@
         </div>
     </footer>
 
-    <script src="dist/org_profile.js"></script>
+    <script src="functions/org_profile.js"></script>
 </body>
 
 </html>

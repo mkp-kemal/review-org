@@ -185,12 +185,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 body: JSON.stringify(body)
             });
 
-            if (!res.ok) throw new Error("Failed to create checkout session");
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData?.message || "Failed to create checkout session");
+            }
 
             const data = await res.json();
 
             if (data?.url) {
-                // Buka Stripe Checkout di tab baru
                 window.open(data.url, "_blank");
             } else {
                 alert("Checkout session did not return a valid URL");
@@ -199,7 +201,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             $('#upgradeModal').modal('hide');
         } catch (err) {
             console.error("confirmUpgrade error:", err);
-            alert("Failed to start upgrade process. Please try again.");
+            swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `Failed: ${err instanceof Error ? err.message : String(err)}`
+            })
         }
     });
 

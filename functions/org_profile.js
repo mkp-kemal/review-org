@@ -428,6 +428,30 @@ async function loadOrgProfile() {
         const reviewsContainer = document.getElementById('reviews-container');
         reviewsContainer.innerHTML = ''; // Clear loading message
 
+        //Team Photos
+        const teamPhotosContainer = document.getElementById("teamPhotos");
+        teamPhotosContainer.innerHTML = "";
+
+        data.teamPhoto.forEach(photo => {
+            const img = document.createElement("img");
+            img.src = photo.filename;
+            img.alt = "Team Photo";
+            img.className = "rounded-lg";
+            img.onerror = function () {
+                this.src = "https://placehold.co/400x300/808080/FFFFFF?text=Not%20Load";
+            };
+            teamPhotosContainer.appendChild(img);
+        });
+
+        // if does not have team photo
+        if (data.teamPhoto.length === 0) {
+            teamPhotosContainer.innerHTML = `
+      <img src="https://placehold.co/400x300/1E40AF/FFFFFF?text=No+Photo" 
+           alt="Placeholder" 
+           class="rounded-lg">
+    `;
+        }
+
         if (data.reviews && data.reviews.length > 0) {
             data.reviews.forEach(review => {
                 const reviewDiv = document.createElement('div');
@@ -624,7 +648,6 @@ async function claimOrganization(organizationId) {
     }
 }
 
-// Run when page is ready
 document.addEventListener('DOMContentLoaded', async () => {
     let user = await checkCredentials();
 
