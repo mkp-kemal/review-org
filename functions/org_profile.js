@@ -358,7 +358,21 @@ async function loadOrgProfile() {
                 claimButton.addEventListener('click', async () => {
                     const email = window?.user?.email || '';
                     const domain = email.split('@')[1];
-                    const orgDomain = data.organization?.website;
+
+                    // --- Normalisasi domain dari website organisasi ---
+                    let orgDomain = data.organization?.website || '';
+
+                    try {
+                        // Pakai URL untuk parsing (butuh protokol, kalau tidak ada, tambahin)
+                        if (!orgDomain.startsWith('http')) {
+                            orgDomain = 'http://' + orgDomain;
+                        }
+                        const parsed = new URL(orgDomain);
+                        orgDomain = parsed.hostname.replace(/^www\./, ''); // buang 'www.'
+                    } catch (e) {
+                        orgDomain = orgDomain.replace(/^https?:\/\//, '')  // hapus http/https
+                            .replace(/^www\./, '');     // hapus www
+                    }
 
                     if (domain !== orgDomain) {
                         Swal.fire({
@@ -386,6 +400,7 @@ async function loadOrgProfile() {
                 })
             }
         }
+
 
         // Update Ratings
         const accum = data.accumulation || {};
