@@ -224,9 +224,6 @@
         try {
             let url;
 
-            console.log(window.user);
-
-
             if (window?.user?.role === 'SITE_ADMIN') {
                 url = `${window.APP_CONFIG.API_URL}/teams/reviews?sort=${sort}`;
             } else {
