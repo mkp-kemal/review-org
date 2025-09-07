@@ -519,7 +519,7 @@ async function loadOrgProfile() {
                 }
 
                 // Add admin buttons for each review if user is admin
-                if (storedUser && (storedUser?.role?.includes('SITE_ADMIN') || data.claimedById == window?.user?.id || data.organization?.claimedById == window?.user?.id)) {
+                if (storedUser && data.subscription?.plan !== 'BASIC' && (storedUser?.role?.includes('SITE_ADMIN') || data.claimedById == window?.user?.id || data.organization?.claimedById == window?.user?.id)) {
                     const adminActions = document.createElement('div');
                     adminActions.className = 'mt-3 flex justify-end space-x-2';
 

@@ -307,52 +307,52 @@
 <div>
     <div class="container">
         <header>
-            <h1>Log Aktivitas Sistem</h1>
+            <h1>System Activity Logs</h1>
             <div class="controls">
                 <button id="refreshBtn">Refresh Data</button>
-                <button id="deleteAllBtn">Hapus Semua Logs</button>
+                <button id="deleteAllBtn">Delete All Logs</button>
             </div>
         </header>
 
         <div class="charts-container">
             <div class="chart-box">
-                <div class="chart-title">Distribusi Jenis Aksi</div>
+                <div class="chart-title">Action Distribution</div>
                 <canvas id="actionChart"></canvas>
             </div>
             <div class="chart-box">
-                <div class="chart-title">Aktivitas per Jam</div>
+                <div class="chart-title">Hourly Activity</div>
                 <canvas id="activityChart"></canvas>
             </div>
         </div>
 
         <div class="table-container">
-            <div id="loading" class="loading">Memuat data logs...</div>
+            <div id="loading" class="loading">Loading logs data...</div>
             <div id="error" class="error" style="display: none;"></div>
             <div id="emptyState" class="empty-state" style="display: none;">
-                Tidak ada data logs yang tersedia.
+                No logs data available.
             </div>
 
             <!-- 🔍 Search bar -->
             <div class="search-container" style="margin: 10px 0; display:none;" id="searchBoxWrapper">
-                <input type="text" id="searchInput" placeholder="Search email, action, atau path..."
+                <input type="text" id="searchInput" placeholder="Search email, action, or path..."
                     style="padding:6px; width: 300px;">
             </div>
 
             <table id="logsTable" style="display: none;">
                 <thead>
                     <tr>
-                        <th>Waktu</th>
-                        <th>Aksi</th>
-                        <th>Tipe Target</th>
-                        <th>Aktor</th>
+                        <th>Time</th>
+                        <th>Action</th>
+                        <th>Target Type</th>
+                        <th>Actor</th>
                         <th>Method</th>
                         <th>Path</th>
                         <th>Response</th>
-                        <th>Aksi</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="logsTableBody">
-                    <!-- Data logs akan diisi oleh JavaScript -->
+                    <!-- Logs data will be inserted here by JavaScript -->
                 </tbody>
             </table>
         </div>
@@ -366,11 +366,11 @@
         </div>
     </div>
 
-    <!-- Modal untuk melihat detail -->
+    <!-- Modal for viewing details -->
     <div class="modal" id="detailModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Detail Log</h2>
+                <h2 class="modal-title">Log Details</h2>
                 <button class="modal-close" id="closeModal">&times;</button>
             </div>
             <div class="modal-body">
