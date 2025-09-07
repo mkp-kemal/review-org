@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // cek setiap kali DOM berubah
     const observer = new MutationObserver(() => {
         const orgFileInput = document.getElementById('orgCsvFile');
         if (orgFileInput && !orgFileInput.dataset.bound) {

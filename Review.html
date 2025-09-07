@@ -372,9 +372,9 @@
         function goToStep(step) {
             if (step < 1 || step > totalSteps) return;
 
-            // Hide current step
+            
             document.getElementById(`form-step-${currentStep}`).classList.add('hidden');
-            // Update indicator for current step
+            
             const currentIndicator = document.getElementById(`step-indicator-${currentStep}`);
             currentIndicator.classList.remove('active');
             if (step > currentStep) {
@@ -384,27 +384,27 @@
             }
 
 
-            // Show new step
+            
             currentStep = step;
             document.getElementById(`form-step-${currentStep}`).classList.remove('hidden');
-            // Update indicator for new step
+            
             const newIndicator = document.getElementById(`step-indicator-${currentStep}`);
             newIndicator.classList.add('active');
-            newIndicator.classList.remove('completed'); // In case we are going back
+            newIndicator.classList.remove('completed'); 
         }
 
-        // Star Rating Logic
+        
         document.querySelectorAll('.star-rating').forEach(starContainer => {
             const stars = starContainer.querySelectorAll('.fa-star');
             stars.forEach(star => {
                 star.addEventListener('click', () => {
                     const value = star.dataset.value;
-                    // Reset all stars in this container
+                    
                     stars.forEach(s => {
                         s.classList.remove('fas', 'selected');
                         s.classList.add('far');
                     });
-                    // Highlight stars up to the selected one
+                    
                     for (let i = 0; i < value; i++) {
                         stars[i].classList.remove('far');
                         stars[i].classList.add('fas', 'selected');
@@ -470,7 +470,7 @@
             }
         });
 
-        // LOAD REVIEW FROM TEAMS & ORGANIZATION ===================================================================
+        
         document.addEventListener('DOMContentLoaded', loadReviews());
 
         document.addEventListener('DOMContentLoaded', loadSeasonYears);

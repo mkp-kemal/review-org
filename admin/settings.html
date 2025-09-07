@@ -199,7 +199,7 @@
             const currentTimeZone = document.getElementById('current-time-zone');
             const timeOptions = document.querySelectorAll('.time-option');
 
-            let selectedZone = localStorage.getItem('selectedZone') || 'UTC'; // Default 'UTC'
+            let selectedZone = localStorage.getItem('selectedZone') || 'UTC'; 
 
             return {
                 changeTimeBtn,
@@ -215,9 +215,9 @@
         window.timeElements = getTimeElements();
         window.selectedZone = getTimeElements().selectedZone;
 
-        // Fungsi bantu: hitung offset local
+        
         function getLocalTimeOffset() {
-            const offsetMinutes = new Date().getTimezoneOffset(); // negatif = ahead of UTC
+            const offsetMinutes = new Date().getTimezoneOffset(); 
             const totalMinutes = -offsetMinutes;
             const hours = String(Math.floor(Math.abs(totalMinutes) / 60)).padStart(2, '0');
             const minutes = String(Math.abs(totalMinutes) % 60).padStart(2, '0');
@@ -225,7 +225,7 @@
             return `UTC${sign}${hours}:${minutes}`;
         }
 
-        // Fungsi: update tampilan text timezone
+        
         function updateTimeZoneText() {
             let timeZoneText = '';
 
@@ -241,7 +241,7 @@
             window.timeElements.currentTimeZone.textContent = timeZoneText;
         }
 
-        // Fungsi: pilih opsi berdasarkan zona yang disimpan
+        
         function selectSavedZone() {
             window.timeElements.timeOptions.forEach(option => {
                 if (option.getAttribute('data-zone') === window.selectedZone) {
@@ -252,17 +252,17 @@
             });
         }
 
-        // Set awal dari localStorage
+        
         updateTimeZoneText();
-        selectSavedZone(); // Pilih opsi yang disimpan saat halaman dimuat
+        selectSavedZone(); 
 
-        // Open modal
+        
         window.timeElements.changeTimeBtn.addEventListener('click', function () {
             window.timeElements.timeModal.style.display = 'flex';
-            selectSavedZone(); // Pastikan opsi yang benar terpilih saat modal dibuka
+            selectSavedZone(); 
         });
 
-        // Close modal
+        
         window.timeElements.closeModal.addEventListener('click', function () {
             window.timeElements.timeModal.style.display = 'none';
         });
@@ -273,7 +273,7 @@
             }
         });
 
-        // Select option
+        
         window.timeElements.timeOptions.forEach(option => {
             option.addEventListener('click', function () {
                 window.timeElements.timeOptions.forEach(opt => opt.classList.remove('selected'));
@@ -282,12 +282,12 @@
             });
         });
 
-        // Apply selection
+        
         window.timeElements.applyTimezoneBtn.addEventListener('click', function () {
-            // Simpan ke localStorage
+            
             localStorage.setItem('selectedZone', window.selectedZone);
 
-            // Update tampilan
+            
             updateTimeZoneText();
 
             window.timeElements.timeModal.style.display = 'none';

@@ -406,7 +406,7 @@
         let currentPage = 1;
         let itemsPerPage = 10;
         let allLogs = [];
-        let filteredLogs = []; // hasil filter/search
+        let filteredLogs = []; 
 
         function formatDateTime(dateString) {
             const date = new Date(dateString);
@@ -415,7 +415,7 @@
             let timeZoneOption = 'UTC';
 
             if (selectedZone === 'Pacific') {
-                // ambil timezone lokal dari browser, contoh "Asia/Jakarta"
+                
                 timeZoneOption = Intl.DateTimeFormat().resolvedOptions().timeZone;
             }
 
@@ -469,7 +469,7 @@
                     return;
                 }
 
-                filteredLogs = allLogs; // default tanpa filter
+                filteredLogs = allLogs; 
                 currentPage = 1;
                 logsTable.style.display = 'table';
                 paginationElement.style.display = 'flex';
@@ -629,7 +629,7 @@
             }
         }
 
-        // Event Listeners
+        
         refreshBtn.addEventListener('click', fetchLogs);
         deleteAllBtn.addEventListener('click', deleteAllLogs);
         firstPageBtn.addEventListener('click', () => goToPage(1));
@@ -640,7 +640,7 @@
         modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
         searchInput.addEventListener('input', applySearch);
 
-        // Init
+        
         fetchLogs();
     })();
 </script>

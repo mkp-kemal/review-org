@@ -235,7 +235,7 @@
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getCookie('accessToken')}` }
             });
             window.allReviews = await res.json();
-            window.filteredReviews = [...window.allReviews]; // awalnya sama
+            window.filteredReviews = [...window.allReviews]; 
             window.currentPage = page;
 
             renderTable();
@@ -246,7 +246,7 @@
         }
     }
 
-    // Render table berdasarkan filteredReviews
+    
     function renderTable() {
         const tbody = document.querySelector("#reviewTable tbody");
         tbody.innerHTML = "";
@@ -325,9 +325,9 @@
                 cell.style.backgroundColor = 'var(--primary-light)';
 
                 const saveChange = async () => {
-                    const newValue = editableElement.value === 'public'; // true / false
+                    const newValue = editableElement.value === 'public'; 
 
-                    // kalau tidak berubah, render ulang
+                    
                     if ((currentValue === 'Public' && newValue) || (currentValue === 'Private' && !newValue)) {
                         renderCell(newValue);
                         return;
@@ -368,20 +368,20 @@
     }
 
 
-    // Render pagination controls
+    
     function renderPaginationControls() {
         const reviews = window.filteredReviews;
         const totalPages = Math.ceil(reviews.length / window.itemsPerPage);
         const paginationControls = document.getElementById('paginationControls');
         paginationControls.innerHTML = '';
 
-        // Previous
+        
         const prevLi = document.createElement('li');
         prevLi.className = `page-item ${window.currentPage === 1 ? 'disabled' : ''}`;
         prevLi.innerHTML = `<a class="page-link" href="#" onclick="window.changePage(${window.currentPage - 1})">&laquo;</a>`;
         paginationControls.appendChild(prevLi);
 
-        // Pages
+        
         const maxVisiblePages = 5;
         let startPage = Math.max(1, window.currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -394,14 +394,14 @@
             paginationControls.appendChild(pageLi);
         }
 
-        // Next
+        
         const nextLi = document.createElement('li');
         nextLi.className = `page-item ${window.currentPage === totalPages ? 'disabled' : ''}`;
         nextLi.innerHTML = `<a class="page-link" href="#" onclick="window.changePage(${window.currentPage + 1})">&raquo;</a>`;
         paginationControls.appendChild(nextLi);
     }
 
-    // Change page
+    
     function changePage(page) {
         const reviews = window.filteredReviews;
         if (page < 1 || page > Math.ceil(reviews.length / window.itemsPerPage)) return;
@@ -410,7 +410,7 @@
         renderPaginationControls();
     }
 
-    // Search input
+    
     document.getElementById('reviewGlobalSearch').addEventListener('input', function (e) {
         const term = e.target.value.toLowerCase();
         window.filteredReviews = window.allReviews.filter(r => {
@@ -447,7 +447,7 @@
         window.currentReviewId = r.id;
         window.currentResponse = r.orgResponse || null;
 
-        // Basic Info
+        
         $('#modalTitle').text(r.title);
         $('#modalBody').text(r.body);
         $('#modalTeam').text(r.team?.name || "-");
@@ -456,13 +456,13 @@
         $('#modalSeason').text(`${r.season_term} ${r.season_year}`);
         $('#modalDate').text(new Date(r.createdAt).toLocaleDateString());
 
-        // Public/Private status
+        
         const publicBadge = r.isPublic ?
             '<span class="badge-public">Public</span>' :
             '<span class="badge-private">Private</span>';
         $('#modalPublic').html(publicBadge);
 
-        // Ratings
+        
         const coaching = r.rating?.coaching ?? 0;
         const development = r.rating?.development ?? 0;
         const transparency = r.rating?.transparency ?? 0;
@@ -477,7 +477,7 @@
         $('#ratingSafety').text(safety.toFixed(1) + '/5');
         $('#ratingOverall').text(overall.toFixed(1) + '/5');
 
-        // Progress bars
+        
         $('#progressCoaching').css('width', (coaching / 5 * 100) + '%');
         $('#progressDevelopment').css('width', (development / 5 * 100) + '%');
         $('#progressTransparency').css('width', (transparency / 5 * 100) + '%');
@@ -504,23 +504,23 @@
                 flagsContainer.append(flagElement);
             });
 
-            // Inisialisasi tooltip setelah menambahkan elemen
+            
             $('[data-toggle="tooltip"]').tooltip();
         } else {
             $('#flagsSection').hide();
         }
 
-        // Star ratings
+        
         $('#ratingStars').html(getStarRating(overall));
 
-        // Handle admin response
+        
         if (window.currentResponse) {
             $('#adminResponseText').text(window.currentResponse.body);
             $('#adminResponseDate').text('Posted: ' + new Date(window.currentResponse.createdAt).toLocaleDateString());
             $('#adminResponseBy').text('By: ' + (window.currentResponse.user?.email || 'Admin'));
             $('#adminResponseSection').show();
 
-            // Set up edit mode
+            
             $('#replyText').val(window.currentResponse.body);
             $('#submitReplyBtn').hide();
             $('#updateReplyBtn').show();
@@ -534,7 +534,7 @@
         $('#reviewModal').modal('show');
     }
 
-    // Handle reply submission
+    
     document.getElementById('submitReplyBtn').addEventListener('click', async function () {
         const responseText = $('#replyText').val().trim();
 
@@ -569,7 +569,7 @@
                 text: 'Response submitted successfully'
             });
 
-            // Refresh the review to show the new response
+            
             fetchReviews();
             $('#reviewModal').modal('hide');
         } catch (err) {
@@ -582,7 +582,7 @@
         }
     });
 
-    // Handle reply update
+    
     document.getElementById('updateReplyBtn').addEventListener('click', async function () {
         const responseText = $('#replyText').val().trim();
 
@@ -608,14 +608,14 @@
             });
 
             if (!res.ok) {
-                // Try to get error message from backend JSON response
+                
                 let errorMessage = 'Failed to update response';
                 try {
                     const errorData = await res.json();
-                    // Check if backend sent { message: '...' } or { error: '...' }
+                    
                     errorMessage = errorData.message || errorData.error || errorMessage;
                 } catch (jsonErr) {
-                    // If response is not JSON, keep the default error message
+                    
                 }
                 throw new Error(errorMessage);
             }
@@ -626,7 +626,7 @@
                 text: 'Response updated successfully'
             });
 
-            // Refresh the review to show the updated response
+            
             fetchReviews();
             $('#reviewModal').modal('hide');
         } catch (err) {
@@ -640,12 +640,12 @@
 
     });
 
-    // Handle status flag
+    
     document.addEventListener('click', async function (e) {
         if (e.target.classList.contains('flag-reason')) {
             const flagId = e.target.dataset.flagId;
 
-            // Tampilkan modal Swal
+            
             const { value: selectedStatus } = await Swal.fire({
                 title: 'Update Flag Status',
                 input: 'select',
@@ -699,10 +699,10 @@
 
 
 
-    // Initialize
+    
     fetchReviews("recent");
 
-    // Add search functionality
+    
     document.getElementById('reviewGlobalSearch').addEventListener('input', function (e) {
         const searchTerm = e.target.value.toLowerCase();
         const rows = document.querySelectorAll('#reviewTable tbody tr');
@@ -713,7 +713,7 @@
         });
     });
 
-    // Helper function to get cookie
+    
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);

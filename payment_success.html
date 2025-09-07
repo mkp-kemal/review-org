@@ -220,13 +220,13 @@
     </div>
 
     <script>
-        // Fungsi untuk mendapatkan parameter URL
+        
         function getQueryParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(name);
         }
 
-        // Fungsi untuk memformat tanggal
+        
         function formatDate(dateString) {
             const options = { 
                 year: 'numeric', 
@@ -238,7 +238,7 @@
             return new Date(dateString).toLocaleDateString('id-ID', options);
         }
 
-        // Fungsi untuk memformat mata uang
+        
         function formatCurrency(amount, currency = 'USD') {
             return new Intl.NumberFormat('en-US', {
                 style: 'currency',
@@ -246,7 +246,7 @@
             }).format(amount);
         }
 
-        // Fungsi utama untuk memvalidasi pembayaran
+        
         async function validatePayment() {
             const sessionId = getQueryParam('session_id');
             
@@ -256,7 +256,7 @@
             }
             
             try {
-                // Panggil API untuk memverifikasi sesi pembayaran
+                
                 const response = await fetch(`${window.APP_CONFIG.API_URL}/billing/checkout-session?session_id=${sessionId}`);
                 
                 if (!response.ok) {
@@ -265,7 +265,7 @@
                 
                 const sessionData = await response.json();
                 
-                // Tampilkan data pembayaran
+                
                 document.getElementById('plan-name').textContent = sessionData.plan;
                 document.getElementById('target-name').textContent = sessionData.targetName;
                 document.getElementById('email').textContent = sessionData.email;
@@ -273,7 +273,7 @@
                 document.getElementById('purchase-date').textContent = formatDate(sessionData.created);
                 document.getElementById('amount').textContent = formatCurrency(sessionData.amount_total / 100, sessionData.currency);
                 
-                // Sembunyikan loading, tampilkan sukses
+                
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('success-card').style.display = 'block';
                 
@@ -294,7 +294,7 @@
             validatePayment();
         }
 
-        // Jalankan validasi ketika halaman dimuat
+        
         document.addEventListener('DOMContentLoaded', validatePayment);
     </script>
 </body>

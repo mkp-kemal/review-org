@@ -195,66 +195,6 @@ function initPageScripts(page) {
 }
 
 
-
-// async function fetchWithAuth(url, options = {}) {
-//     let accessToken = getCookie('accessToken');
-//     let res = await fetch(url, {
-//         ...options,
-//         headers: {
-//             ...options.headers,
-//             'Authorization': `Bearer ${accessToken}`
-//         }
-//     });
-
-//     // Kalau token expired
-//     if (res.status === 401) {
-//         const refreshToken = getCookie('refreshToken');
-//         if (!refreshToken) {
-//             window.location.href = 'Login.html';
-//             return;
-//         }
-
-//         // Minta token baru
-//         const refreshRes = await fetch(`${window.APP_CONFIG.API_URL}/auth/refresh`, {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify({ refreshToken })
-//         });
-
-//         if (!refreshRes.ok) {
-//             window.location.href = 'Login.html';
-//             return;
-//         }
-
-//         const data = await refreshRes.json();
-//         // Simpan ulang cookie
-//         document.cookie = `accessToken=${data.accessToken}; path=/`;
-//         document.cookie = `refreshToken=${data.refreshToken}; path=/`;
-
-//         // Ulang request dengan token baru
-//         res = await fetch(url, {
-//             ...options,
-//             headers: {
-//                 ...options.headers,
-//                 'Authorization': `Bearer ${data.accessToken}`
-//             }
-//         });
-//     }
-
-//     // 🔎 Cek role user kalau responsenya ada data user
-//     try {
-//         const json = await res.clone().json(); // clone supaya res asli tetap bisa dipakai
-//         if (json?.user?.role === 'REVIEWER') {
-//             window.location.href = 'index.html';
-//             return;
-//         }
-//     } catch (e) {
-//         // bukan JSON, biarkan saja
-//     }
-
-//     return res;
-// }
-
 async function checkCredentials() {
     try {
         const res = await fetchWithAuth(`${window.APP_CONFIG.API_URL}/auth/check`, {
@@ -299,10 +239,6 @@ async function checkCredentials() {
 document.addEventListener('DOMContentLoaded', function () {
     checkCredentials().then((res) => {
         loadSidebar();
-
-        // loadPage('organizations')
-        // Load default page (organizations)
-        // setTimeout(() => loadPage('organizations'), 100);
 
         const observer = new MutationObserver(() => {
             const orgFileInput = document.getElementById('orgCsvFile');

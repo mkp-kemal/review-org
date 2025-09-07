@@ -1,5 +1,5 @@
 async function loadReviews() {
-    // Initialize star ratings
+    
     document.querySelectorAll('.star-rating').forEach(ratingContainer => {
         const stars = ratingContainer.querySelectorAll('.fa-star');
         const hiddenInput = ratingContainer.querySelector('input[type="hidden"]');
@@ -25,7 +25,7 @@ async function loadReviews() {
         });
     });
 
-    // Team/Organization search
+    
     const teamSearch = document.getElementById('team-search');
     const suggestions = document.getElementById('suggestions');
     const teamSuggestions = document.getElementById('team-suggestions');
@@ -109,7 +109,7 @@ async function loadReviews() {
         }
     }
 
-    // Handle form submit
+    
     document.getElementById('reviewForm').addEventListener('submit', async function (e) {
         e.preventDefault();
         Swal.showLoading();
@@ -120,7 +120,7 @@ async function loadReviews() {
             body: formData.get('body'),
             season_term: formData.get('season'),
             season_year: parseInt(formData.get('seasonYear')),
-            // age_level_at_review: formData.get('ageLevelAtReview'),
+            
             coaching: parseInt(formData.get('coaching')),
             development: parseInt(formData.get('development')),
             transparency: parseInt(formData.get('transparency')),
@@ -129,10 +129,10 @@ async function loadReviews() {
             teamId: formData.get('teamId'),
         };
 
-        // if (!reviewData.season_year || !reviewData.age_level_at_review) {
-        //     Swal.fire({ title: "Error", text: "Please select both Season Year and Age Group.", icon: "error" });
-        //     return;
-        // }
+        
+        
+        
+        
 
         const token = getJwtFromCookie();
         let isLoggedIn = false;

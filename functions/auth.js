@@ -15,7 +15,7 @@ async function checkAuth() {
         if (user && user.email) {
             sessionStorage.setItem("user", JSON.stringify(user));
 
-            // const username = user.email.split('@')[0];
+            
             loginLink.textContent = 'Logout';
             loginLink.href = '#';
             loginLink.onclick = showLogoutConfirmation;
@@ -64,11 +64,11 @@ function showLogoutConfirmation(event) {
 
 async function logout() {
     try {
-        // Hapus cookies
+        
         document.cookie = 'accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         document.cookie = 'refreshToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 
-        // Redirect ke halaman login
+        
         window.location.href = 'Login.html';
     } catch (err) {
         console.error('Logout error:', err);
@@ -86,15 +86,15 @@ async function fetchWithAuth(url, options = {}) {
         }
     });
 
-    // Kalau token expired
+    
     if (res.status === 401) {
         const refreshToken = getCookie('refreshToken');
         if (!refreshToken) {
-            // window.location.href = 'Login.html';
+            
             return;
         }
 
-        // Minta token baru
+        
         const refreshRes = await fetch(`${window.APP_CONFIG.API_URL}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -102,16 +102,16 @@ async function fetchWithAuth(url, options = {}) {
         });
 
         if (!refreshRes.ok) {
-            // window.location.href = 'Login.html';
+            
             return;
         }
 
         const data = await refreshRes.json();
-        // Simpan ulang cookie
+        
         document.cookie = `accessToken=${data.accessToken}; path=/`;
         document.cookie = `refreshToken=${data.refreshToken}; path=/`;
 
-        // Ulang request dengan token baru
+        
         res = await fetch(url, {
             ...options,
             headers: {

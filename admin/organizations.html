@@ -268,7 +268,7 @@
                 const saveChange = async () => {
                     let newValue = (field === 'status' || field === 'organizationId') ? editableElement.value : editableElement.value.trim();
 
-                    // Jangan simpan kalau tidak berubah
+                    
                     if (newValue === currentValue || (currentValue === '-' && !newValue)) {
                         renderCell(currentValue);
                         return;
@@ -276,7 +276,7 @@
 
                     let bodyData = { [field]: newValue };
 
-                    // Jika REJECTED, minta alasan
+                    
                     if (field === 'status' && newValue === 'REJECTED') {
                         const { value: reason, isConfirmed } = await Swal.fire({
                             title: 'Rejected Reason',
@@ -365,13 +365,13 @@
         });
     }
 
-    // ---------------- Create & Delete ----------------
+    
     async function createOrganization() {
         const name = document.getElementById('orgName').value;
         const city = document.getElementById('orgCity').value;
         const state = document.getElementById('orgState').value;
         const website = document.getElementById('orgWebsite').value;
-        // const status = document.getElementById('orgStatus').value;
+        
 
         if (!name) {
             Swal.fire({ icon: 'error', title: 'Error', text: 'Organization name is required' });
@@ -390,7 +390,7 @@
                 throw new Error(errorData.message || 'Failed to create organization');
             }
 
-            // Clear form fields
+            
             document.getElementById('orgName').value = '';
             document.getElementById('orgCity').value = '';
             document.getElementById('orgState').value = '';
@@ -466,7 +466,7 @@
                         `
             });
 
-            // Reset file input
+            
             fileInput.value = '';
             document.getElementById('orgCsvFileName').textContent = 'No file chosen';
 
@@ -482,19 +482,19 @@
         el.style.display = el.style.display === "block" ? "none" : "block";
     }
 
-    // General filtering function
+    
     function filterTableGlobalAndStatus(tableId, searchInputId, statusClass, statusIndex) {
         const rows = document.querySelectorAll(`#${tableId} tbody tr`);
         const searchValue = document.getElementById(searchInputId).value.toLowerCase();
 
-        // Get checked status filters
+        
         const checkedStatuses = Array.from(document.querySelectorAll(`.${statusClass}:checked`)).map(cb => cb.value);
 
         rows.forEach(row => {
             let textMatch = false;
             let statusMatch = false;
 
-            // Check global search (any column)
+            
             const cells = row.querySelectorAll("td");
             for (let cell of cells) {
                 if (cell.textContent.toLowerCase().includes(searchValue)) {
@@ -502,15 +502,15 @@
                     break;
                 }
             }
-            if (!searchValue) textMatch = true; // no search = match all
+            if (!searchValue) textMatch = true; 
 
-            // Check status filter
+            
             const statusText = row.cells[statusIndex]?.textContent.trim();
             if (checkedStatuses.length === 0 || checkedStatuses.includes(statusText)) {
                 statusMatch = true;
             }
 
-            // Show/Hide row
+            
             row.style.display = (textMatch && statusMatch) ? "" : "none";
         });
     }
@@ -548,7 +548,7 @@
         const tbody = document.querySelector('#orgTable tbody');
         tbody.innerHTML = '';
 
-        // Filter by status first
+        
         const checkedStatuses = Array.from(document.querySelectorAll('.org-status-filter:checked')).map(cb => cb.value);
         let filteredOrgs = window.allOrgs;
 
@@ -556,7 +556,7 @@
             filteredOrgs = window.allOrgs.filter(org => checkedStatuses.includes(org.status));
         }
 
-        // Apply search filter
+        
         const searchTerm = document.getElementById('orgGlobalSearch').value.toLowerCase();
         if (searchTerm) {
             filteredOrgs = filteredOrgs.filter(org =>
@@ -569,16 +569,16 @@
             );
         }
 
-        // Calculate pagination
+        
         const startIndex = (window.currentPageOrg - 1) * window.itemsPerPageOrg;
         const endIndex = Math.min(startIndex + window.itemsPerPageOrg, filteredOrgs.length);
         const paginatedOrgs = filteredOrgs.slice(startIndex, endIndex);
 
-        // Update pagination info
+        
         document.getElementById('orgPaginationInfo').textContent =
             `Showing ${startIndex + 1} to ${endIndex} of ${filteredOrgs.length} organizations`;
 
-        // Render table rows
+        
         paginatedOrgs.forEach(org => {
             const tr = document.createElement('tr');
 
@@ -614,7 +614,7 @@
     }
 
     function renderPaginationControls() {
-        // Calculate total items after filtering
+        
         const checkedStatuses = Array.from(document.querySelectorAll('.org-status-filter:checked')).map(cb => cb.value);
         let filteredOrgs = window.allOrgs;
 
@@ -638,7 +638,7 @@
         const paginationControls = document.getElementById('orgPaginationControls');
         paginationControls.innerHTML = '';
 
-        // Previous button
+        
         const prevLi = document.createElement('li');
         prevLi.className = `page-item ${window.currentPageOrg === 1 ? 'disabled' : ''}`;
         prevLi.innerHTML = `
@@ -648,7 +648,7 @@
         `;
         paginationControls.appendChild(prevLi);
 
-        // Page numbers
+        
         const maxVisiblePages = 5;
         let startPage = Math.max(1, window.currentPageOrg - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -692,7 +692,7 @@
             paginationControls.appendChild(lastLi);
         }
 
-        // Next button
+        
         const nextLi = document.createElement('li');
         nextLi.className = `page-item ${window.currentPageOrg === totalPages ? 'disabled' : ''}`;
         nextLi.innerHTML = `
@@ -712,7 +712,7 @@
 
     fetchOrganizations();
 
-    // Event listeners
+    
     document.getElementById('orgGlobalSearch').addEventListener('input', function () {
         window.currentPageOrg = 1;
         renderTable();
@@ -727,13 +727,13 @@
         });
     });
 
-    // File input display
+    
     document.getElementById('orgCsvFile').addEventListener('change', function (e) {
         const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
         document.getElementById('orgCsvFileName').textContent = fileName;
     });
 
-    // Event listeners ORGS
+    
     document.getElementById("orgGlobalSearch").addEventListener("input", () => {
         filterTableGlobalAndStatus("orgTable", "orgGlobalSearch", "org-status-filter", 5);
     });

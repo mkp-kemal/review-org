@@ -180,7 +180,7 @@
                 const saveChange = async () => {
                     let newValue = (field === 'status' || field === 'organizationId') ? editableElement.value : editableElement.value.trim();
 
-                    // Jangan simpan kalau tidak berubah
+                    
                     if (newValue === currentValue || (currentValue === '-' && !newValue)) {
                         renderCell(currentValue);
                         return;
@@ -188,7 +188,7 @@
 
                     let bodyData = { [field]: newValue };
 
-                    // Jika REJECTED, minta alasan
+                    
                     if (field === 'status' && newValue === 'REJECTED') {
                         const { value: reason, isConfirmed } = await Swal.fire({
                             title: 'Rejected Reason',
@@ -318,7 +318,7 @@
             });
             window.teamsList = await res.json();
 
-            // Populate organization dropdowns
+            
             const orgSelect = document.getElementById('teamOrgSelect');
             const orgCsvSelect = document.getElementById('teamCsvOrgSelect');
 
@@ -338,7 +338,7 @@
         const tbody = document.querySelector('#teamTable tbody');
         tbody.innerHTML = '';
 
-        // Filter by status first
+        
         const checkedStatuses = Array.from(document.querySelectorAll('.team-status-filter:checked')).map(cb => cb.value);
         let filteredTeams = window.allTeams;
 
@@ -346,7 +346,7 @@
             filteredTeams = window.allTeams.filter(team => checkedStatuses.includes(team.status));
         }
 
-        // Apply search filter
+        
         const searchTerm = document.getElementById('teamGlobalSearch').value.toLowerCase();
         if (searchTerm) {
             filteredTeams = filteredTeams.filter(team =>
@@ -361,16 +361,16 @@
             );
         }
 
-        // Calculate pagination
+        
         const startIndex = (window.currentPageTeam - 1) * window.itemsPerPageTeam;
         const endIndex = Math.min(startIndex + window.itemsPerPageTeam, filteredTeams.length);
         const paginatedTeams = filteredTeams.slice(startIndex, endIndex);
 
-        // Update pagination info
+        
         document.getElementById('teamPaginationInfo').textContent =
             `Showing ${startIndex + 1} to ${endIndex} of ${filteredTeams.length} teams`;
 
-        // Render table rows
+        
         paginatedTeams.forEach(team => {
             const tr = document.createElement('tr');
 
@@ -413,7 +413,7 @@
     }
 
     function renderPaginationControls() {
-        // Calculate total items after filtering
+        
         const checkedStatuses = Array.from(document.querySelectorAll('.team-status-filter:checked')).map(cb => cb.value);
         let filteredTeams = window.allTeams;
 
@@ -439,7 +439,7 @@
         const paginationControls = document.getElementById('teamPaginationControls');
         paginationControls.innerHTML = '';
 
-        // Previous button
+        
         const prevLi = document.createElement('li');
         prevLi.className = `page-item ${window.currentPageTeam === 1 ? 'disabled' : ''}`;
         prevLi.innerHTML = `
@@ -449,7 +449,7 @@
         `;
         paginationControls.appendChild(prevLi);
 
-        // Page numbers
+        
         const maxVisiblePages = 5;
         let startPage = Math.max(1, window.currentPageTeam - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -493,7 +493,7 @@
             paginationControls.appendChild(lastLi);
         }
 
-        // Next button
+        
         const nextLi = document.createElement('li');
         nextLi.className = `page-item ${window.currentPageTeam === totalPages ? 'disabled' : ''}`;
         nextLi.innerHTML = `
@@ -528,25 +528,25 @@
         });
     });
 
-    // File input display
+    
     document.getElementById('teamCsvFile').addEventListener('change', function (e) {
         const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
         document.getElementById('teamCsvFileName').textContent = fileName;
     });
 
-    // General filtering function
+    
     function filterTableGlobalAndStatus(tableId, searchInputId, statusClass, statusIndex) {
         const rows = document.querySelectorAll(`#${tableId} tbody tr`);
         const searchValue = document.getElementById(searchInputId).value.toLowerCase();
 
-        // Get checked status filters
+        
         const checkedStatuses = Array.from(document.querySelectorAll(`.${statusClass}:checked`)).map(cb => cb.value);
 
         rows.forEach(row => {
             let textMatch = false;
             let statusMatch = false;
 
-            // Check global search (any column)
+            
             const cells = row.querySelectorAll("td");
             for (let cell of cells) {
                 if (cell.textContent.toLowerCase().includes(searchValue)) {
@@ -554,15 +554,15 @@
                     break;
                 }
             }
-            if (!searchValue) textMatch = true; // no search = match all
+            if (!searchValue) textMatch = true; 
 
-            // Check status filter
+            
             const statusText = row.cells[statusIndex]?.textContent.trim();
             if (checkedStatuses.length === 0 || checkedStatuses.includes(statusText)) {
                 statusMatch = true;
             }
 
-            // Show/Hide row
+            
             row.style.display = (textMatch && statusMatch) ? "" : "none";
         });
     }
@@ -575,7 +575,7 @@
         const division = document.getElementById('teamDivision').value;
         const city = document.getElementById('teamCity').value;
         const state = document.getElementById('teamState').value;
-        // const status = document.getElementById('teamStatus').value;
+        
 
         if (!organizationId) {
             Swal.fire({ icon: 'error', title: 'Error', text: 'Please select an organization' });
@@ -599,7 +599,7 @@
                 throw new Error(errorData.message || 'Failed to create team');
             }
 
-            // Clear form fields
+            
             document.getElementById('teamEmail').value = '';
             document.getElementById('teamName').value = '';
             document.getElementById('teamAgeLevel').value = '';
@@ -646,7 +646,7 @@
     }
 
     async function claimTeam(teamId) {
-        // Cari data team berdasarkan ID
+        
         const team = window.allTeams.find(t => t.id === teamId);
 
         if (!team) {
@@ -654,7 +654,7 @@
             return;
         }
 
-        // Tampilkan Swal dengan input email
+        
         const { value: email } = await Swal.fire({
             title: `Claim Team: ${team.name}`,
             input: 'email',
@@ -673,7 +673,7 @@
                     Swal.showValidationMessage('Email is required');
                     return false;
                 }
-                // Bisa juga validasi format email di sini
+                
                 return email;
             }
         });
@@ -702,7 +702,7 @@
             text: `Team "${team.name}" has been claimed with email: ${email}`
         });
 
-        // Update data lokal (optional)
+        
         team.claimedBy = { email };
         renderTable();
 
@@ -754,7 +754,7 @@
                         `
             });
 
-            // Reset file input
+            
             fileInput.value = '';
             document.getElementById('teamCsvFileName').textContent = 'No file chosen';
 
@@ -765,7 +765,7 @@
         }
     }
 
-    // Event listeners TEAMS
+    
     document.getElementById("teamGlobalSearch").addEventListener("input", () => {
         filterTableGlobalAndStatus("teamTable", "teamGlobalSearch", "team-status-filter", 7);
     });

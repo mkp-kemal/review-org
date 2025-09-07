@@ -5,10 +5,10 @@ async function loadTeams() {
 
         const reviews = await res.json();
 
-        // Group by teamId
+        
         const teamsMap = {};
         reviews.forEach(r => {
-            const teamKey = r.teamId; // diambil dari root
+            const teamKey = r.teamId; 
             if (!teamsMap[teamKey]) {
                 teamsMap[teamKey] = {
                     reviews: [],
@@ -22,29 +22,29 @@ async function loadTeams() {
         const container = document.getElementById('teams-container');
         container.innerHTML = '';
 
-        // Kalau kosong semua
+        
         if (!reviews.length || Object.keys(teamsMap).length === 0) {
                     document.getElementById('no-available-data').innerHTML = '<p class="text-red-500">Not yet available review</p>';
             return;
         }
 
-        // Render tiap team
+        
         Object.values(teamsMap).forEach(({ reviews, team, organization }) => {
             let avgOverall = 0;
             let bestReview = null;
             let starsHtml = '';
 
             if (reviews.length > 0) {
-                // Hitung rata-rata overall
+                
                 avgOverall = reviews.reduce((acc, cur) => acc + cur.rating.overall, 0) / reviews.length;
 
-                // Cari review terbaik
+                
                 bestReview = reviews.reduce((best, cur) =>
                     (cur.rating.overall > best.rating.overall ? cur : best),
                     reviews[0]
                 );
 
-                // Bintang rating
+                
                 const fullStars = Math.floor(avgOverall);
                 const halfStar = avgOverall % 1 >= 0.5;
                 for (let i = 0; i < fullStars; i++) starsHtml += '<i class="fas fa-star"></i>';
@@ -105,7 +105,7 @@ function setupViewProfileButtons(teamsMap) {
 function renderTeamProfile(teamData) {
     const { reviews, team, organization } = teamData;
 
-    // Fungsi hitung rata-rata berdasarkan key di r.rating
+    
     const avg = (key) => {
         const sum = reviews.reduce((acc, cur) => acc + (cur.rating?.[key] || 0), 0);
         return (sum / reviews.length).toFixed(1);
@@ -114,7 +114,7 @@ function renderTeamProfile(teamData) {
     const avgOverall = (reviews.reduce((a, c) => a + (c.rating?.overall || 0), 0) / reviews.length).toFixed(1);
     const reviewCount = reviews.length;
 
-    // Bintang overall
+    
     const fullStars = Math.floor(avgOverall);
     const halfStar = avgOverall % 1 >= 0.5;
     let starsHtml = '';
@@ -122,10 +122,10 @@ function renderTeamProfile(teamData) {
     if (halfStar) starsHtml += '<i class="fas fa-star-half-alt"></i>';
     for (let i = starsHtml.match(/fa-star/g)?.length || 0; i < 5; i++) starsHtml += '<i class="far fa-star"></i>';
 
-    // Reviews urut dari terbaru
+    
     const sortedReviews = reviews.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    // HTML detail rating
+    
     const ratingsHtml = `
         ${renderRatingRow('Coaching Quality', avg('coaching'), 'bg-blue-600')}
         ${renderRatingRow('Player Development', avg('development'), 'bg-blue-600')}
@@ -134,7 +134,7 @@ function renderTeamProfile(teamData) {
         ${renderRatingRow('Safety & Health', avg('safety'), 'bg-green-500')}
     `;
 
-    // HTML review
+    
     const reviewsHtml = sortedReviews.map(r => `
         <div class="p-6 border rounded-lg">
             <div class="flex justify-between items-center mb-3">
@@ -186,7 +186,7 @@ function renderTeamProfile(teamData) {
     `;
 }
 
-// Helper untuk bar rating
+
 function renderRatingRow(label, value, color) {
     return `
         <div>
@@ -201,7 +201,7 @@ function renderRatingRow(label, value, color) {
     `;
 }
 
-// Helper untuk bintang
+
 function renderStars(score) {
     let stars = '';
     const full = Math.floor(score);

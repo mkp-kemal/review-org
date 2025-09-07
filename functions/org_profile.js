@@ -47,7 +47,7 @@ function showAdminButtons(roles, teamData) {
     if (isSiteAdmin || isOrgAdmin || isTeamAdmin) {
         adminButtons.style.display = 'block';
 
-        // Show/hide specific buttons based on role
+        
         document.getElementById('edit-team-btn').style.display =
             (isSiteAdmin || isOrgAdmin || isTeamAdmin) ? 'block' : 'none';
 
@@ -65,7 +65,7 @@ function showAdminButtons(roles, teamData) {
     }
 }
 
-// Function to show respond modal
+
 function showRespondModal(reviewId, teamId, currentResponse = '') {
     Swal.fire({
         title: 'Respond to Review',
@@ -81,9 +81,9 @@ function showRespondModal(reviewId, teamId, currentResponse = '') {
                 return false;
             }
 
-            // Determine if we're creating or updating a response
+            
             const url = currentResponse
-                ? `${window.APP_CONFIG.API_URL}/teams/${teamId}/respond`
+                ? `${window.APP_CONFIG.API_URL}/teams/${reviewId}/respond`
                 : `${window.APP_CONFIG.API_URL}/reviews/${reviewId}/respond`;
 
             const method = currentResponse ? 'PATCH' : 'POST';
@@ -114,14 +114,14 @@ function showRespondModal(reviewId, teamId, currentResponse = '') {
                 text: 'Response submitted successfully',
                 icon: 'success'
             }).then(() => {
-                // Reload the page to see the changes
+                
                 location.reload();
             });
         }
     });
 }
 
-// Function to toggle review visibility
+
 function toggleReviewVisibility(reviewId, isCurrentlyPublic) {
     const newStatus = !isCurrentlyPublic;
 
@@ -154,7 +154,7 @@ function toggleReviewVisibility(reviewId, isCurrentlyPublic) {
                         `Review has been ${newStatus ? 'shown' : 'hidden'}.`,
                         'success'
                     ).then(() => {
-                        // Reload the page to see the changes
+                        
                         location.reload();
                     });
                 })
@@ -169,9 +169,9 @@ function toggleReviewVisibility(reviewId, isCurrentlyPublic) {
     });
 }
 
-// Function to delete a response
+
 function deleteResponse(respondId) {
-    // console.log('respondId', respondId);
+    
 
     Swal.fire({
         title: 'Are you sure?',
@@ -202,7 +202,7 @@ function deleteResponse(respondId) {
                         'Response has been deleted.',
                         'success'
                     ).then(() => {
-                        // Reload the page to see the changes
+                        
                         location.reload();
                     });
                 })
@@ -307,7 +307,7 @@ function getOrCreateUserId() {
 }
 
 async function loadOrgProfile() {
-    // Get id from URL ?id=...
+    
     const params = new URLSearchParams(window.location.search);
     const orgId = params.get('id');
     if (!orgId) {
@@ -326,15 +326,15 @@ async function loadOrgProfile() {
         if (!res.ok) throw new Error(`Failed to fetch organization data: ${res.status}`);
 
         const data = await res.json();
-        // console.log(data);
+        
 
         const storedUser = window.user
 
-        // Update Profile Header
+        
         document.getElementById('org-name').textContent = data.name || 'Unknown Team';
         document.getElementById('org-location').innerHTML = `<i class="fas fa-map-marker-alt mr-2"></i>${data.city || 'Unknown'}, ${data.state || 'Unknown'}`;
 
-        // Update Team Tags
+        
         const tagsContainer = document.getElementById('team-tags');
         if (data.ageLevel) {
             const tag = document.createElement('span');
@@ -359,19 +359,19 @@ async function loadOrgProfile() {
                     const email = window?.user?.email || '';
                     const domain = email.split('@')[1];
 
-                    // --- Normalisasi domain dari website organisasi ---
+                    
                     let orgDomain = data.organization?.website || '';
 
                     try {
-                        // Pakai URL untuk parsing (butuh protokol, kalau tidak ada, tambahin)
+                        
                         if (!orgDomain.startsWith('http')) {
                             orgDomain = 'http://' + orgDomain;
                         }
                         const parsed = new URL(orgDomain);
-                        orgDomain = parsed.hostname.replace(/^www\./, ''); // buang 'www.'
+                        orgDomain = parsed.hostname.replace(/^www\./, ''); 
                     } catch (e) {
-                        orgDomain = orgDomain.replace(/^https?:\/\//, '')  // hapus http/https
-                            .replace(/^www\./, '');     // hapus www
+                        orgDomain = orgDomain.replace(/^https?:\/\//, '')  
+                            .replace(/^www\./, '');     
                     }
 
                     if (domain !== orgDomain) {
@@ -402,12 +402,12 @@ async function loadOrgProfile() {
         }
 
 
-        // Update Ratings
+        
         const accum = data.accumulation || {};
         document.getElementById('overall-rating').textContent = accum.overall?.toFixed(1) || '0.0';
         document.getElementById('star-rating').innerHTML = renderStars(accum.overall || 0);
 
-        // Update detailed ratings
+        
         const ratingFields = [
             { id: 'coaching', value: accum.coaching },
             { id: 'development', value: accum.development },
@@ -424,12 +424,12 @@ async function loadOrgProfile() {
             document.getElementById(`${field.id}-bar`).style.width = `${percentage}%`;
         });
 
-        // Update review count
+        
         const reviewCount = data.reviews?.length || 0;
         document.getElementById('review-count').textContent = `Based on ${reviewCount} reviews`;
         document.getElementById('reviews-title').textContent = `Parent & Player Reviews (${reviewCount})`;
 
-        // Update About Section
+        
         document.getElementById('about-org-name').textContent = data.name || 'Organization';
 
         const aboutContent = document.getElementById('about-content');
@@ -439,9 +439,9 @@ async function loadOrgProfile() {
                 <p>This team competes in ${data.ageLevel || 'unknown age level'} and plays in the ${data.division || 'unknown division'}.</p>
             `;
 
-        // Update Reviews Section
+        
         const reviewsContainer = document.getElementById('reviews-container');
-        reviewsContainer.innerHTML = ''; // Clear loading message
+        reviewsContainer.innerHTML = ''; 
 
         //Team Photos
         const teamPhotosContainer = document.getElementById("teamPhotos");
@@ -458,7 +458,7 @@ async function loadOrgProfile() {
             teamPhotosContainer.appendChild(img);
         });
 
-        // if does not have team photo
+        
         if (data.teamPhoto.length === 0) {
             teamPhotosContainer.innerHTML = `
       <img src="https://placehold.co/400x300/1E40AF/FFFFFF?text=No+Photo" 
@@ -488,7 +488,7 @@ async function loadOrgProfile() {
                         <p class="text-sm text-gray-500">Season: ${seasonDisplay} | Reviewed: ${formatDate(review.createdAt)}</p>
                     `;
 
-                // Add organization response if available
+                
                 if (hasResponse) {
                     const responseDiv = document.createElement('div');
                     responseDiv.className = 'mt-4 p-4 bg-gray-50 rounded-lg border-t';
@@ -518,40 +518,44 @@ async function loadOrgProfile() {
                     reviewDiv.appendChild(responseDiv);
                 }
 
-                // Add admin buttons for each review if user is admin
-                if (storedUser && data.subscription?.plan !== 'BASIC' && (storedUser?.role?.includes('SITE_ADMIN') || data.claimedById == window?.user?.id || data.organization?.claimedById == window?.user?.id)) {
+                
+                const isSiteAdmin = storedUser?.role?.includes('SITE_ADMIN');
+                const isRelatedUser = (data.claimedById == window?.user?.id || data.organization?.claimedById == window?.user?.id);
+                const isNotBasicPlan = data.subscription?.plan !== 'BASIC';
+
+                if (storedUser && (isSiteAdmin || (isRelatedUser && isNotBasicPlan))) {
                     const adminActions = document.createElement('div');
                     adminActions.className = 'mt-3 flex justify-end space-x-2';
 
-                    // Always show hide/unhide button
+                    
                     adminActions.innerHTML = `
-                                <button class="hide-review-btn bg-gray-100 text-gray-800 text-sm font-semibold py-1 px-3 rounded hover:bg-gray-200">
-                                    <i class="fas ${review.isPublic ? 'fa-eye-slash' : 'fa-eye'} mr-1"></i>${review.isPublic ? 'Hide' : 'Unhide'}
-                                </button>
-                            `;
+        <button class="hide-review-btn bg-gray-100 text-gray-800 text-sm font-semibold py-1 px-3 rounded hover:bg-gray-200">
+            <i class="fas ${review.isPublic ? 'fa-eye-slash' : 'fa-eye'} mr-1"></i>${review.isPublic ? 'Hide' : 'Unhide'}
+        </button>
+    `;
 
-                    // Only show edit/delete buttons if there's a response
+                    
                     if (hasResponse) {
                         adminActions.innerHTML += `
-                                <button class="edit-response-btn bg-blue-100 text-blue-800 text-sm font-semibold py-1 px-3 rounded hover:bg-blue-200">
-                                    <i class="fas fa-edit mr-1"></i>Edit
-                                </button>
-                                <button class="delete-response-btn bg-red-100 text-red-800 text-sm font-semibold py-1 px-3 rounded hover:bg-red-200">
-                                    <i class="fas fa-trash mr-1"></i>Delete
-                                </button>
-                            `;
+            <button class="edit-response-btn bg-blue-100 text-blue-800 text-sm font-semibold py-1 px-3 rounded hover:bg-blue-200">
+                <i class="fas fa-edit mr-1"></i>Edit
+            </button>
+            <button class="delete-response-btn bg-red-100 text-red-800 text-sm font-semibold py-1 px-3 rounded hover:bg-red-200">
+                <i class="fas fa-trash mr-1"></i>Delete
+            </button>
+        `;
                     } else {
-                        // Show respond button if no response exists
+                        
                         adminActions.innerHTML += `
-                                <button class="respond-review-btn bg-purple-100 text-purple-800 text-sm font-semibold py-1 px-3 rounded hover:bg-purple-200">
-                                    <i class="fas fa-reply mr-1"></i>Respond
-                                </button>
-                            `;
+            <button class="respond-review-btn bg-purple-100 text-purple-800 text-sm font-semibold py-1 px-3 rounded hover:bg-purple-200">
+                <i class="fas fa-reply mr-1"></i>Respond
+            </button>
+        `;
                     }
 
                     reviewDiv.appendChild(adminActions);
 
-                    // Add event listeners for review admin buttons
+                    
                     adminActions.querySelector('.hide-review-btn')?.addEventListener('click', () => {
                         toggleReviewVisibility(review.id, review.isPublic);
                     });
@@ -570,22 +574,21 @@ async function loadOrgProfile() {
                         });
                     }
                 } else {
-                    // ambil userId dari login atau dari localStorage
+                    
                     const currentUserId = window?.user?.id || localStorage.getItem("userId");
 
-                    // user tidak boleh flag review sendiri
+                    
                     if (window?.user?.email !== review?.user?.email) {
-                        // cek apakah user sudah pernah nge-flag
                         const alreadyFlagged = review.flags?.some(f => f.reporterUserId === currentUserId);
 
                         if (!alreadyFlagged) {
                             const flagsDiv = document.createElement('div');
                             flagsDiv.className = 'flex justify-end space-x-2 mt-3';
                             flagsDiv.innerHTML = `
-                                <button class="flag-review-btn bg-gray-100 text-gray-800 text-sm font-semibold py-1 px-3 rounded hover:bg-gray-200">
-                                    <i class="fas fa-flag mr-1"></i>Flag
-                                </button>
-                            `;
+                <button class="flag-review-btn bg-gray-100 text-gray-800 text-sm font-semibold py-1 px-3 rounded hover:bg-gray-200">
+                    <i class="fas fa-flag mr-1"></i>Flag
+                </button>
+            `;
                             reviewDiv.appendChild(flagsDiv);
 
                             flagsDiv.querySelector('.flag-review-btn')?.addEventListener('click', () => {
@@ -593,8 +596,8 @@ async function loadOrgProfile() {
                             });
                         }
                     }
-
                 }
+
 
                 reviewsContainer.appendChild(reviewDiv);
 
@@ -620,7 +623,7 @@ async function loadOrgProfile() {
     } catch (err) {
         console.error('Error loading organization profile:', err);
 
-        // Show error message
+        
         const reviewsContainer = document.getElementById('reviews-container');
         reviewsContainer.innerHTML = `
                 <div class="text-center py-8">

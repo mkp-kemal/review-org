@@ -46,13 +46,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const entityList = document.getElementById("entityList");
     const upgradeType = document.getElementById("upgradeType");
 
-    // Event tombol PRO
+    
     if (!user) {
         document.getElementById("buttonPro")?.addEventListener("click", () => {
             window.location.href = "/Login.html";
         });
 
-        // Event tombol ELITE
+        
         document.getElementById("buttonElite")?.addEventListener("click", () => {
             window.location.href = "/Login.html";
         });
@@ -64,33 +64,33 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.getElementById("benefitsList").innerHTML = benefits.PRO;
             $('#upgradeModal').modal('show');
 
-            // Trigger load default entity list
+            
             loadEntities(upgradeType.value);
         });
 
-        // Event tombol ELITE
+        
         document.getElementById("buttonElite")?.addEventListener("click", () => {
             currentPlan = "ELITE";
             document.getElementById("upgradeTitle").innerText = "Upgrade to ELITE";
             document.getElementById("benefitsList").innerHTML = benefits.ELITE;
             $('#upgradeModal').modal('show');
 
-            // Trigger load default entity list
+            
             loadEntities(upgradeType.value);
         });
     }
 
-    // Ketika ganti tipe upgrade Team / Org
+    
     upgradeType?.addEventListener("change", (e) => {
         loadEntities(e.target.value);
     });
 
-    // Load dropdown list Team / Organization
-    // Load dropdown list Team / Organization
+    
+    
     async function loadEntities(type) {
         const parentEntityList = document.getElementById("parent-entity-list");
 
-        // tampilkan loading state
+        
         parentEntityList.innerHTML = `
         <label for="entityList">Select:</label>
         <select id="entityList" class="form-control" disabled>
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
 
         const confirmBtn = document.getElementById("confirmUpgrade");
-        if (confirmBtn) confirmBtn.disabled = true; // pastikan awalnya disabled
+        if (confirmBtn) confirmBtn.disabled = true; 
 
         if (type) {
             const func = type === "team" ? loadTeamsClaimed : loadOrganizationsClaimed;
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     return;
                 }
 
-                // render ulang select normal
+                
                 parentEntityList.innerHTML = `
                 <label for="entityList">Select:</label>
                 <select id="entityList" class="form-control">
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             `;
                 const entityList = parentEntityList.querySelector("#entityList");
 
-                // isi option dari API
+                
                 res.forEach(item => {
                     const option = document.createElement("option");
                     option.value = item.id;
@@ -130,9 +130,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     entityList.appendChild(option);
                 });
 
-                // enable/disable confirmBtn berdasarkan pilihan
+                
                 if (confirmBtn) {
-                    confirmBtn.disabled = true; // default disabled
+                    confirmBtn.disabled = true; 
                     entityList.addEventListener("change", () => {
                         confirmBtn.disabled = !entityList.value;
                     });
@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-            // Siapkan body request
+            
             const body = {
                 plan: currentPlan
             };
@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 body.organizationId = selectedId;
             }
 
-            // Panggil API checkout session
+            
             const res = await fetch(`${window.APP_CONFIG.API_URL}/billing/checkout-session`, {
                 method: "POST",
                 headers: {
@@ -212,10 +212,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 });
 
-// LOAD REVIEW FROM TEAMS & ORGANIZATION ===================================================================
+
 document.addEventListener('DOMContentLoaded', loadTeams());
 
-// LOAD REVIEW FROM TEAMS & ORGANIZATION ===================================================================
+
 document.addEventListener('DOMContentLoaded', loadReviews());
 
 
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', loadSeasonYears);
 function initTeamSearch(inputElement, options = {}) {
     const { hiddenInput } = options;
 
-    // Buat dropdown container jika belum ada
+    
     let suggestionsContainer = document.createElement('div');
     suggestionsContainer.className = 'absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto hidden';
     inputElement.parentElement.appendChild(suggestionsContainer);
@@ -246,7 +246,7 @@ function initTeamSearch(inputElement, options = {}) {
                 .then(data => {
                     suggestionsContainer.innerHTML = '';
 
-                    // Sticky header
+                    
                     const header = document.createElement('div');
                     header.className = 'sticky top-0 bg-gray-100 p-2 font-semibold border-b text-gray-600';
                     header.textContent = 'Teams';
@@ -283,7 +283,7 @@ function initTeamSearch(inputElement, options = {}) {
         }, 300);
     });
 
-    // Hide suggestions if clicking outside
+    
     document.addEventListener('click', e => {
         if (!inputElement.contains(e.target) && !suggestionsContainer.contains(e.target)) {
             suggestionsContainer.classList.add('hidden');
@@ -328,7 +328,7 @@ async function loadOrganizationsClaimed() {
         });
         if (!res.ok) throw new Error("Failed to load organizations");
 
-        // kalau kosong (204 atau body kosong) → return []
+        
         const text = await res.text();
         if (!text) return [];
 
@@ -361,12 +361,12 @@ async function loadTeamsClaimed() {
 }
 
 
-// --- Inisialisasi search ---
-// Hero big search
+
+
 const heroInput = document.querySelector('.hero-section input[type="text"]');
 initTeamSearch(heroInput);
 
-// Review form search
+
 const reviewInput = document.getElementById('team-big-search');
 const teamIdInput = document.getElementById('team-id');
 initTeamSearch(reviewInput, { hiddenInput: teamIdInput });

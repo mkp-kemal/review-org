@@ -1,17 +1,17 @@
-// 🔹 TOGGLE FORMS
+
 function toggleForms() {
     document.getElementById('login-form').classList.toggle('hidden');
     document.getElementById('signup-form').classList.toggle('hidden');
-    document.getElementById('reset-form').classList.add('hidden'); // hide reset
+    document.getElementById('reset-form').classList.add('hidden'); 
 }
 
 function toggleReset() {
     document.getElementById('login-form').classList.toggle('hidden');
     document.getElementById('reset-form').classList.toggle('hidden');
-    document.getElementById('signup-form').classList.add('hidden'); // hide signup
+    document.getElementById('signup-form').classList.add('hidden'); 
 }
 
-// 🔹 LOGIN HANDLER
+
 document.querySelector('#login-form form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
@@ -46,7 +46,7 @@ document.querySelector('#login-form form').addEventListener('submit', async (e) 
     }
 });
 
-// 🔹 REGISTER HANDLER
+
 document.querySelector('#signup-form form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('signup-email').value;
@@ -101,7 +101,7 @@ document.querySelector('#signup-form form').addEventListener('submit', async (e)
     }
 });
 
-// 🔹 RESET PASSWORD HANDLER
+
 document.querySelector('#reset-form form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('reset-email').value;
