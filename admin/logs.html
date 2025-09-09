@@ -406,7 +406,7 @@
         let currentPage = 1;
         let itemsPerPage = 10;
         let allLogs = [];
-        let filteredLogs = []; 
+        let filteredLogs = [];
 
         function formatDateTime(dateString) {
             const date = new Date(dateString);
@@ -415,7 +415,7 @@
             let timeZoneOption = 'UTC';
 
             if (selectedZone === 'Pacific') {
-                
+
                 timeZoneOption = Intl.DateTimeFormat().resolvedOptions().timeZone;
             }
 
@@ -469,7 +469,7 @@
                     return;
                 }
 
-                filteredLogs = allLogs; 
+                filteredLogs = allLogs;
                 currentPage = 1;
                 logsTable.style.display = 'table';
                 paginationElement.style.display = 'flex';
@@ -519,7 +519,7 @@
                 type: 'bar',
                 data: {
                     labels: Object.keys(hourlyActivity).map(h => `${h}:00`),
-                    datasets: [{ label: 'Jumlah Aktivitas', data: Object.values(hourlyActivity), backgroundColor: '#3498db' }]
+                    datasets: [{ label: 'Activity', data: Object.values(hourlyActivity), backgroundColor: '#3498db' }]
                 },
                 options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
             });
@@ -535,7 +535,10 @@
                         (log.actor?.email || '').toLowerCase().includes(query) ||
                         (log.actor?.id || '').toLowerCase().includes(query) ||
                         (log.action || '').toLowerCase().includes(query) ||
-                        (log.metadata?.path || '').toLowerCase().includes(query)
+                        (log.metadata?.path || '').toLowerCase().includes(query) ||
+                        (formatDateTime(log.createdAt) || '').toLowerCase().includes(query) ||
+                        (log.targetType || '').toLowerCase().includes(query)
+
                     );
                 });
             }
@@ -629,7 +632,7 @@
             }
         }
 
-        
+
         refreshBtn.addEventListener('click', fetchLogs);
         deleteAllBtn.addEventListener('click', deleteAllLogs);
         firstPageBtn.addEventListener('click', () => goToPage(1));
@@ -640,7 +643,7 @@
         modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
         searchInput.addEventListener('input', applySearch);
 
-        
+
         fetchLogs();
     })();
 </script>
