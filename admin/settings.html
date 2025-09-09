@@ -203,6 +203,28 @@
             background-color: #fff3e0;
             color: #ef6c00;
         }
+
+        /* Reset Password Modal Styles */
+        .reset-password-modal {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
@@ -290,6 +312,28 @@
         </div>
     </div>
 
+    <!-- Reset Password Modal -->
+    <div class="modal reset-password-modal" id="reset-password-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <span class="close" id="close-reset-password-modal">&times;</span>
+            </div>
+
+            <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input type="password" id="new-password" placeholder="Enter your new password">
+            </div>
+
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" placeholder="Confirm your new password">
+            </div>
+
+            <button class="apply-btn" id="submit-reset-password">Reset Password</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
         function getTimeElements() {
@@ -328,6 +372,13 @@
             const profileStatus = document.getElementById('profile-status');
             const profileCreated = document.getElementById('profile-created');
 
+
+            const resetPasswordModal = document.getElementById('reset-password-modal');
+            const closeResetPasswordModal = document.getElementById('close-reset-password-modal');
+            const newPasswordInput = document.getElementById('new-password');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+            const submitResetPasswordBtn = document.getElementById('submit-reset-password');
+
             return {
                 profileBtn,
                 profileModal,
@@ -339,7 +390,12 @@
                 profileRole,
                 profileVerified,
                 profileStatus,
-                profileCreated
+                profileCreated,
+                resetPasswordModal,
+                closeResetPasswordModal,
+                newPasswordInput,
+                confirmPasswordInput,
+                submitResetPasswordBtn
             };
         }
 
@@ -386,7 +442,7 @@
 
         async function fetchUserProfile() {
             try {
-                const response = await fetch(`${window.APP_CONFIG.API_URL}/users/me`, {
+                const response = await fetch(`${window.window.APP_CONFIG.API_URL}/users/me`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${getCookie('accessToken')}`,
@@ -398,8 +454,7 @@
                     throw new Error('Failed to fetch user profile');
                 }
 
-                const userData = await response.json();
-                return userData;
+                return await response.json();
             } catch (error) {
                 console.error('Error fetching user profile:', error);
                 throw error;
@@ -436,21 +491,22 @@
             });
         }
 
-        async function resetPassword() {
+        async function resetPassword(newPassword) {
             try {
-                const response = await fetch(`${window.APP_CONFIG.API_URL}/auth/reset-password`, {
+                const response = await fetch(`${window.window.APP_CONFIG.API_URL}/auth/reset-password`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${getCookie('accessToken')}`,
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({ newPassword })
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to initiate password reset');
+                    throw new Error('Failed to reset password');
                 }
 
-                return true;
+                return await response.json();
             } catch (error) {
                 console.error('Error resetting password:', error);
                 throw error;
@@ -459,7 +515,7 @@
 
         async function deleteAccount() {
             try {
-                const response = await fetch(`${window.APP_CONFIG.API_URL}/users/me`, {
+                const response = await fetch(`${window.window.APP_CONFIG.API_URL}/users/me`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${getCookie('accessToken')}`,
@@ -501,7 +557,7 @@
                     if (value !== 'DELETE MY ACCOUNT') {
                         return 'You must type the confirmation phrase exactly!';
                     }
-                }
+                },
             });
         }
 
@@ -575,31 +631,81 @@
             if (event.target === window.profileElements.profileModal) {
                 window.profileElements.profileModal.style.display = 'none';
             }
+            if (event.target === window.profileElements.resetPasswordModal) {
+                window.profileElements.resetPasswordModal.style.display = 'none';
+            }
         });
 
-        window.profileElements.resetPasswordBtn.addEventListener('click', async function () {
+        window.profileElements.resetPasswordBtn.addEventListener('click', function () {
+
+            window.profileElements.newPasswordInput.value = '';
+            window.profileElements.confirmPasswordInput.value = '';
+
+
+            window.profileElements.resetPasswordModal.style.display = 'flex';
+        });
+
+        window.profileElements.closeResetPasswordModal.addEventListener('click', function () {
+            window.profileElements.resetPasswordModal.style.display = 'none';
+        });
+
+        window.profileElements.submitResetPasswordBtn.addEventListener('click', async function () {
+            const newPassword = window.profileElements.newPasswordInput.value;
+            const confirmPassword = window.profileElements.confirmPasswordInput.value;
+
+
+            if (!newPassword || !confirmPassword) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Please fill in all fields',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Passwords do not match',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Password must be at least 6 characters long',
+                    icon: 'error'
+                });
+                return;
+            }
+
             try {
-                const result = await Swal.fire({
-                    title: 'Reset Password?',
-                    text: 'A password reset link will be sent to your email address.',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, reset password',
-                    cancelButtonText: 'Cancel'
+
+                Swal.fire({
+                    title: 'Resetting Password...',
+                    text: 'Please wait while we reset your password.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
                 });
 
-                if (result.isConfirmed) {
-                    await resetPassword();
-                    Swal.fire({
-                        title: 'Email Sent',
-                        text: 'Password reset instructions have been sent to your email.',
-                        icon: 'success'
-                    });
-                }
+                await resetPassword(newPassword);
+
+                Swal.fire({
+                    title: 'Password Reset',
+                    text: 'Your password has been successfully reset.',
+                    icon: 'success'
+                });
+
+
+                window.profileElements.resetPasswordModal.style.display = 'none';
             } catch (error) {
                 Swal.fire({
                     title: 'Error',
-                    text: 'Failed to initiate password reset. Please try again.',
+                    text: 'Failed to reset password. Please try again.',
                     icon: 'error'
                 });
                 console.error('Error resetting password:', error);
@@ -628,8 +734,7 @@
                         text: 'Your account has been successfully deleted.',
                         icon: 'success'
                     }).then(() => {
-
-                        window.location.href = '/';
+                        logout();
                     });
                 }
             } catch (error) {
