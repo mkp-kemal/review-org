@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Time Configuration</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         * {
             margin: 0;
@@ -62,6 +63,14 @@
             background-color: #2980b9;
         }
 
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -83,6 +92,8 @@
             width: 90%;
             max-width: 500px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .modal-header {
@@ -136,6 +147,62 @@
             font-weight: bold;
             color: #2c3e50;
         }
+
+        /* Profile Info Styles */
+        .profile-info {
+            margin-bottom: 20px;
+        }
+
+        .profile-field {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-field:last-child {
+            border-bottom: none;
+        }
+
+        .profile-label {
+            font-weight: bold;
+            color: #7f8c8d;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .profile-value {
+            color: #2c3e50;
+        }
+
+        .profile-actions {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .profile-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-verified {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-banned {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .status-not-verified {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
     </style>
 </head>
 
@@ -145,28 +212,19 @@
 
         <div class="setting-item">
             <div>
+                <h3>Profile</h3>
+                <p>View and manage your account information</p>
+            </div>
+            <button class="btn" id="profile-btn">View Profile</button>
+        </div>
+
+        <div class="setting-item">
+            <div>
                 <h3>Time Zone</h3>
                 <p>Current time zone: <span id="current-time-zone">UTC+00:00</span></p>
             </div>
             <button class="btn" id="change-time-btn">Change Time</button>
         </div>
-
-        <!-- Other setting items can be added here -->
-        <!-- <div class="setting-item">
-            <div>
-                <h3>Language</h3>
-                <p>English (US)</p>
-            </div>
-            <button class="btn">Change</button>
-        </div>
-
-        <div class="setting-item">
-            <div>
-                <h3>Notifications</h3>
-                <p>Manage your notification preferences</p>
-            </div>
-            <button class="btn">Configure</button>
-        </div> -->
     </div>
 
     <!-- Time Zone Modal -->
@@ -174,7 +232,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Select Time Zone</h2>
-                <span class="close" id="close-modal">&times;</span>
+                <span class="close" id="close-time-modal">&times;</span>
             </div>
 
             <div class="time-option" data-zone="UTC">
@@ -190,16 +248,59 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Your Profile</h2>
+                <span class="close" id="close-profile-modal">&times;</span>
+            </div>
+
+            <div class="profile-info" id="profile-info">
+                <div class="profile-field">
+                    <span class="profile-label">ID</span>
+                    <span class="profile-value" id="profile-id">Loading...</span>
+                </div>
+                <div class="profile-field">
+                    <span class="profile-label">Email</span>
+                    <span class="profile-value" id="profile-email">Loading...</span>
+                </div>
+                <div class="profile-field">
+                    <span class="profile-label">Role</span>
+                    <span class="profile-value" id="profile-role">Loading...</span>
+                </div>
+                <div class="profile-field">
+                    <span class="profile-label">Verification Status</span>
+                    <span class="profile-value" id="profile-verified">Loading...</span>
+                </div>
+                <div class="profile-field">
+                    <span class="profile-label">Account Status</span>
+                    <span class="profile-value" id="profile-status">Loading...</span>
+                </div>
+                <div class="profile-field">
+                    <span class="profile-label">Member Since</span>
+                    <span class="profile-value" id="profile-created">Loading...</span>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button class="btn" id="reset-password-btn">Reset Password</button>
+                <button class="btn btn-danger" id="delete-account-btn">Delete Account</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
         function getTimeElements() {
             const changeTimeBtn = document.getElementById('change-time-btn');
             const timeModal = document.getElementById('time-modal');
-            const closeModal = document.getElementById('close-modal');
+            const closeModal = document.getElementById('close-time-modal');
             const applyTimezoneBtn = document.getElementById('apply-timezone');
             const currentTimeZone = document.getElementById('current-time-zone');
             const timeOptions = document.querySelectorAll('.time-option');
 
-            let selectedZone = localStorage.getItem('selectedZone') || 'UTC'; 
+            let selectedZone = localStorage.getItem('selectedZone') || 'UTC';
 
             return {
                 changeTimeBtn,
@@ -212,12 +313,44 @@
             };
         }
 
+        function getProfileElements() {
+            const profileBtn = document.getElementById('profile-btn');
+            const profileModal = document.getElementById('profile-modal');
+            const closeProfileModal = document.getElementById('close-profile-modal');
+            const resetPasswordBtn = document.getElementById('reset-password-btn');
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
+
+
+            const profileId = document.getElementById('profile-id');
+            const profileEmail = document.getElementById('profile-email');
+            const profileRole = document.getElementById('profile-role');
+            const profileVerified = document.getElementById('profile-verified');
+            const profileStatus = document.getElementById('profile-status');
+            const profileCreated = document.getElementById('profile-created');
+
+            return {
+                profileBtn,
+                profileModal,
+                closeProfileModal,
+                resetPasswordBtn,
+                deleteAccountBtn,
+                profileId,
+                profileEmail,
+                profileRole,
+                profileVerified,
+                profileStatus,
+                profileCreated
+            };
+        }
+
+
         window.timeElements = getTimeElements();
+        window.profileElements = getProfileElements();
         window.selectedZone = getTimeElements().selectedZone;
 
-        
+
         function getLocalTimeOffset() {
-            const offsetMinutes = new Date().getTimezoneOffset(); 
+            const offsetMinutes = new Date().getTimezoneOffset();
             const totalMinutes = -offsetMinutes;
             const hours = String(Math.floor(Math.abs(totalMinutes) / 60)).padStart(2, '0');
             const minutes = String(Math.abs(totalMinutes) % 60).padStart(2, '0');
@@ -225,7 +358,6 @@
             return `UTC${sign}${hours}:${minutes}`;
         }
 
-        
         function updateTimeZoneText() {
             let timeZoneText = '';
 
@@ -241,7 +373,6 @@
             window.timeElements.currentTimeZone.textContent = timeZoneText;
         }
 
-        
         function selectSavedZone() {
             window.timeElements.timeOptions.forEach(option => {
                 if (option.getAttribute('data-zone') === window.selectedZone) {
@@ -252,17 +383,138 @@
             });
         }
 
-        
-        updateTimeZoneText();
-        selectSavedZone(); 
 
-        
+        async function fetchUserProfile() {
+            try {
+                const response = await fetch(`${window.APP_CONFIG.API_URL}/users/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${getCookie('accessToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user profile');
+                }
+
+                const userData = await response.json();
+                return userData;
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+                throw error;
+            }
+        }
+
+        function displayProfileData(userData) {
+            const { profileId, profileEmail, profileRole, profileVerified, profileStatus, profileCreated } = window.profileElements;
+
+            profileId.textContent = userData.id;
+            profileEmail.textContent = userData.email;
+            profileRole.textContent = userData.role;
+
+
+            if (userData.isVerified) {
+                profileVerified.innerHTML = '<span class="profile-status status-verified">Verified</span>';
+            } else {
+                profileVerified.innerHTML = '<span class="profile-status status-not-verified">Not Verified</span>';
+            }
+
+
+            if (userData.isBanned) {
+                profileStatus.innerHTML = '<span class="profile-status status-banned">Banned</span>';
+            } else {
+                profileStatus.innerHTML = '<span class="profile-status status-verified">Active</span>';
+            }
+
+
+            const createdDate = new Date(userData.createdAt);
+            profileCreated.textContent = createdDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        async function resetPassword() {
+            try {
+                const response = await fetch(`${window.APP_CONFIG.API_URL}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${getCookie('accessToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to initiate password reset');
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                throw error;
+            }
+        }
+
+        async function deleteAccount() {
+            try {
+                const response = await fetch(`${window.APP_CONFIG.API_URL}/users/me`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${getCookie('accessToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete account');
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error deleting account:', error);
+                throw error;
+            }
+        }
+
+        function showScaryDeleteConfirmation() {
+            return Swal.fire({
+                title: 'ARE YOU ABSOLUTELY SURE?',
+                html: `
+                    <div style="text-align: left;">
+                        <p style="color: #e74c3c; font-weight: bold;">This action cannot be undone!</p>
+                        <p>This will permanently delete your account, remove all your data, and cannot be recovered.</p>
+                        <p>Please type <strong style="color: #c0392b;">DELETE MY ACCOUNT</strong> to confirm.</p>
+                    </div>
+                `,
+                icon: 'warning',
+                iconColor: '#e74c3c',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#7f8c8d',
+                confirmButtonText: 'I understand, delete my account',
+                cancelButtonText: 'Cancel',
+                input: 'text',
+                inputPlaceholder: 'Type here to confirm',
+                inputValidator: (value) => {
+                    if (value !== 'DELETE MY ACCOUNT') {
+                        return 'You must type the confirmation phrase exactly!';
+                    }
+                }
+            });
+        }
+
+
+
+        updateTimeZoneText();
+        selectSavedZone();
+
         window.timeElements.changeTimeBtn.addEventListener('click', function () {
             window.timeElements.timeModal.style.display = 'flex';
-            selectSavedZone(); 
+            selectSavedZone();
         });
 
-        
         window.timeElements.closeModal.addEventListener('click', function () {
             window.timeElements.timeModal.style.display = 'none';
         });
@@ -273,7 +525,6 @@
             }
         });
 
-        
         window.timeElements.timeOptions.forEach(option => {
             option.addEventListener('click', function () {
                 window.timeElements.timeOptions.forEach(opt => opt.classList.remove('selected'));
@@ -282,16 +533,113 @@
             });
         });
 
-        
         window.timeElements.applyTimezoneBtn.addEventListener('click', function () {
-            
             localStorage.setItem('selectedZone', window.selectedZone);
-
-            
             updateTimeZoneText();
-
             window.timeElements.timeModal.style.display = 'none';
             alert(`Time zone changed to ${window.timeElements.currentTimeZone.textContent}`);
+        });
+
+
+        window.profileElements.profileBtn.addEventListener('click', async function () {
+            try {
+
+                window.profileElements.profileId.textContent = 'Loading...';
+                window.profileElements.profileEmail.textContent = 'Loading...';
+                window.profileElements.profileRole.textContent = 'Loading...';
+                window.profileElements.profileVerified.textContent = 'Loading...';
+                window.profileElements.profileStatus.textContent = 'Loading...';
+                window.profileElements.profileCreated.textContent = 'Loading...';
+
+
+                window.profileElements.profileModal.style.display = 'flex';
+
+
+                const userData = await fetchUserProfile();
+                displayProfileData(userData);
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to load profile information. Please try again.',
+                    icon: 'error'
+                });
+                console.error('Error loading profile:', error);
+            }
+        });
+
+        window.profileElements.closeProfileModal.addEventListener('click', function () {
+            window.profileElements.profileModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function (event) {
+            if (event.target === window.profileElements.profileModal) {
+                window.profileElements.profileModal.style.display = 'none';
+            }
+        });
+
+        window.profileElements.resetPasswordBtn.addEventListener('click', async function () {
+            try {
+                const result = await Swal.fire({
+                    title: 'Reset Password?',
+                    text: 'A password reset link will be sent to your email address.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, reset password',
+                    cancelButtonText: 'Cancel'
+                });
+
+                if (result.isConfirmed) {
+                    await resetPassword();
+                    Swal.fire({
+                        title: 'Email Sent',
+                        text: 'Password reset instructions have been sent to your email.',
+                        icon: 'success'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to initiate password reset. Please try again.',
+                    icon: 'error'
+                });
+                console.error('Error resetting password:', error);
+            }
+        });
+
+        window.profileElements.deleteAccountBtn.addEventListener('click', async function () {
+            try {
+                const result = await showScaryDeleteConfirmation();
+
+                if (result.isConfirmed) {
+
+                    Swal.fire({
+                        title: 'Deleting Account...',
+                        text: 'Please wait while we delete your account.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    await deleteAccount();
+
+                    Swal.fire({
+                        title: 'Account Deleted',
+                        text: 'Your account has been successfully deleted.',
+                        icon: 'success'
+                    }).then(() => {
+
+                        window.location.href = '/';
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to delete account. Please try again.',
+                    icon: 'error'
+                });
+                console.error('Error deleting account:', error);
+            }
         });
     </script>
 </body>
