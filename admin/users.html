@@ -1,20 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         .table-container {
-            max-height: 70vh;
-            overflow-y: auto;
+            position: relative;
         }
 
         .status-badge {
             cursor: pointer;
+            font-size: 0.85rem;
+            padding: 0.35rem 0.5rem;
         }
 
         .search-box {
@@ -24,6 +19,7 @@
         .action-btn {
             padding: 0.25rem 0.5rem;
             font-size: 0.875rem;
+            margin-right: 0.25rem;
         }
 
         .table th {
@@ -31,369 +27,780 @@
             top: 0;
             background-color: #f8f9fa;
             z-index: 1;
+            vertical-align: middle;
+        }
+
+        .sort-btn {
+            white-space: nowrap;
+            text-align: left;
+        }
+
+        .sort-btn i {
+            transition: transform 0.2s ease;
+        }
+
+        .sort-btn.active i {
+            color: #0d6efd;
+        }
+
+        .user-id {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+        }
+
+        .no-email {
+            font-style: italic;
+            color: #6c757d;
+        }
+
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pagination-container {
+            padding: 1.5rem 0;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .page-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .modal-content {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .user-detail-row {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .user-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .role-badge {
+            font-size: 0.85rem;
+            padding: 0.35rem 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.85rem;
+            }
+
+            .user-id {
+                font-size: 0.75rem;
+            }
+
+            .action-btn {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
 
-<body>
-    <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3">User Management</h1>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">User Management</h1>
+        <div class="text-muted small">
+            Total Users: <span id="total-users-count">0</span>
         </div>
+    </div>
 
-        <!-- Filter and Search -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" id="search-input" class="form-control" placeholder="Search by email...">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <select id="filter-banned" class="form-select">
-                            <option value="">All Ban Status</option>
-                            <option value="true">Banned</option>
-                            <option value="false">Not Banned</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select id="filter-verified" class="form-select">
-                            <option value="">All Verification Status</option>
-                            <option value="true">Verified</option>
-                            <option value="false">Not Verified</option>
-                        </select>
+    <!-- Filter and Search Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h6 class="mb-0">Filter & Search</h6>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-4">
+                    <label class="form-label">Search by Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" id="search-input" class="form-control" placeholder="Search by email...">
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Users Table -->
-        <div class="card">
-            <div class="card-body p-0">
-                <div class="table-container">
-                    <table class="table table-striped table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>ID</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>
-                                    <button class="btn btn-sm btn-outline-secondary sort-btn" data-sort="isVerified">
-                                        Verification Status <i class="bi bi-arrow-down"></i>
-                                    </button>
-                                </th>
-                                <th>
-                                    <button class="btn btn-sm btn-outline-secondary sort-btn" data-sort="isBanned">
-                                        Ban Status <i class="bi bi-arrow-down"></i>
-                                    </button>
-                                </th>
-                                <th>Created At</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-table-body">
-                            <!-- Data will be populated by JavaScript -->
-                        </tbody>
-                    </table>
+                <div class="col-md-6 col-lg-3">
+                    <label class="form-label">Ban Status</label>
+                    <select id="filter-banned" class="form-select">
+                        <option value="">All Users</option>
+                        <option value="true">Banned Only</option>
+                        <option value="false">Not Banned</option>
+                    </select>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label class="form-label">Verification Status</label>
+                    <select id="filter-verified" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="true">Verified Only</option>
+                        <option value="false">Not Verified</option>
+                    </select>
+                </div>
+                <div class="col-md-6 col-lg-2 d-flex align-items-end">
+                    <button id="reset-filters" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- User Detail Modal -->
-    <div class="modal fade" id="userDetailModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">User Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="user-detail-content">
-                    <!-- Detail content will be populated by JavaScript -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
+    <!-- Users Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Users List</h6>
+            <div class="text-muted small" id="filtered-count">0 users found</div>
         </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        
-        (function () {
-            
-            const API_BASE_URL = window.APP_CONFIG.API_URL;
-            let usersData = [];
-            let filteredData = [];
-            let sortField = 'createdAt';
-            let sortDirection = 'desc';
-
-            
-            const tableBody = document.getElementById('users-table-body');
-            const searchInput = document.getElementById('search-input');
-            const filterBanned = document.getElementById('filter-banned');
-            const filterVerified = document.getElementById('filter-verified');
-            const sortButtons = document.querySelectorAll('.sort-btn');
-            const userDetailModal = new bootstrap.Modal(document.getElementById('userDetailModal'));
-
-            
-            function formatDate(dateString) {
-                const options = {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                };
-                return new Date(dateString).toLocaleDateString('en-US', options);
-            }
-
-            
-            async function fetchUsers() {
-                try {
-                    if (!API_BASE_URL) {
-                        throw new Error('API URL is not defined');
-                    }
-
-                    const response = await fetch(`${API_BASE_URL}/users/all`, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${getCookie('accessToken')}`
-                        }
-                    });
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch user data');
-                    }
-                    usersData = await response.json();
-                    filteredData = [...usersData];
-                    renderTable();
-                } catch (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: error.message
-                    })
-                }
-            }
-
-            
-            function renderTable() {
-                tableBody.innerHTML = '';
-
-                if (filteredData.length === 0) {
-                    tableBody.innerHTML = `
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <td colspan="7" class="text-center py-4">No data matching the filters</td>
+                            <th style="width: 200px;">User ID</th>
+                            <th>Email</th>
+                            <th>
+                                <button class="btn btn-sm btn-link sort-btn p-0" data-sort="role">
+                                    Role <i class="bi bi-arrow-down"></i>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="btn btn-sm btn-link sort-btn p-0" data-sort="isVerified">
+                                    Verification <i class="bi bi-arrow-down"></i>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="btn btn-sm btn-link sort-btn p-0" data-sort="isBanned">
+                                    Ban Status <i class="bi bi-arrow-down"></i>
+                                </button>
+                            </th>
+                            <th>
+                                <button class="btn btn-sm btn-link sort-btn p-0" data-sort="createdAt">
+                                    Created At <i class="bi bi-arrow-down"></i>
+                                </button>
+                            </th>
+                            <th style="width: 120px;">Actions</th>
                         </tr>
-                    `;
-                    return;
-                }
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
 
-                filteredData.forEach(user => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td class="text-truncate" style="max-width: 150px;" title="${user.id}">${user.id}</td>
-                        <td>${user.email || '<i class="text-muted">No email</i>'}</td>
-                        <td><span class="badge bg-secondary">${user.role}</span></td>
-                        <td>
-                            <span class="badge ${user.isVerified ? 'bg-success' : 'bg-warning'}">
-                                ${user.isVerified ? 'Verified' : 'Not Verified'}
-                            </span>
-                        </td>
-                        <td>
-                            <select class="form-select form-select-sm banned-select" data-user-id="${user.id}" style="width: 120px;">
-                                <option value="false" ${!user.isBanned ? 'selected' : ''}>Not Banned</option>
-                                <option value="true" ${user.isBanned ? 'selected' : ''}>Banned</option>
-                            </select>
-                        </td>
-                        <td>${formatDate(user.createdAt)}</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary action-btn view-details" data-user-id="${user.id}">
-                                <i class="bi bi-eye"></i> View
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="page-info" id="pagination-info">Showing 0-0 of 0 users</div>
+                    <nav>
+                        <ul class="pagination mb-0" id="pagination-controls">
+                            <!-- Pagination controls will be generated by JavaScript -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                
-                document.querySelectorAll('.banned-select').forEach(select => {
-                    select.addEventListener('change', handleBanStatusChange);
-                });
-
-                
-                document.querySelectorAll('.view-details').forEach(button => {
-                    button.addEventListener('click', showUserDetails);
-                });
-            }
-
-            
-            async function handleBanStatusChange(event) {
-                const userId = event.target.dataset.userId;
-                const isBanned = event.target.value === 'true';
-
-                try {
-                    const action = isBanned ? 'ban' : 'unban';
-                    const response = await fetch(`${API_BASE_URL}/users/${userId}/${action}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Authorization': `Bearer ${getCookie('accessToken')}`
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to update ban status');
-                    }
-
-                    
-                    const userIndex = usersData.findIndex(user => user.id === userId);
-                    if (userIndex !== -1) {
-                        usersData[userIndex].isBanned = isBanned;
-                    }
-
-                    swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: `User ${action === 'ban' ? 'banned' : 'unbanned'} successfully`
-                    })
-
-                    applyFilters(); 
-                } catch (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: `Failed to ${action === 'ban' ? 'ban' : 'unban'} user: ${error.message}`
-                    })
-
-                    event.target.value = !isBanned;
-                }
-            }
-
-            
-            function showUserDetails(event) {
-                const userId = event.target.closest('.view-details').dataset.userId;
-                const user = usersData.find(u => u.id === userId);
-
-                if (!user) return;
-
-                const modalContent = document.getElementById('user-detail-content');
-                modalContent.innerHTML = `
-                    <div class="row mb-3">
-                        <div class="col-4 fw-bold">ID:</div>
-                        <div class="col-8"><small>${user.id}</small></div>
+<!-- User Detail Modal -->
+<div class="modal fade" id="userDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-circle me-2"></i>User Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="user-detail-section">
+                    <div class="text-center mb-4">
+                        <div class="avatar-placeholder rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                            style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <h5 class="mt-3" id="modal-user-email">-</h5>
+                        <span class="badge bg-secondary" id="modal-user-role">-</span>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-4 fw-bold">Email:</div>
-                        <div class="col-8">${user.email || '<i class="text-muted">No email</i>'}</div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-4 fw-bold">Role:</div>
-                        <div class="col-8">${user.role}</div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-4 fw-bold">Verification Status:</div>
-                        <div class="col-8">
-                            <span class="badge ${user.isVerified ? 'bg-success' : 'bg-warning'}">
-                                ${user.isVerified ? 'Verified' : 'Not Verified'}
-                            </span>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="card border-0">
+                                <div class="card-body p-0">
+                                    <div class="user-detail-row">
+                                        <div class="row">
+                                            <div class="col-4 detail-label">User ID:</div>
+                                            <div class="col-8">
+                                                <div class="user-id" id="modal-user-id">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="user-detail-row">
+                                        <div class="row">
+                                            <div class="col-4 detail-label">Email:</div>
+                                            <div class="col-8" id="modal-user-email-full">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="user-detail-row">
+                                        <div class="row">
+                                            <div class="col-4 detail-label">Role:</div>
+                                            <div class="col-8">
+                                                <span class="badge role-badge" id="modal-user-role-badge">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="user-detail-row">
+                                        <div class="row">
+                                            <div class="col-4 detail-label">Verification:</div>
+                                            <div class="col-8">
+                                                <span class="badge" id="modal-user-verified">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="user-detail-row">
+                                        <div class="row">
+                                            <div class="col-4 detail-label">Ban Status:</div>
+                                            <div class="col-8">
+                                                <span class="badge" id="modal-user-banned">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="user-detail-row">
+                                        <div class="row">
+                                            <div class="col-4 detail-label">Created At:</div>
+                                            <div class="col-8" id="modal-user-created">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-4 fw-bold">Ban Status:</div>
-                        <div class="col-8">
-                            <span class="badge ${user.isBanned ? 'bg-danger' : 'bg-success'}">
-                                ${user.isBanned ? 'Banned' : 'Not Banned'}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-4 fw-bold">Created At:</div>
-                        <div class="col-8">${formatDate(user.createdAt)}</div>
-                    </div>
-                `;
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                userDetailModal.show();
-            }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function () {
+        // Configuration
+        const API_BASE_URL = window.APP_CONFIG?.API_URL || '';
+        const ITEMS_PER_PAGE = 10;
 
-            
-            function applyFilters() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const bannedFilter = filterBanned.value;
-                const verifiedFilter = filterVerified.value;
+        // State variables
+        let usersData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        let sortField = 'createdAt';
+        let sortDirection = 'desc';
 
-                filteredData = usersData.filter(user => {
-                    const emailMatch = user.email ? user.email.toLowerCase().includes(searchTerm) : searchTerm === '';
-                    const bannedMatch = bannedFilter === '' || user.isBanned.toString() === bannedFilter;
-                    const verifiedMatch = verifiedFilter === '' || user.isVerified.toString() === verifiedFilter;
+        // DOM Elements
+        const tableBody = document.getElementById('users-table-body');
+        const searchInput = document.getElementById('search-input');
+        const filterBanned = document.getElementById('filter-banned');
+        const filterVerified = document.getElementById('filter-verified');
+        const resetFiltersBtn = document.getElementById('reset-filters');
+        const sortButtons = document.querySelectorAll('.sort-btn');
+        const paginationControls = document.getElementById('pagination-controls');
+        const paginationInfo = document.getElementById('pagination-info');
+        const totalUsersCount = document.getElementById('total-users-count');
+        const filteredCount = document.getElementById('filtered-count');
 
-                    return emailMatch && bannedMatch && verifiedMatch;
+        // Initialize Bootstrap Modal
+        const userDetailModalElement = document.getElementById('userDetailModal');
+        const userDetailModal = new bootstrap.Modal(userDetailModalElement);
+
+        // Helper Functions
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const options = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Fetch Users Data
+        async function fetchUsers() {
+            try {
+                if (!API_BASE_URL) {
+                    throw new Error('API URL is not defined');
+                }
+
+                const response = await fetch(`${API_BASE_URL}/users/all`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${getCookie('accessToken')}`
+                    }
                 });
 
-                sortData();
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
+                }
+
+                usersData = await response.json();
+                totalUsersCount.textContent = usersData.length;
+                filteredData = [...usersData];
+                currentPage = 1;
                 renderTable();
-            }
-
-            
-            function sortData() {
-                filteredData.sort((a, b) => {
-                    let valueA = a[sortField];
-                    let valueB = b[sortField];
-
-                    
-                    if (valueA === null) valueA = '';
-                    if (valueB === null) valueB = '';
-
-                    if (typeof valueA === 'string') {
-                        return sortDirection === 'asc'
-                            ? valueA.localeCompare(valueB)
-                            : valueB.localeCompare(valueA);
-                    } else {
-                        return sortDirection === 'asc'
-                            ? valueA - valueB
-                            : valueB - valueA;
-                    }
+                renderPagination();
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Failed to load user data'
                 });
             }
+        }
 
-            
-            function handleSort(event) {
-                const newSortField = event.currentTarget.dataset.sort;
+        // Render Table with Pagination
+        function renderTable() {
+            tableBody.innerHTML = '';
 
-                
-                if (sortField === newSortField) {
-                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortField = newSortField;
-                    sortDirection = 'asc';
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredData.length);
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+
+            // Update pagination info
+            paginationInfo.textContent = filteredData.length === 0
+                ? 'Showing 0 of 0 users'
+                : `Showing ${startIndex + 1} to ${endIndex} of ${filteredData.length} users`;
+            filteredCount.textContent = `${filteredData.length} users found`;
+
+            // Handle empty state
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-search h1 mb-3"></i>
+                                <h5>No users found</h5>
+                                <p>Try adjusting your search or filter criteria</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Render table rows
+            paginatedData.forEach(user => {
+                const row = document.createElement('tr');
+
+                // Format email display
+                const emailDisplay = user.email
+                    ? `<span title="${user.email}">${user.email}</span>`
+                    : '<span class="no-email">No email</span>';
+
+                // Role badge styling
+                let roleBadgeClass = 'bg-secondary';
+                if (user.role === 'SITE_ADMIN') roleBadgeClass = 'bg-danger';
+                else if (user.role === 'ORG_ADMIN') roleBadgeClass = 'bg-primary';
+                else if (user.role === 'TEAM_ADMIN') roleBadgeClass = 'bg-info';
+                else if (user.role === 'ANONYMOUS') roleBadgeClass = 'bg-warning';
+
+                // Verification badge
+                const verificationBadge = user.isVerified
+                    ? '<span class="badge bg-success">Verified</span>'
+                    : '<span class="badge bg-warning text-dark">Not Verified</span>';
+
+                row.innerHTML = `
+                    <td class="text-truncate" style="max-width: 200px;">
+                        <div class="user-id" title="${user.id}">${user.id}</div>
+                    </td>
+                    <td>${emailDisplay}</td>
+                    <td><span class="badge ${roleBadgeClass}">${user.role}</span></td>
+                    <td>${verificationBadge}</td>
+                    <td>
+                        <select class="form-select form-select-sm banned-select" data-user-id="${user.id}" style="width: 120px;">
+                            <option value="false" ${!user.isBanned ? 'selected' : ''}>Not Banned</option>
+                            <option value="true" ${user.isBanned ? 'selected' : ''}>Banned</option>
+                        </select>
+                    </td>
+                    <td>${formatDate(user.createdAt)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary action-btn view-details" data-user-id="${user.id}">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Attach event listeners
+            document.querySelectorAll('.banned-select').forEach(select => {
+                select.addEventListener('change', handleBanStatusChange);
+            });
+
+            document.querySelectorAll('.view-details').forEach(button => {
+                button.addEventListener('click', showUserDetails);
+            });
+        }
+
+        // Handle Ban Status Change
+        async function handleBanStatusChange(event) {
+            const userId = event.target.dataset.userId;
+            const isBanned = event.target.value === 'true';
+            const previousValue = !isBanned;
+
+            try {
+                const action = isBanned ? 'ban' : 'unban';
+                const response = await fetch(`${API_BASE_URL}/users/${userId}/${action}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${getCookie('accessToken')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to ${action} user: ${response.status} ${response.statusText}`);
                 }
 
-                
-                sortButtons.forEach(button => {
-                    const icon = button.querySelector('i');
-                    if (button.dataset.sort === sortField) {
-                        icon.className = sortDirection === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
-                    } else {
-                        icon.className = 'bi bi-arrow-down';
-                    }
+                // Update local data
+                const userIndex = usersData.findIndex(user => user.id === userId);
+                if (userIndex !== -1) {
+                    usersData[userIndex].isBanned = isBanned;
+                }
+
+                // Update filtered data
+                const filteredIndex = filteredData.findIndex(user => user.id === userId);
+                if (filteredIndex !== -1) {
+                    filteredData[filteredIndex].isBanned = isBanned;
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: `User ${isBanned ? 'banned' : 'unbanned'} successfully`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (error) {
+                console.error('Error updating ban status:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: `Failed to ${isBanned ? 'ban' : 'unban'} user: ${error.message}`
                 });
 
-                applyFilters();
+                // Revert selection on error
+                event.target.value = previousValue;
+            }
+        }
+
+        // Show User Details in Modal
+        function showUserDetails(event) {
+            const button = event.target.closest('.view-details');
+            const userId = button.dataset.userId;
+            const user = usersData.find(u => u.id === userId);
+
+            if (!user) return;
+
+            // Populate modal with user data
+            document.getElementById('modal-user-id').textContent = user.id;
+            document.getElementById('modal-user-email').textContent = user.email || 'No email';
+            document.getElementById('modal-user-email-full').textContent = user.email || 'No email';
+            document.getElementById('modal-user-role').textContent = user.role;
+            document.getElementById('modal-user-created').textContent = formatDate(user.createdAt);
+
+            // Set role badge
+            const roleBadge = document.getElementById('modal-user-role-badge');
+            roleBadge.textContent = user.role;
+            roleBadge.className = 'badge';
+
+            let roleBadgeClass = 'bg-secondary';
+            if (user.role === 'SITE_ADMIN') roleBadgeClass = 'bg-danger';
+            else if (user.role === 'ORG_ADMIN') roleBadgeClass = 'bg-primary';
+            else if (user.role === 'TEAM_ADMIN') roleBadgeClass = 'bg-info';
+            else if (user.role === 'ANONYMOUS') roleBadgeClass = 'bg-warning';
+            roleBadge.classList.add(roleBadgeClass);
+
+            // Set verification badge
+            const verificationBadge = document.getElementById('modal-user-verified');
+            verificationBadge.textContent = user.isVerified ? 'Verified' : 'Not Verified';
+            verificationBadge.className = 'badge';
+            verificationBadge.classList.add(user.isVerified ? 'bg-success' : 'bg-warning');
+            if (!user.isVerified) {
+                verificationBadge.classList.add('text-dark');
             }
 
-            fetchUsers();
+            // Set ban status badge
+            const banBadge = document.getElementById('modal-user-banned');
+            banBadge.textContent = user.isBanned ? 'Banned' : 'Not Banned';
+            banBadge.className = 'badge';
+            banBadge.classList.add(user.isBanned ? 'bg-danger' : 'bg-success');
 
-            
+            // Show modal
+            userDetailModal.show();
+        }
+
+        // Apply Filters and Search
+        function applyFilters() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const bannedFilter = filterBanned.value;
+            const verifiedFilter = filterVerified.value;
+
+            filteredData = usersData.filter(user => {
+                // Search by email
+                const emailMatch = searchTerm === '' ||
+                    (user.email && user.email.toLowerCase().includes(searchTerm));
+
+                // Filter by ban status
+                const bannedMatch = bannedFilter === '' ||
+                    user.isBanned.toString() === bannedFilter;
+
+                // Filter by verification status
+                const verifiedMatch = verifiedFilter === '' ||
+                    user.isVerified.toString() === verifiedFilter;
+
+                return emailMatch && bannedMatch && verifiedMatch;
+            });
+
+            // Sort data
+            sortData();
+
+            // Reset to first page after filtering
+            currentPage = 1;
+
+            // Render table and pagination
+            renderTable();
+            renderPagination();
+        }
+
+        // Sort Data
+        function sortData() {
+            filteredData.sort((a, b) => {
+                let valueA = a[sortField];
+                let valueB = b[sortField];
+
+                // Handle null/undefined values
+                if (valueA === null || valueA === undefined) valueA = '';
+                if (valueB === null || valueB === undefined) valueB = '';
+
+                // Special handling for boolean fields
+                if (typeof valueA === 'boolean') {
+                    valueA = valueA ? 1 : 0;
+                    valueB = valueB ? 1 : 0;
+                }
+
+                // Compare based on type
+                let comparison = 0;
+                if (typeof valueA === 'string') {
+                    comparison = valueA.localeCompare(valueB, undefined, { sensitivity: 'base' });
+                } else {
+                    comparison = valueA - valueB;
+                }
+
+                return sortDirection === 'asc' ? comparison : -comparison;
+            });
+        }
+
+        // Handle Sort
+        function handleSort(event) {
+            const newSortField = event.currentTarget.dataset.sort;
+
+            // Toggle sort direction if clicking same field
+            if (sortField === newSortField) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortField = newSortField;
+                sortDirection = 'asc';
+            }
+
+            // Update UI for sort buttons
+            sortButtons.forEach(button => {
+                const icon = button.querySelector('i');
+                if (button.dataset.sort === sortField) {
+                    button.classList.add('active');
+                    icon.className = sortDirection === 'asc' ? 'bi bi-arrow-up' : 'bi bi-arrow-down';
+                } else {
+                    button.classList.remove('active');
+                    icon.className = 'bi bi-arrow-down';
+                }
+            });
+
+            // Apply sorting and render
+            applyFilters();
+        }
+
+        // Render Pagination Controls
+        function renderPagination() {
+            paginationControls.innerHTML = '';
+
+            if (filteredData.length === 0) return;
+
+            const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>`;
+            paginationControls.appendChild(prevLi);
+
+            // Calculate visible pages
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            // First page and ellipsis
+            if (startPage > 1) {
+                const firstLi = document.createElement('li');
+                firstLi.className = 'page-item';
+                firstLi.innerHTML = `<a class="page-link" href="#">1</a>`;
+                paginationControls.appendChild(firstLi);
+
+                if (startPage > 2) {
+                    const ellipsisLi = document.createElement('li');
+                    ellipsisLi.className = 'page-item disabled';
+                    ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                    paginationControls.appendChild(ellipsisLi);
+                }
+            }
+
+            // Page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                const pageLi = document.createElement('li');
+                pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                paginationControls.appendChild(pageLi);
+            }
+
+            // Last page and ellipsis
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsisLi = document.createElement('li');
+                    ellipsisLi.className = 'page-item disabled';
+                    ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                    paginationControls.appendChild(ellipsisLi);
+                }
+
+                const lastLi = document.createElement('li');
+                lastLi.className = 'page-item';
+                lastLi.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+                paginationControls.appendChild(lastLi);
+            }
+
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>`;
+            paginationControls.appendChild(nextLi);
+
+            // Add event listeners to pagination links
+            document.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const parentLi = this.closest('li');
+                    if (parentLi.classList.contains('disabled')) return;
+
+                    if (this.textContent === '«') {
+                        changePage(currentPage - 1);
+                    } else if (this.textContent === '»') {
+                        changePage(currentPage + 1);
+                    } else {
+                        const pageNum = parseInt(this.textContent);
+                        if (!isNaN(pageNum)) {
+                            changePage(pageNum);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Change Page
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+            if (page < 1 || page > totalPages) return;
+
+            currentPage = page;
+            renderTable();
+            renderPagination();
+
+            // Scroll to top of table
+            tableBody.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Reset Filters
+        function resetFilters() {
+            searchInput.value = '';
+            filterBanned.value = '';
+            filterVerified.value = '';
+            sortField = 'createdAt';
+            sortDirection = 'desc';
+
+            // Reset sort buttons UI
+            sortButtons.forEach(button => {
+                const icon = button.querySelector('i');
+                button.classList.remove('active');
+                icon.className = 'bi bi-arrow-down';
+            });
+
+            // Reset to default sort
+            const createdAtButton = document.querySelector('[data-sort="createdAt"]');
+            if (createdAtButton) {
+                createdAtButton.classList.add('active');
+                createdAtButton.querySelector('i').className = 'bi bi-arrow-down';
+            }
+
+            applyFilters();
+        }
+
+        // Initialize Event Listeners
+        function initEventListeners() {
             searchInput.addEventListener('input', applyFilters);
             filterBanned.addEventListener('change', applyFilters);
             filterVerified.addEventListener('change', applyFilters);
+            resetFiltersBtn.addEventListener('click', resetFilters);
+
             sortButtons.forEach(button => {
                 button.addEventListener('click', handleSort);
             });
-        })();
-    </script>
-</body>
+        }
 
-</html>
+        // Initialize Application
+        function init() {
+            initEventListeners();
+            fetchUsers();
+        }
+
+        // Start the application
+        init();
+    })();
+</script>

@@ -4,9 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - Time Configuration</title>
+    <title>Settings - Account & Time Configuration</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --danger-color: #e74c3c;
+            --danger-hover: #c0392b;
+            --success-color: #2ecc71;
+            --success-hover: #27ae60;
+            --light-bg: #f8f9fa;
+            --border-color: #e9ecef;
+            --text-color: #212529;
+            --text-muted: #6c757d;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -16,7 +32,7 @@
 
         body {
             background-color: #f5f5f5;
-            color: #333;
+            color: var(--text-color);
             line-height: 1.6;
             padding: 20px;
         }
@@ -25,54 +41,130 @@
             max-width: 800px;
             margin: 0 auto;
             background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
             padding: 30px;
         }
 
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
         }
 
-        .setting-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
+        .page-header i {
+            color: var(--primary-color);
+            font-size: 28px;
+        }
+
+        .page-title {
+            color: var(--text-color);
+            font-size: 28px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .settings-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .settings-section-header {
+            padding: 20px 25px;
+            background-color: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        .settings-section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .settings-section-content {
+            padding: 25px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
         .setting-item:last-child {
             border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .setting-description {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
         }
 
         .btn {
-            background-color: #3498db;
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: var(--transition);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn:hover {
-            background-color: #2980b9;
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
         }
 
         .btn-danger {
-            background-color: #e74c3c;
+            background-color: var(--danger-color);
         }
 
         .btn-danger:hover {
-            background-color: #c0392b;
+            background-color: var(--danger-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
         }
 
         /* Modal Styles */
-        .modal {
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0;
@@ -80,113 +172,177 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            z-index: 100;
+            z-index: 1000;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
 
         .modal-content {
             background-color: white;
-            padding: 25px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            max-height: 80vh;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
             overflow-y: auto;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .modal-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            background-color: var(--light-bg);
+            border-radius: 12px 12px 0 0;
         }
 
-        .close {
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
             font-size: 24px;
             cursor: pointer;
-            color: #7f8c8d;
+            color: var(--text-muted);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
         }
 
+        .modal-close:hover {
+            background-color: #e9ecef;
+            color: var(--text-color);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* Time Zone Modal */
         .time-option {
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 16px;
+            margin: 12px 0;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: var(--transition);
+            background-color: white;
         }
 
         .time-option:hover {
-            background-color: #f9f9f9;
+            background-color: var(--light-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
         .time-option.selected {
             background-color: #e1f0fa;
-            border-color: #3498db;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .time-option-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: var(--text-color);
+        }
+
+        .time-option-description {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.4;
         }
 
         .apply-btn {
-            margin-top: 20px;
+            margin-top: 25px;
             width: 100%;
-            padding: 12px;
-            background-color: #2ecc71;
+            padding: 14px;
+            background-color: var(--success-color);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 16px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .apply-btn:hover {
-            background-color: #27ae60;
+            background-color: var(--success-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
         }
 
-        .time-display {
-            font-weight: bold;
-            color: #2c3e50;
+        .current-time-zone {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 15px;
         }
 
         /* Profile Info Styles */
-        .profile-info {
-            margin-bottom: 20px;
+        .profile-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
         }
 
         .profile-field {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .profile-field:last-child {
-            border-bottom: none;
+            margin-bottom: 20px;
         }
 
         .profile-label {
-            font-weight: bold;
-            color: #7f8c8d;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 8px;
             display: block;
-            margin-bottom: 5px;
         }
 
         .profile-value {
-            color: #2c3e50;
+            font-size: 16px;
+            color: var(--text-color);
+            font-weight: 500;
+            word-break: break-all;
         }
 
-        .profile-actions {
-            margin-top: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .profile-status {
+        .profile-status-badge {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .status-verified {
@@ -204,139 +360,238 @@
             color: #ef6c00;
         }
 
-        /* Reset Password Modal Styles */
-        .reset-password-modal {
-            display: none;
+        .status-active {
+            background-color: #e8f5e9;
+            color: #2e7d32;
         }
 
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Reset Password Modal */
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 25px;
         }
 
-        .form-group label {
+        .form-label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 16px;
         }
 
-        .form-group input {
+        .form-control {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .password-requirements {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding: 12px;
+            background-color: var(--light-bg);
+            border-radius: 6px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .profile-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .modal-content {
+                margin: 10px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>Settings</h1>
-
-        <div class="setting-item">
-            <div>
-                <h3>Profile</h3>
-                <p>View and manage your account information</p>
-            </div>
-            <button class="btn" id="profile-btn">View Profile</button>
+        <div class="page-header">
+            <i class="fas fa-cog"></i>
+            <h1 class="page-title">Settings</h1>
         </div>
 
-        <div class="setting-item">
-            <div>
-                <h3>Time Zone</h3>
-                <p>Current time zone: <span id="current-time-zone">UTC+00:00</span></p>
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">Account Settings</h2>
             </div>
-            <button class="btn" id="change-time-btn">Change Time</button>
+            <div class="settings-section-content">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3 class="setting-title">Profile Information</h3>
+                        <p class="setting-description">View and manage your account details, including email, role, and
+                            verification status.</p>
+                    </div>
+                    <button class="btn" id="profile-btn">
+                        <i class="fas fa-user"></i> View Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">Display Preferences</h2>
+            </div>
+            <div class="settings-section-content">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3 class="setting-title">Time Zone</h3>
+                        <p class="setting-description">Current time zone: <span class="current-time-zone"
+                                id="current-time-zone">UTC+00:00</span></p>
+                    </div>
+                    <button class="btn" id="change-time-btn">
+                        <i class="fas fa-clock"></i> Change Time
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Time Zone Modal -->
-    <div class="modal" id="time-modal">
+    <div class="modal-overlay" id="time-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Select Time Zone</h2>
-                <span class="close" id="close-time-modal">&times;</span>
+                <h2 class="modal-title">Select Your Time Zone</h2>
+                <button class="modal-close" id="close-time-modal" aria-label="Close">×</button>
             </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 25px; color: var(--text-muted);">Choose how you want timestamps to be displayed
+                    throughout the application.</p>
 
-            <div class="time-option" data-zone="UTC">
-                <strong>UTC (Coordinated Universal Time)</strong>
-                <p>Universal time standard</p>
-            </div>
+                <div class="time-option" data-zone="UTC">
+                    <div class="time-option-title">UTC (Coordinated Universal Time)</div>
+                    <div class="time-option-description">Standard time reference used worldwide. Recommended for
+                        consistency.</div>
+                </div>
 
-            <div class="time-option" data-zone="Pacific">
-                <strong>Local Time</strong>
-                <p>Based on your location</p>
+                <div class="time-option" data-zone="Pacific">
+                    <div class="time-option-title">Local Time (Based on Your Location)</div>
+                    <div class="time-option-description">Displays times according to your device's local time zone
+                        settings.</div>
+                </div>
+
+                <button class="apply-btn" id="apply-timezone">
+                    <i class="fas fa-check"></i> Apply Selected Time Zone
+                </button>
             </div>
-            <button class="apply-btn" id="apply-timezone">Apply Time Zone</button>
         </div>
     </div>
 
     <!-- Profile Modal -->
-    <div class="modal" id="profile-modal">
+    <div class="modal-overlay" id="profile-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Your Profile</h2>
-                <span class="close" id="close-profile-modal">&times;</span>
+                <h2 class="modal-title">Your Profile</h2>
+                <button class="modal-close" id="close-profile-modal" aria-label="Close">×</button>
             </div>
+            <div class="modal-body">
+                <div class="profile-info-grid">
+                    <div class="profile-field">
+                        <span class="profile-label">User ID</span>
+                        <span class="profile-value" id="profile-id">Loading...</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="profile-label">Email Address</span>
+                        <span class="profile-value" id="profile-email">Loading...</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="profile-label">Account Role</span>
+                        <span class="profile-value" id="profile-role">Loading...</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="profile-label">Verification Status</span>
+                        <span class="profile-value" id="profile-verified">Loading...</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="profile-label">Account Status</span>
+                        <span class="profile-value" id="profile-status">Loading...</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="profile-label">Member Since</span>
+                        <span class="profile-value" id="profile-created">Loading...</span>
+                    </div>
+                </div>
 
-            <div class="profile-info" id="profile-info">
-                <div class="profile-field">
-                    <span class="profile-label">ID</span>
-                    <span class="profile-value" id="profile-id">Loading...</span>
+                <div class="profile-actions">
+                    <button class="btn" id="reset-password-btn">
+                        <i class="fas fa-key"></i> Reset Password
+                    </button>
+                    <button class="btn btn-danger" id="delete-account-btn">
+                        <i class="fas fa-trash-alt"></i> Delete Account
+                    </button>
                 </div>
-                <div class="profile-field">
-                    <span class="profile-label">Email</span>
-                    <span class="profile-value" id="profile-email">Loading...</span>
-                </div>
-                <div class="profile-field">
-                    <span class="profile-label">Role</span>
-                    <span class="profile-value" id="profile-role">Loading...</span>
-                </div>
-                <div class="profile-field">
-                    <span class="profile-label">Verification Status</span>
-                    <span class="profile-value" id="profile-verified">Loading...</span>
-                </div>
-                <div class="profile-field">
-                    <span class="profile-label">Account Status</span>
-                    <span class="profile-value" id="profile-status">Loading...</span>
-                </div>
-                <div class="profile-field">
-                    <span class="profile-label">Member Since</span>
-                    <span class="profile-value" id="profile-created">Loading...</span>
-                </div>
-            </div>
-
-            <div class="profile-actions">
-                <button class="btn" id="reset-password-btn">Reset Password</button>
-                <button class="btn btn-danger" id="delete-account-btn">Delete Account</button>
             </div>
         </div>
     </div>
 
     <!-- Reset Password Modal -->
-    <div class="modal reset-password-modal" id="reset-password-modal">
+    <div class="modal-overlay" id="reset-password-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Reset Password</h2>
-                <span class="close" id="close-reset-password-modal">&times;</span>
+                <h2 class="modal-title">Reset Your Password</h2>
+                <button class="modal-close" id="close-reset-password-modal" aria-label="Close">×</button>
             </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-password" class="form-label">New Password</label>
+                    <input type="password" id="new-password" class="form-control" placeholder="Enter your new password">
+                    <div class="password-requirements">
+                        <i class="fas fa-info-circle"></i> Password must be at least 6 characters long
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label for="new-password">New Password</label>
-                <input type="password" id="new-password" placeholder="Enter your new password">
+                <div class="form-group">
+                    <label for="confirm-password" class="form-label">Confirm Password</label>
+                    <input type="password" id="confirm-password" class="form-control"
+                        placeholder="Confirm your new password">
+                </div>
+
+                <button class="apply-btn" id="submit-reset-password">
+                    <i class="fas fa-sync-alt"></i> Reset Password
+                </button>
             </div>
-
-            <div class="form-group">
-                <label for="confirm-password">Confirm Password</label>
-                <input type="password" id="confirm-password" placeholder="Confirm your new password">
-            </div>
-
-            <button class="apply-btn" id="submit-reset-password">Reset Password</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
-        function getTimeElements() {
+        (function () {            // DOM Elements
             const changeTimeBtn = document.getElementById('change-time-btn');
             const timeModal = document.getElementById('time-modal');
             const closeModal = document.getElementById('close-time-modal');
@@ -344,26 +599,11 @@
             const currentTimeZone = document.getElementById('current-time-zone');
             const timeOptions = document.querySelectorAll('.time-option');
 
-            let selectedZone = localStorage.getItem('selectedZone') || 'UTC';
-
-            return {
-                changeTimeBtn,
-                timeModal,
-                closeModal,
-                applyTimezoneBtn,
-                currentTimeZone,
-                timeOptions,
-                selectedZone,
-            };
-        }
-
-        function getProfileElements() {
             const profileBtn = document.getElementById('profile-btn');
             const profileModal = document.getElementById('profile-modal');
             const closeProfileModal = document.getElementById('close-profile-modal');
             const resetPasswordBtn = document.getElementById('reset-password-btn');
             const deleteAccountBtn = document.getElementById('delete-account-btn');
-
 
             const profileId = document.getElementById('profile-id');
             const profileEmail = document.getElementById('profile-email');
@@ -372,380 +612,383 @@
             const profileStatus = document.getElementById('profile-status');
             const profileCreated = document.getElementById('profile-created');
 
-
             const resetPasswordModal = document.getElementById('reset-password-modal');
             const closeResetPasswordModal = document.getElementById('close-reset-password-modal');
             const newPasswordInput = document.getElementById('new-password');
             const confirmPasswordInput = document.getElementById('confirm-password');
             const submitResetPasswordBtn = document.getElementById('submit-reset-password');
 
-            return {
-                profileBtn,
-                profileModal,
-                closeProfileModal,
-                resetPasswordBtn,
-                deleteAccountBtn,
-                profileId,
-                profileEmail,
-                profileRole,
-                profileVerified,
-                profileStatus,
-                profileCreated,
-                resetPasswordModal,
-                closeResetPasswordModal,
-                newPasswordInput,
-                confirmPasswordInput,
-                submitResetPasswordBtn
-            };
-        }
+            // State
+            let selectedZone = localStorage.getItem('selectedZone') || 'UTC';
 
-
-        window.timeElements = getTimeElements();
-        window.profileElements = getProfileElements();
-        window.selectedZone = getTimeElements().selectedZone;
-
-
-        function getLocalTimeOffset() {
-            const offsetMinutes = new Date().getTimezoneOffset();
-            const totalMinutes = -offsetMinutes;
-            const hours = String(Math.floor(Math.abs(totalMinutes) / 60)).padStart(2, '0');
-            const minutes = String(Math.abs(totalMinutes) % 60).padStart(2, '0');
-            const sign = totalMinutes >= 0 ? '+' : '-';
-            return `UTC${sign}${hours}:${minutes}`;
-        }
-
-        function updateTimeZoneText() {
-            let timeZoneText = '';
-
-            switch (window.selectedZone) {
-                case 'UTC':
-                    timeZoneText = 'UTC+00:00';
-                    break;
-                case 'Pacific':
-                    timeZoneText = getLocalTimeOffset();
-                    break;
+            // Helper Functions
+            function getLocalTimeOffset() {
+                const offsetMinutes = new Date().getTimezoneOffset();
+                const totalMinutes = -offsetMinutes;
+                const hours = String(Math.floor(Math.abs(totalMinutes) / 60)).padStart(2, '0');
+                const minutes = String(Math.abs(totalMinutes) % 60).padStart(2, '0');
+                const sign = totalMinutes >= 0 ? '+' : '-';
+                return `UTC${sign}${hours}:${minutes}`;
             }
 
-            window.timeElements.currentTimeZone.textContent = timeZoneText;
-        }
+            function updateTimeZoneText() {
+                let timeZoneText = '';
+                switch (selectedZone) {
+                    case 'UTC':
+                        timeZoneText = 'UTC+00:00';
+                        break;
+                    case 'Pacific':
+                        timeZoneText = getLocalTimeOffset();
+                        break;
+                }
+                currentTimeZone.textContent = timeZoneText;
+            }
 
-        function selectSavedZone() {
-            window.timeElements.timeOptions.forEach(option => {
-                if (option.getAttribute('data-zone') === window.selectedZone) {
-                    option.classList.add('selected');
+            function selectSavedZone() {
+                timeOptions.forEach(option => {
+                    if (option.getAttribute('data-zone') === selectedZone) {
+                        option.classList.add('selected');
+                    } else {
+                        option.classList.remove('selected');
+                    }
+                });
+            }
+
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+
+            async function fetchUserProfile() {
+                try {
+                    const response = await fetch(`${window.APP_CONFIG.API_URL}/users/me`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${getCookie('accessToken')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch user profile');
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error fetching user profile:', error);
+                    throw error;
+                }
+            }
+
+            function displayProfileData(userData) {
+                profileId.textContent = userData.id || 'Not available';
+                profileEmail.textContent = userData.email || 'Not available';
+                profileRole.textContent = userData.role || 'Not available';
+
+                // Verification status
+                if (userData.isVerified) {
+                    profileVerified.innerHTML = '<span class="profile-status-badge status-verified">Verified</span>';
                 } else {
-                    option.classList.remove('selected');
+                    profileVerified.innerHTML = '<span class="profile-status-badge status-not-verified">Not Verified</span>';
                 }
-            });
-        }
 
+                // Account status
+                if (userData.isBanned) {
+                    profileStatus.innerHTML = '<span class="profile-status-badge status-banned">Banned</span>';
+                } else {
+                    profileStatus.innerHTML = '<span class="profile-status-badge status-active">Active</span>';
+                }
 
-        async function fetchUserProfile() {
-            try {
-                const response = await fetch(`${window.window.APP_CONFIG.API_URL}/users/me`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${getCookie('accessToken')}`,
-                        'Content-Type': 'application/json'
+                // Created date
+                if (userData.createdAt) {
+                    const createdDate = new Date(userData.createdAt);
+                    profileCreated.textContent = createdDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                } else {
+                    profileCreated.textContent = 'Not available';
+                }
+            }
+
+            async function resetPassword(newPassword) {
+                try {
+                    const response = await fetch(`${window.APP_CONFIG.API_URL}/auth/reset-password`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${getCookie('accessToken')}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ newPassword })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to reset password');
                     }
-                });
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user profile');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error resetting password:', error);
+                    throw error;
                 }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Error fetching user profile:', error);
-                throw error;
-            }
-        }
-
-        function displayProfileData(userData) {
-            const { profileId, profileEmail, profileRole, profileVerified, profileStatus, profileCreated } = window.profileElements;
-
-            profileId.textContent = userData.id;
-            profileEmail.textContent = userData.email;
-            profileRole.textContent = userData.role;
-
-
-            if (userData.isVerified) {
-                profileVerified.innerHTML = '<span class="profile-status status-verified">Verified</span>';
-            } else {
-                profileVerified.innerHTML = '<span class="profile-status status-not-verified">Not Verified</span>';
             }
 
+            async function deleteAccount() {
+                try {
+                    const response = await fetch(`${window.APP_CONFIG.API_URL}/users/me`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${getCookie('accessToken')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
 
-            if (userData.isBanned) {
-                profileStatus.innerHTML = '<span class="profile-status status-banned">Banned</span>';
-            } else {
-                profileStatus.innerHTML = '<span class="profile-status status-verified">Active</span>';
+                    if (!response.ok) {
+                        throw new Error('Failed to delete account');
+                    }
+
+                    return true;
+                } catch (error) {
+                    console.error('Error deleting account:', error);
+                    throw error;
+                }
             }
 
-
-            const createdDate = new Date(userData.createdAt);
-            profileCreated.textContent = createdDate.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        }
-
-        async function resetPassword(newPassword) {
-            try {
-                const response = await fetch(`${window.window.APP_CONFIG.API_URL}/auth/reset-password`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${getCookie('accessToken')}`,
-                        'Content-Type': 'application/json'
+            function showScaryDeleteConfirmation() {
+                return Swal.fire({
+                    title: 'ARE YOU ABSOLUTELY SURE?',
+                    html: `
+                        <div style="text-align: left;">
+                            <p style="color: #e74c3c; font-weight: bold; font-size: 18px;">
+                                <i class="fas fa-exclamation-triangle"></i> This action cannot be undone!
+                            </p>
+                            <p style="font-size: 16px;">This will permanently delete your account and all associated data.</p>
+                            <p style="font-size: 16px;">Please type <strong style="color: #c0392b;">DELETE MY ACCOUNT</strong> to confirm.</p>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    iconColor: '#e74c3c',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e74c3c',
+                    cancelButtonColor: '#7f8c8d',
+                    confirmButtonText: 'I understand, delete my account',
+                    cancelButtonText: 'Cancel',
+                    input: 'text',
+                    inputPlaceholder: 'Type here to confirm',
+                    inputValidator: (value) => {
+                        if (value !== 'DELETE MY ACCOUNT') {
+                            return 'You must type the confirmation phrase exactly!';
+                        }
                     },
-                    body: JSON.stringify({ newPassword })
                 });
-
-                if (!response.ok) {
-                    throw new Error('Failed to reset password');
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Error resetting password:', error);
-                throw error;
             }
-        }
 
-        async function deleteAccount() {
-            try {
-                const response = await fetch(`${window.window.APP_CONFIG.API_URL}/users/me`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${getCookie('accessToken')}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to delete account');
-                }
-
-                return true;
-            } catch (error) {
-                console.error('Error deleting account:', error);
-                throw error;
+            function logout() {
+                // Clear authentication tokens
+                document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                // Redirect to login page or home page
+                window.location.href = '/';
             }
-        }
 
-        function showScaryDeleteConfirmation() {
-            return Swal.fire({
-                title: 'ARE YOU ABSOLUTELY SURE?',
-                html: `
-                    <div style="text-align: left;">
-                        <p style="color: #e74c3c; font-weight: bold;">This action cannot be undone!</p>
-                        <p>This will permanently delete your account, remove all your data, and cannot be recovered.</p>
-                        <p>Please type <strong style="color: #c0392b;">DELETE MY ACCOUNT</strong> to confirm.</p>
-                    </div>
-                `,
-                icon: 'warning',
-                iconColor: '#e74c3c',
-                showCancelButton: true,
-                confirmButtonColor: '#e74c3c',
-                cancelButtonColor: '#7f8c8d',
-                confirmButtonText: 'I understand, delete my account',
-                cancelButtonText: 'Cancel',
-                input: 'text',
-                inputPlaceholder: 'Type here to confirm',
-                inputValidator: (value) => {
-                    if (value !== 'DELETE MY ACCOUNT') {
-                        return 'You must type the confirmation phrase exactly!';
-                    }
-                },
-            });
-        }
-
-
-
-        updateTimeZoneText();
-        selectSavedZone();
-
-        window.timeElements.changeTimeBtn.addEventListener('click', function () {
-            window.timeElements.timeModal.style.display = 'flex';
-            selectSavedZone();
-        });
-
-        window.timeElements.closeModal.addEventListener('click', function () {
-            window.timeElements.timeModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', function (event) {
-            if (event.target === window.timeElements.timeModal) {
-                window.timeElements.timeModal.style.display = 'none';
-            }
-        });
-
-        window.timeElements.timeOptions.forEach(option => {
-            option.addEventListener('click', function () {
-                window.timeElements.timeOptions.forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-                window.selectedZone = this.getAttribute('data-zone');
-            });
-        });
-
-        window.timeElements.applyTimezoneBtn.addEventListener('click', function () {
-            localStorage.setItem('selectedZone', window.selectedZone);
+            // Initialize
             updateTimeZoneText();
-            window.timeElements.timeModal.style.display = 'none';
-            alert(`Time zone changed to ${window.timeElements.currentTimeZone.textContent}`);
-        });
+            selectSavedZone();
 
+            // Event Listeners
+            changeTimeBtn.addEventListener('click', function () {
+                timeModal.style.display = 'flex';
+                selectSavedZone();
+            });
 
-        window.profileElements.profileBtn.addEventListener('click', async function () {
-            try {
+            closeModal.addEventListener('click', function () {
+                timeModal.style.display = 'none';
+            });
 
-                window.profileElements.profileId.textContent = 'Loading...';
-                window.profileElements.profileEmail.textContent = 'Loading...';
-                window.profileElements.profileRole.textContent = 'Loading...';
-                window.profileElements.profileVerified.textContent = 'Loading...';
-                window.profileElements.profileStatus.textContent = 'Loading...';
-                window.profileElements.profileCreated.textContent = 'Loading...';
+            closeProfileModal.addEventListener('click', function () {
+                profileModal.style.display = 'none';
+            });
 
+            closeResetPasswordModal.addEventListener('click', function () {
+                resetPasswordModal.style.display = 'none';
+            });
 
-                window.profileElements.profileModal.style.display = 'flex';
+            window.addEventListener('click', function (event) {
+                if (event.target === timeModal) {
+                    timeModal.style.display = 'none';
+                }
+                if (event.target === profileModal) {
+                    profileModal.style.display = 'none';
+                }
+                if (event.target === resetPasswordModal) {
+                    resetPasswordModal.style.display = 'none';
+                }
+            });
 
+            // Close modals with Escape key
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    timeModal.style.display = 'none';
+                    profileModal.style.display = 'none';
+                    resetPasswordModal.style.display = 'none';
+                }
+            });
 
-                const userData = await fetchUserProfile();
-                displayProfileData(userData);
-            } catch (error) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Failed to load profile information. Please try again.',
-                    icon: 'error'
+            timeOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    timeOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedZone = this.getAttribute('data-zone');
                 });
-                console.error('Error loading profile:', error);
-            }
-        });
+            });
 
-        window.profileElements.closeProfileModal.addEventListener('click', function () {
-            window.profileElements.profileModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', function (event) {
-            if (event.target === window.profileElements.profileModal) {
-                window.profileElements.profileModal.style.display = 'none';
-            }
-            if (event.target === window.profileElements.resetPasswordModal) {
-                window.profileElements.resetPasswordModal.style.display = 'none';
-            }
-        });
-
-        window.profileElements.resetPasswordBtn.addEventListener('click', function () {
-
-            window.profileElements.newPasswordInput.value = '';
-            window.profileElements.confirmPasswordInput.value = '';
-
-
-            window.profileElements.resetPasswordModal.style.display = 'flex';
-        });
-
-        window.profileElements.closeResetPasswordModal.addEventListener('click', function () {
-            window.profileElements.resetPasswordModal.style.display = 'none';
-        });
-
-        window.profileElements.submitResetPasswordBtn.addEventListener('click', async function () {
-            const newPassword = window.profileElements.newPasswordInput.value;
-            const confirmPassword = window.profileElements.confirmPasswordInput.value;
-
-
-            if (!newPassword || !confirmPassword) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Please fill in all fields',
-                    icon: 'error'
-                });
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Passwords do not match',
-                    icon: 'error'
-                });
-                return;
-            }
-
-            if (newPassword.length < 6) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Password must be at least 6 characters long',
-                    icon: 'error'
-                });
-                return;
-            }
-
-            try {
+            applyTimezoneBtn.addEventListener('click', function () {
+                localStorage.setItem('selectedZone', selectedZone);
+                updateTimeZoneText();
+                timeModal.style.display = 'none';
 
                 Swal.fire({
-                    title: 'Resetting Password...',
-                    text: 'Please wait while we reset your password.',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
+                    icon: 'success',
+                    title: 'Time Zone Updated',
+                    text: `Your time zone has been changed to ${currentTimeZone.textContent}`,
+                    timer: 2000,
+                    showConfirmButton: false
                 });
+            });
 
-                await resetPassword(newPassword);
+            profileBtn.addEventListener('click', async function () {
+                try {
+                    // Show loading state
+                    profileId.textContent = 'Loading...';
+                    profileEmail.textContent = 'Loading...';
+                    profileRole.textContent = 'Loading...';
+                    profileVerified.textContent = 'Loading...';
+                    profileStatus.textContent = 'Loading...';
+                    profileCreated.textContent = 'Loading...';
 
-                Swal.fire({
-                    title: 'Password Reset',
-                    text: 'Your password has been successfully reset.',
-                    icon: 'success'
-                });
+                    profileModal.style.display = 'flex';
 
-
-                window.profileElements.resetPasswordModal.style.display = 'none';
-            } catch (error) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Failed to reset password. Please try again.',
-                    icon: 'error'
-                });
-                console.error('Error resetting password:', error);
-            }
-        });
-
-        window.profileElements.deleteAccountBtn.addEventListener('click', async function () {
-            try {
-                const result = await showScaryDeleteConfirmation();
-
-                if (result.isConfirmed) {
-
+                    // Fetch and display user data
+                    const userData = await fetchUserProfile();
+                    displayProfileData(userData);
+                } catch (error) {
                     Swal.fire({
-                        title: 'Deleting Account...',
-                        text: 'Please wait while we delete your account.',
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to load profile information. Please try again.',
+                    });
+                    console.error('Error loading profile:', error);
+                }
+            });
+
+            resetPasswordBtn.addEventListener('click', function () {
+                // Clear form fields
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+                resetPasswordModal.style.display = 'flex';
+            });
+
+            submitResetPasswordBtn.addEventListener('click', async function () {
+                const newPassword = newPasswordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+
+                // Validation
+                if (!newPassword || !confirmPassword) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Please fill in all fields',
+                    });
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Passwords do not match',
+                    });
+                    return;
+                }
+
+                if (newPassword.length < 6) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Password must be at least 6 characters long',
+                    });
+                    return;
+                }
+
+                try {
+                    Swal.fire({
+                        title: 'Resetting Password...',
+                        html: 'Please wait while we reset your password.',
                         allowOutsideClick: false,
                         didOpen: () => {
                             Swal.showLoading();
                         }
                     });
 
-                    await deleteAccount();
+                    await resetPassword(newPassword);
 
                     Swal.fire({
-                        title: 'Account Deleted',
-                        text: 'Your account has been successfully deleted.',
-                        icon: 'success'
-                    }).then(() => {
-                        logout();
+                        icon: 'success',
+                        title: 'Password Reset',
+                        text: 'Your password has been successfully reset.',
                     });
+
+                    resetPasswordModal.style.display = 'none';
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to reset password. Please try again.',
+                    });
+                    console.error('Error resetting password:', error);
                 }
-            } catch (error) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Failed to delete account. Please try again.',
-                    icon: 'error'
-                });
-                console.error('Error deleting account:', error);
-            }
-        });
+            });
+
+            deleteAccountBtn.addEventListener('click', async function () {
+                try {
+                    const result = await showScaryDeleteConfirmation();
+
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Deleting Account...',
+                            html: 'Please wait while we delete your account.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        await deleteAccount();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Account Deleted',
+                            text: 'Your account has been successfully deleted.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            logout();
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to delete account. Please try again.',
+                    });
+                    console.error('Error deleting account:', error);
+                }
+            });
+        })();
     </script>
 </body>
 

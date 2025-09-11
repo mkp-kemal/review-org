@@ -444,13 +444,13 @@ async function loadOrgProfile() {
         reviewsContainer.innerHTML = '';
 
         //Team Photos
-        // Check if user can upload photos (admin or team admin)
-        const isSiteAdmin = storedUser?.role?.includes('SITE_ADMIN');
-        const isOrgAdmin = storedUser?.role?.includes('ORG_ADMIN');
-        const isTeamAdmin = storedUser?.role?.includes('TEAM_ADMIN');
-        const canUpload = isSiteAdmin || isOrgAdmin || isTeamAdmin;
 
-        // Render team photos with upload option if user can upload
+        const isSiteAdmin = storedUser?.role?.includes('SITE_ADMIN');
+        const isRelatedUser = (data.claimedById == window?.user?.id || data.organization?.claimedById == window?.user?.id);
+        const isElite = data.subscription?.plan === 'ELITE';
+        const canUpload = isSiteAdmin || (isRelatedUser && isElite);
+
+
         renderTeamPhotos(data.teamPhoto || [], orgId, canUpload);
 
         if (data.reviews && data.reviews.length > 0) {
@@ -656,20 +656,20 @@ function renderTeamPhotos(photos, teamId, canUpload) {
     const teamPhotosContainer = document.getElementById("teamPhotos");
     teamPhotosContainer.innerHTML = "";
 
-    // Render existing photos
+
     photos.forEach(photo => {
         const imgContainer = document.createElement("div");
         imgContainer.className = "relative group";
-        
+
         const img = document.createElement("img");
         img.src = photo.filename;
         img.alt = "Team Photo";
         img.className = "rounded-lg w-full h-48 object-cover";
-        img.onerror = function() {
+        img.onerror = function () {
             this.src = "https://placehold.co/400x300/808080/FFFFFF?text=Not%20Load";
         };
 
-        // Add delete button for admins
+
         if (canUpload) {
             const deleteBtn = document.createElement("button");
             deleteBtn.className = "absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity";
@@ -680,12 +680,12 @@ function renderTeamPhotos(photos, teamId, canUpload) {
             });
             imgContainer.appendChild(deleteBtn);
         }
-        
+
         imgContainer.appendChild(img);
         teamPhotosContainer.appendChild(imgContainer);
     });
 
-    // Add upload placeholder if user can upload and we have less than 5 photos
+
     if (canUpload && photos.length < 5) {
         const uploadPlaceholder = document.createElement("div");
         uploadPlaceholder.className = "relative border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-48 cursor-pointer hover:border-blue-500 transition-colors";
@@ -696,17 +696,17 @@ function renderTeamPhotos(photos, teamId, canUpload) {
             </div>
             <input type="file" id="photo-upload" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
         `;
-        
+
         teamPhotosContainer.appendChild(uploadPlaceholder);
 
-        // Add event listener for file upload
+
         const fileInput = uploadPlaceholder.querySelector('#photo-upload');
         fileInput.addEventListener('change', (event) => {
             handlePhotoUpload(event, teamId);
         });
     }
 
-    // Show placeholder if no photos
+
     if (photos.length === 0 && !canUpload) {
         teamPhotosContainer.innerHTML = `
             <img src="https://placehold.co/400x300/1E40AF/FFFFFF?text=No+Photo" 
@@ -719,8 +719,8 @@ function renderTeamPhotos(photos, teamId, canUpload) {
 async function handlePhotoUpload(event, teamId) {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-    
-    // Check if total photos would exceed 5
+
+
     const teamPhotosContainer = document.getElementById("teamPhotos");
     const currentPhotos = teamPhotosContainer.querySelectorAll('img:not([src*="placehold"])').length;
     if (currentPhotos + files.length > 5) {
@@ -732,18 +732,18 @@ async function handlePhotoUpload(event, teamId) {
         });
         return;
     }
-    
+
     try {
-        // Create form data
+
         const formData = new FormData();
         formData.append('teamId', teamId);
-        
-        // Add all files
+
+
         for (let i = 0; i < files.length; i++) {
             formData.append('files', files[i]);
         }
-        
-        // Show loading
+
+
         Swal.fire({
             title: 'Uploading photos...',
             text: 'Please wait',
@@ -752,8 +752,8 @@ async function handlePhotoUpload(event, teamId) {
                 Swal.showLoading();
             }
         });
-        
-        // Upload to API
+
+
         const response = await fetch(`${window.APP_CONFIG.API_URL}/teams/upload-photos-aws`, {
             method: 'POST',
             headers: {
@@ -761,24 +761,24 @@ async function handlePhotoUpload(event, teamId) {
             },
             body: formData
         });
-        
+
         if (!response.ok) {
             throw new Error(`Upload failed: ${response.statusText}`);
         }
-        
+
         const result = await response.json();
-        
-        // Success message
+
+
         Swal.fire({
             title: 'Success!',
             text: 'Photos uploaded successfully',
             icon: 'success',
             confirmButtonText: 'OK'
         }).then(() => {
-            // Reload the page to show new photos
+
             location.reload();
         });
-        
+
     } catch (error) {
         console.error('Error uploading photos:', error);
         Swal.fire({
@@ -788,13 +788,13 @@ async function handlePhotoUpload(event, teamId) {
             confirmButtonText: 'OK'
         });
     }
-    
-    // Reset the file input
+
+
     event.target.value = '';
 }
 
 async function deletePhoto(photoId, teamId) {
-    // Confirmation dialog
+
     const result = await Swal.fire({
         title: 'Are you sure?',
         text: "This photo will be permanently deleted!",
@@ -804,11 +804,11 @@ async function deletePhoto(photoId, teamId) {
         cancelButtonColor: '#3085d6',
         confirmButtonText: 'Yes, delete it!'
     });
-    
+
     if (!result.isConfirmed) return;
-    
+
     try {
-        // Show loading
+
         Swal.fire({
             title: 'Deleting photo...',
             text: 'Please wait',
@@ -817,8 +817,8 @@ async function deletePhoto(photoId, teamId) {
                 Swal.showLoading();
             }
         });
-        
-        // Delete from API
+
+
         const response = await fetch(`${window.APP_CONFIG.API_URL}/teams/upload-photos-aws/${photoId}`, {
             method: 'DELETE',
             headers: {
@@ -826,22 +826,22 @@ async function deletePhoto(photoId, teamId) {
                 'Content-Type': 'application/json'
             },
         });
-        
+
         if (!response.ok) {
             throw new Error(`Delete failed: ${response.statusText}`);
         }
-        
-        // Success message
+
+
         Swal.fire({
             title: 'Deleted!',
             text: 'Photo has been deleted.',
             icon: 'success',
             confirmButtonText: 'OK'
         }).then(() => {
-            // Reload the page to reflect changes
+
             location.reload();
         });
-        
+
     } catch (error) {
         console.error('Error deleting photo:', error);
         Swal.fire({

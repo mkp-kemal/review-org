@@ -207,7 +207,7 @@
       }
 
       if (settingsMenu) {
-        if (window.user.role === 'SITE_ADMIN') {
+        if (window.user) {
           settingsMenu.style.display = 'block';
         } else {
           settingsMenu.style.display = 'none';
