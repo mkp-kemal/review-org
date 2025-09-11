@@ -1,5 +1,4 @@
 <style>
-    /* Modern, clean styling for the logs management system */
     .logs-container {
         max-width: 1400px;
         margin: 0 auto;
@@ -293,7 +292,6 @@
         border-color: #0d6efd;
     }
 
-    /* Modal Styles */
     .modal-overlay {
         display: none;
         position: fixed;
@@ -463,6 +461,70 @@
         margin-bottom: 16px;
     }
 
+    .date-filter-section {
+        background: white;
+        padding: 16px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 24px;
+        border: 1px solid #e9ecef;
+    }
+
+    .date-filter-container {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .date-label {
+        font-weight: 500;
+        color: #212529;
+        white-space: nowrap;
+    }
+
+    .date-input {
+        padding: 10px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: white;
+        min-width: 200px;
+    }
+
+    .date-input:focus {
+        outline: none;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    }
+
+    .date-input:disabled {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
+        color: #6c757d;
+    }
+
+    .clear-date-btn {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .clear-date-btn:hover {
+        background-color: #5a6268;
+    }
+
+    .clear-date-btn:disabled {
+        background-color: #e9ecef;
+        color: #adb5bd;
+        cursor: not-allowed;
+    }
+
     @media (max-width: 768px) {
         .charts-section {
             grid-template-columns: 1fr;
@@ -491,6 +553,11 @@
         .response-cell {
             max-width: 150px;
         }
+
+        .date-filter-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
     }
 </style>
 
@@ -515,6 +582,14 @@
         <div class="chart-card">
             <h3 class="chart-title">Hourly Activity</h3>
             <canvas id="activityChart" height="250"></canvas>
+        </div>
+    </div>
+
+    <div class="date-filter-section">
+        <div class="date-filter-container">
+            <label class="date-label">Filter by Date:</label>
+            <input type="date" id="dateFilter" class="date-input">
+            <button id="clearDateFilter" class="clear-date-btn" disabled>Clear Filter</button>
         </div>
     </div>
 
@@ -572,7 +647,6 @@
     </div>
 </div>
 
-<!-- Modal for viewing log details -->
 <div class="modal-overlay" id="detailModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -652,7 +726,7 @@
 
 <script>
     (function () {
-        // DOM Elements
+        
         const logsTable = document.getElementById('logsTable');
         const logsTableBody = document.getElementById('logsTableBody');
         const loadingElement = document.getElementById('loading');
@@ -670,8 +744,8 @@
         const modal = document.getElementById('detailModal');
         const closeModalBtn = document.getElementById('closeModal');
         const searchInput = document.getElementById('searchInput');
-
-        // Modal detail elements
+        const dateFilter = document.getElementById('dateFilter');
+        const clearDateFilterBtn = document.getElementById('clearDateFilter');
         const modalTimestamp = document.getElementById('modal-timestamp');
         const modalActionBadge = document.getElementById('modal-action-badge');
         const modalTargetType = document.getElementById('modal-target-type');
@@ -683,15 +757,67 @@
         const modalQuery = document.getElementById('modal-query');
         const modalResponse = document.getElementById('modal-response');
 
-        // State variables
         let actionChartInstance = null;
         let activityChartInstance = null;
         let currentPage = 1;
         let itemsPerPage = 10;
         let allLogs = [];
         let filteredLogs = [];
+        let availableDates = new Set();
 
-        // Helper Functions
+        
+        function getDateFromTimestamp(timestamp) {
+            if (!timestamp) return null;
+            const date = new Date(timestamp);
+            return date.toISOString().split('T')[0]; 
+        }
+
+        function getMinMaxDates(logs) {
+            if (logs.length === 0) return { min: null, max: null };
+
+            const dates = logs.map(log => new Date(log.createdAt))
+                .filter(date => !isNaN(date.getTime()));
+
+            if (dates.length === 0) return { min: null, max: null };
+
+            const minDate = new Date(Math.min(...dates));
+            const maxDate = new Date(Math.max(...dates));
+
+            return {
+                min: minDate.toISOString().split('T')[0],
+                max: maxDate.toISOString().split('T')[0]
+            };
+        }
+
+        
+        function getAvailableDates(logs) {
+            const dates = new Set();
+            logs.forEach(log => {
+                const dateStr = getDateFromTimestamp(log.createdAt);
+                if (dateStr) {
+                    dates.add(dateStr);
+                }
+            });
+            return dates;
+        }
+
+        
+        function setupDatePicker() {
+            const { min, max } = getMinMaxDates(allLogs);
+
+            if (min && max) {
+                dateFilter.min = min;
+                dateFilter.max = max;
+
+                
+                if (dateFilter.value && !availableDates.has(dateFilter.value)) {
+                    dateFilter.value = '';
+                    clearDateFilterBtn.disabled = true;
+                }
+            }
+        }
+
+        
         function formatDateTime(dateString) {
             if (!dateString) return '-';
             const date = new Date(dateString);
@@ -760,8 +886,12 @@
                 }
 
                 allLogs = await response.json();
+                availableDates = getAvailableDates(allLogs);
                 filteredLogs = [...allLogs];
                 currentPage = 1;
+
+                
+                setupDatePicker();
 
                 if (allLogs.length === 0) {
                     showEmptyState();
@@ -784,7 +914,7 @@
         }
 
         function renderCharts(logs) {
-            // Destroy existing charts if they exist
+            
             if (actionChartInstance) {
                 actionChartInstance.destroy();
             }
@@ -792,7 +922,7 @@
                 activityChartInstance.destroy();
             }
 
-            // Action Distribution Chart
+            
             const actionCounts = {};
             logs.forEach(log => {
                 actionCounts[log.action] = (actionCounts[log.action] || 0) + 1;
@@ -806,11 +936,11 @@
                     datasets: [{
                         data: Object.values(actionCounts),
                         backgroundColor: [
-                            '#198754', // green for CREATE
-                            '#ffc107', // yellow for UPDATE
-                            '#dc3545', // red for DELETE
-                            '#0d6efd', // blue for other
-                            '#6f42c1'  // purple for other
+                            '#198754', 
+                            '#ffc107', 
+                            '#dc3545', 
+                            '#0d6efd', 
+                            '#6f42c1'  
                         ],
                         borderWidth: 2,
                         borderColor: '#ffffff'
@@ -841,7 +971,7 @@
                 }
             });
 
-            // Hourly Activity Chart
+            
             const hourlyActivity = {};
             for (let i = 0; i < 24; i++) {
                 hourlyActivity[i] = 0;
@@ -905,26 +1035,61 @@
             });
         }
 
-        function applySearch() {
-            const query = searchInput.value.toLowerCase().trim();
+        function applyDateFilter() {
+            const selectedDate = dateFilter.value;
 
-            if (!query) {
+            if (!selectedDate) {
                 filteredLogs = [...allLogs];
+                clearDateFilterBtn.disabled = true;
             } else {
                 filteredLogs = allLogs.filter(log => {
-                    // Search across all relevant fields
+                    const logDate = getDateFromTimestamp(log.createdAt);
+                    return logDate === selectedDate;
+                });
+                clearDateFilterBtn.disabled = false;
+            }
+
+            currentPage = 1;
+            renderTable();
+            renderCharts(filteredLogs);
+            updatePagination();
+        }
+
+        function clearDateFilter() {
+            dateFilter.value = '';
+            clearDateFilterBtn.disabled = true;
+            applyDateFilter();
+        }
+
+        function applySearch() {
+            const query = searchInput.value.toLowerCase().trim();
+            let tempLogs = [...allLogs];
+
+            
+            const selectedDate = dateFilter.value;
+            if (selectedDate) {
+                tempLogs = tempLogs.filter(log => {
+                    const logDate = getDateFromTimestamp(log.createdAt);
+                    return logDate === selectedDate;
+                });
+            }
+
+            
+            if (query) {
+                tempLogs = tempLogs.filter(log => {
+                    
                     return (
-                        // Basic log fields
+                        
                         (log.action && log.action.toLowerCase().includes(query)) ||
                         (log.targetType && log.targetType.toLowerCase().includes(query)) ||
                         (log.createdAt && formatDateTime(log.createdAt).toLowerCase().includes(query)) ||
 
-                        // Actor fields
+                        
                         (log.actor?.email && log.actor.email.toLowerCase().includes(query)) ||
                         (log.actor?.id && log.actor.id.toLowerCase().includes(query)) ||
                         (log.actor?.role && log.actor.role.toLowerCase().includes(query)) ||
 
-                        // Metadata fields
+                        
                         (log.metadata?.path && log.metadata.path.toLowerCase().includes(query)) ||
                         (log.metadata?.method && log.metadata.method.toLowerCase().includes(query)) ||
                         (log.metadata?.params && JSON.stringify(log.metadata.params).toLowerCase().includes(query)) ||
@@ -934,6 +1099,7 @@
                 });
             }
 
+            filteredLogs = tempLogs;
             currentPage = 1;
             renderTable();
             updatePagination();
@@ -960,14 +1126,14 @@
             currentLogs.forEach(log => {
                 const row = document.createElement('tr');
 
-                // Get appropriate badge class for action
+                
                 const badgeClass = getBadgeClass(log.action);
 
-                // Format response summary
+                
                 const responseSummary = log.metadata?.responseSummary ?
                     JSON.stringify(log.metadata.responseSummary, null, 2) : '-';
 
-                // Create path display
+                
                 const pathDisplay = log.metadata?.path || '-';
 
                 row.innerHTML = `
@@ -991,11 +1157,11 @@
                 logsTableBody.appendChild(row);
             });
 
-            // Add event listeners to view buttons
+            
             document.querySelectorAll('.view-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
                     const logId = this.getAttribute('data-log-id');
-                    // Find the log in our data
+                    
                     const log = filteredLogs.find(l => (l.id || '') === logId) ||
                         currentLogs[parseInt(this.parentNode.parentNode.rowIndex) - 1];
 
@@ -1007,10 +1173,10 @@
         }
 
         function showLogDetails(log) {
-            // Populate modal with log data
+            
             modalTimestamp.textContent = formatDateTime(log.createdAt);
 
-            // Set action badge
+            
             modalActionBadge.textContent = log.action || '-';
             modalActionBadge.className = 'badge ' + getBadgeClass(log.action);
 
@@ -1021,21 +1187,21 @@
             modalMethod.textContent = log.metadata?.method || '-';
             modalPath.textContent = log.metadata?.path || '-';
 
-            // Format query parameters
+            
             if (log.metadata?.query && Object.keys(log.metadata.query).length > 0) {
                 modalQuery.textContent = JSON.stringify(log.metadata.query, null, 2);
             } else {
                 modalQuery.textContent = '{}';
             }
 
-            // Format response summary
+            
             if (log.metadata?.responseSummary) {
                 modalResponse.textContent = JSON.stringify(log.metadata.responseSummary, null, 2);
             } else {
                 modalResponse.textContent = '{}';
             }
 
-            // Show modal
+            
             modal.style.display = 'flex';
         }
 
@@ -1057,7 +1223,7 @@
             renderTable();
             updatePagination();
 
-            // Scroll to top of table
+            
             logsTable.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -1104,7 +1270,7 @@
             }
         }
 
-        // Event Listeners
+        
         refreshBtn.addEventListener('click', fetchLogs);
         deleteAllBtn.addEventListener('click', deleteAllLogs);
         firstPageBtn.addEventListener('click', () => goToPage(1));
@@ -1122,14 +1288,14 @@
             }
         });
 
-        // Close modal with Escape key
+        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modal.style.display === 'flex') {
                 modal.style.display = 'none';
             }
         });
 
-        // Search with debounce
+        
         let searchTimeout;
         searchInput.addEventListener('input', function () {
             clearTimeout(searchTimeout);
@@ -1137,6 +1303,10 @@
                 applySearch();
             }, 300);
         });
+
+        
+        dateFilter.addEventListener('change', applyDateFilter);
+        clearDateFilterBtn.addEventListener('click', clearDateFilter);
 
         fetchLogs();
     })();
