@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,23 +17,23 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .team-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
-        
+
         .file-preview {
             transition: all 0.3s ease;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .file-preview:hover {
             transform: scale(1.02);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
-        
+
         .loading-spinner {
             width: 2rem;
             height: 2rem;
@@ -41,20 +42,25 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .team-tab {
             transition: all 0.2s ease;
         }
-        
+
         .team-tab:hover {
             background-color: #f3f4f6;
         }
-        
+
         .team-tab.active {
             border-color: #3b82f6;
             color: #3b82f6;
@@ -62,22 +68,23 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-50 min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-800 mb-2">Team Files Management</h1>
             <p class="text-gray-600">Manage and view files organized by organization and team</p>
         </div>
-        
+
         <div id="loading" class="flex justify-center items-center py-12">
             <div class="loading-spinner mr-4"></div>
             <span class="text-gray-600">Loading teams and files...</span>
         </div>
-        
+
         <div id="teams-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style="display: none;">
             <!-- Organization cards will be populated here by JavaScript -->
         </div>
-        
+
         <div id="empty-state" class="text-center py-12" style="display: none;">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
                 <i class="fas fa-folder text-gray-400 text-2xl"></i>
@@ -93,7 +100,8 @@
             <div class="flex justify-between items-center p-6 border-b">
                 <h2 id="modalOrgName" class="text-xl font-bold text-gray-800">Organization Files</h2>
                 <div class="flex items-center space-x-4">
-                    <button id="resetCurrentTeam" class="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors">
+                    <button id="resetCurrentTeam"
+                        class="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors">
                         <i class="fas fa-undo"></i>
                         <span>Reset Team</span>
                     </button>
@@ -128,17 +136,17 @@
                 this.currentTeam = null;
                 this.init();
             }
-            
+
             init() {
                 this.loadFiles();
                 this.closeModalButton.addEventListener('click', () => this.closeModal());
                 this.resetCurrentTeamButton.addEventListener('click', () => this.resetCurrentTeamFiles());
             }
-            
+
             async loadFiles() {
                 try {
                     this.closeModal();
-                    
+
                     const response = await fetch(`${window.APP_CONFIG.API_URL}/teams/files/all`, {
                         method: 'GET',
                         headers: {
@@ -146,11 +154,11 @@
                             'Content-Type': 'application/json'
                         }
                     });
-                    
+
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    
+
                     this.allFiles = await response.json();
                     this.renderOrganizations();
                 } catch (error) {
@@ -163,76 +171,76 @@
                     this.hideLoading();
                 }
             }
-            
+
             renderOrganizations() {
                 this.hideLoading();
-                
+
                 if (!this.allFiles || this.allFiles.length === 0) {
                     this.showEmptyState();
                     return;
                 }
+
                 
-                // Group files by organization
                 const organizations = this.groupFilesByOrganization();
+
                 
-                // Render organization cards
                 this.teamsContainer.innerHTML = '';
                 this.teamsContainer.style.display = 'grid';
-                
+
                 organizations.forEach(org => {
                     const orgCard = this.createOrganizationCard(org);
                     this.teamsContainer.appendChild(orgCard);
                 });
             }
-            
+
             groupFilesByOrganization() {
                 const orgsMap = new Map();
-                
+
                 this.allFiles.forEach(file => {
                     const orgName = file.team?.organization?.name || 'Unknown Organization';
                     const teamName = file.team?.name || 'Unknown Team';
                     const teamId = file.team?.id || null;
-                    
+
                     if (!orgsMap.has(orgName)) {
                         orgsMap.set(orgName, {
                             name: orgName,
                             teams: []
                         });
                     }
-                    
+
                     let teams = orgsMap.get(orgName).teams;
                     let team = teams.find(t => t.name === teamName);
-                    
+
                     if (!team) {
                         team = {
                             name: teamName,
-                            id: teamId, // Store team ID
+                            id: teamId, 
                             files: []
                         };
                         teams.push(team);
                     }
-                    
+
                     team.files.push(file);
                 });
-                
+
                 return Array.from(orgsMap.values());
             }
-            
+
             createOrganizationCard(org) {
-                // Calculate total files for organization
-                const totalFiles = org.teams.reduce((sum, team) => sum + team.files.length, 0);
                 
+                const totalFiles = org.teams.reduce((sum, team) => sum + team.files.length, 0);
+
                 const card = document.createElement('div');
                 card.className = 'team-card bg-white overflow-hidden cursor-pointer';
+
                 
-                // If organization has multiple teams, show team names in description
                 let teamsDescription = '';
                 if (org.teams.length > 1) {
                     teamsDescription = org.teams.map(team => `${team.name} (${team.files.length})`).join(', ');
                 } else {
                     teamsDescription = org.teams[0].name;
                 }
-                
+
                 card.innerHTML = `
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-4">
@@ -251,41 +259,41 @@
                         </div>
                     </div>
                 `;
+
                 
-                // Add event listener for viewing files
                 const viewFilesBtn = card.querySelector('.view-files-btn');
                 viewFilesBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.openModal(org);
                 });
-                
+
                 return card;
             }
-            
+
             openModal(org) {
                 this.currentOrganization = org;
+
                 
-                // Set organization name in modal header
                 this.modalOrgNameElement.textContent = `${org.name}`;
+
                 
-                // If organization has multiple teams, show tabs
                 if (org.teams.length > 1) {
                     this.renderTeamTabs(org.teams);
-                    // Set first team as active by default
+                    
                     this.currentTeam = org.teams[0];
                     this.renderModalFiles(this.currentTeam.files);
                 } else {
-                    // Hide tabs if only one team
+                    
                     this.modalTeamTabsElement.innerHTML = '';
                     this.modalTeamTabsElement.style.display = 'none';
                     this.currentTeam = org.teams[0];
                     this.renderModalFiles(this.currentTeam.files);
                 }
-                
+
                 this.modalElement.classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
+                document.body.style.overflow = 'hidden'; 
             }
-            
+
             renderTeamTabs(teams) {
                 this.modalTeamTabsElement.style.display = 'block';
                 this.modalTeamTabsElement.innerHTML = `
@@ -297,35 +305,35 @@
                         `).join('')}
                     </div>
                 `;
+
                 
-                // Add event listeners to team tabs
                 this.modalTeamTabsElement.querySelectorAll('.team-tab').forEach(tab => {
                     tab.addEventListener('click', (e) => {
                         const teamId = e.target.dataset.teamId;
                         const teamName = e.target.dataset.teamName;
                         this.currentTeam = this.currentOrganization.teams.find(t => t.id === teamId || t.name === teamName);
+
                         
-                        // Update active tab styling
                         this.modalTeamTabsElement.querySelectorAll('.team-tab').forEach(t => {
                             t.classList.remove('active', 'border-blue-500', 'text-blue-600', 'bg-blue-50');
                             t.classList.add('border-transparent', 'text-gray-500');
                         });
                         e.target.classList.remove('border-transparent', 'text-gray-500');
                         e.target.classList.add('active', 'border-blue-500', 'text-blue-600', 'bg-blue-50');
+
                         
-                        // Render files for selected team
                         this.renderModalFiles(this.currentTeam.files);
                     });
                 });
             }
-            
+
             closeModal() {
                 this.modalElement.classList.add('hidden');
-                document.body.style.overflow = 'auto'; // Re-enable scrolling
+                document.body.style.overflow = 'auto'; 
                 this.currentOrganization = null;
                 this.currentTeam = null;
             }
-            
+
             renderModalFiles(files) {
                 if (files.length === 0) {
                     this.modalFileListElement.innerHTML = `
@@ -336,20 +344,20 @@
                     `;
                     return;
                 }
-                
+
                 this.modalFileListElement.innerHTML = `
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         ${files.map(file => this.createModalFileItem(file)).join('')}
                     </div>
                 `;
             }
-            
+
             createModalFileItem(file) {
-                // Extract filename from URL
+                
                 const url = file.filename.trim();
                 const fileName = url.split('/').pop().split('?')[0];
                 const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(fileName);
-                
+
                 return `
                     <div class="file-item bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                         ${isImage ? `
@@ -373,7 +381,7 @@
                     </div>
                 `;
             }
-            
+
             async deleteFile(fileId) {
                 try {
                     const result = await Swal.fire({
@@ -386,12 +394,12 @@
                         confirmButtonText: 'Yes, delete it!',
                         cancelButtonText: 'Cancel'
                     });
-                    
+
                     if (!result.isConfirmed) {
                         return;
                     }
+
                     
-                    // Show loading state
                     Swal.fire({
                         title: 'Deleting...',
                         html: 'Please wait while we delete the file.',
@@ -400,7 +408,7 @@
                             Swal.showLoading();
                         }
                     });
-                    
+
                     const response = await fetch(`${window.APP_CONFIG.API_URL}/teams/upload-photos-aws/${fileId}`, {
                         method: 'DELETE',
                         headers: {
@@ -408,12 +416,12 @@
                             'Content-Type': 'application/json'
                         }
                     });
-                    
+
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
+
                     
-                    // Success message
                     Swal.fire({
                         icon: 'success',
                         title: 'Deleted!',
@@ -421,10 +429,10 @@
                         timer: 2000,
                         showConfirmButton: false
                     });
+
                     
-                    // Reload files
                     await this.loadFiles();
-                    // If modal is open, refresh its content
+                    
                     if (this.currentOrganization && this.currentTeam) {
                         const updatedOrg = this.groupFilesByOrganization().find(o => o.name === this.currentOrganization.name);
                         if (updatedOrg) {
@@ -432,16 +440,16 @@
                             if (updatedTeam) {
                                 this.currentTeam = updatedTeam;
                                 this.renderModalFiles(this.currentTeam.files);
-                                // Update team tab count
+                                
                                 if (updatedOrg.teams.length > 1) {
                                     this.renderTeamTabs(updatedOrg.teams);
                                 }
                             } else {
-                                // If team has no files left, check if org still has teams
+                                
                                 if (updatedOrg.teams.length === 0) {
                                     this.closeModal();
                                 } else {
-                                    // Switch to first available team
+                                    
                                     this.currentTeam = updatedOrg.teams[0];
                                     this.renderModalFiles(this.currentTeam.files);
                                     if (updatedOrg.teams.length > 1) {
@@ -453,7 +461,7 @@
                             this.closeModal();
                         }
                     }
-                    
+
                 } catch (error) {
                     console.error('Error deleting file:', error);
                     Swal.fire({
@@ -473,7 +481,7 @@
                     });
                     return;
                 }
-                
+
                 await this.resetTeamFilesById(this.currentTeam.id, this.currentTeam.name);
             }
 
@@ -489,12 +497,12 @@
                         confirmButtonText: 'Yes, reset all!',
                         cancelButtonText: 'Cancel'
                     });
-                    
+
                     if (!result.isConfirmed) {
                         return;
                     }
+
                     
-                    // Show loading state
                     Swal.fire({
                         title: 'Resetting...',
                         html: 'Please wait while we reset all files for this team.',
@@ -503,8 +511,8 @@
                             Swal.showLoading();
                         }
                     });
+
                     
-                    // Call the reset API for this specific team
                     const response = await fetch(`${window.APP_CONFIG.API_URL}/teams/reset-photos-aws/${teamId}`, {
                         method: 'DELETE',
                         headers: {
@@ -512,12 +520,12 @@
                             'Content-Type': 'application/json'
                         }
                     });
-                    
+
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
+
                     
-                    // Success message
                     Swal.fire({
                         icon: 'success',
                         title: 'Reset Complete!',
@@ -525,10 +533,10 @@
                         timer: 2000,
                         showConfirmButton: false
                     });
+
                     
-                    // Reload files
                     await this.loadFiles();
-                    // If modal is still open, refresh its content
+                    
                     if (this.currentOrganization) {
                         const updatedOrg = this.groupFilesByOrganization().find(o => o.name === this.currentOrganization.name);
                         if (updatedOrg) {
@@ -540,7 +548,7 @@
                                     this.renderTeamTabs(updatedOrg.teams);
                                 }
                             } else {
-                                // Team might be gone if it has no files, switch to first team
+                                
                                 if (updatedOrg.teams.length > 0) {
                                     this.currentTeam = updatedOrg.teams[0];
                                     this.renderModalFiles(this.currentTeam.files);
@@ -555,7 +563,7 @@
                             this.closeModal();
                         }
                     }
-                    
+
                 } catch (error) {
                     console.error('Error resetting team files:', error);
                     Swal.fire({
@@ -565,21 +573,21 @@
                     });
                 }
             }
-            
+
             formatFileSize(url) {
-                // Since we don't have actual file size, we'll return a placeholder
-                // In a real app, you would get this from the API response
+                
+                
                 return "File size unknown";
             }
-            
+
             hideLoading() {
                 this.loadingElement.style.display = 'none';
             }
-            
+
             showEmptyState() {
                 this.emptyStateElement.style.display = 'block';
             }
-            
+
             getCookie(name) {
                 const value = `; ${document.cookie}`;
                 const parts = value.split(`; ${name}=`);
@@ -587,18 +595,19 @@
                 return null;
             }
         }
+
         
-        // Initialize the manager when DOM is loaded
-            const manager = new TeamFilesManager();
-            
-            // Add event delegation for delete buttons in modal
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.delete-file-btn')) {
-                    const deleteBtn = e.target.closest('.delete-file-btn');
-                    const fileId = deleteBtn.dataset.fileId;
-                    manager.deleteFile(fileId);
-                }
-            });
+        const manager = new TeamFilesManager();
+
+        
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.delete-file-btn')) {
+                const deleteBtn = e.target.closest('.delete-file-btn');
+                const fileId = deleteBtn.dataset.fileId;
+                manager.deleteFile(fileId);
+            }
+        });
     </script>
 </body>
+
 </html>
