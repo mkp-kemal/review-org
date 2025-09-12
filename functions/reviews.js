@@ -177,9 +177,9 @@ class ReviewFormManager {
                 const teamElement = document.createElement('div');
                 teamElement.className = 'inline-block p-3 m-2 border rounded-lg cursor-pointer hover:bg-gray-100';
                 teamElement.innerHTML = `
-                            <div class="font-semibold">${team.name} ${team.ageLevel}</div>
-                            <div class="text-sm text-gray-600">${team.organization.name} - ${team.city}</div>
-                        `;
+                        <div class="font-semibold">${team.name} ${team.ageLevel}</div>
+                        <div class="text-sm text-gray-600">${team.organization.name} - ${team.city}</div>
+                    `;
                 teamElement.addEventListener('click', () => {
                     teamSearch.value = `${team.name} ${team.ageLevel}`;
                     teamIdInput.value = team.id;
@@ -303,7 +303,7 @@ class ReviewFormManager {
         try {
             const res = await fetchWithAuth(`${window.APP_CONFIG.API_URL}/auth/me`);
             const user = await res.json();
-            
+
             if (user && user.email) {
                 sessionStorage.setItem("user", JSON.stringify(user));
 
@@ -437,26 +437,31 @@ class ReviewFormManager {
     }
 }
 
-// Helper functions (kept for backward compatibility)
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-}
+async function loadReviews() {
 
-function getJwtFromCookie() {
-    const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]+)/);
-    return match ? decodeURIComponent(match[1]) : null;
-}
 
-async function fetchWithAuth(url, options = {}) {
-    const token = getJwtFromCookie();
-    if (token) {
-        options.headers = {
-            ...options.headers,
-            'Authorization': `Bearer ${token}`
-        };
+
+    // Helper functions (kept for backward compatibility)
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
     }
-    return await fetch(url, options);
+
+    function getJwtFromCookie() {
+        const match = document.cookie.match(/(?:^|;\s*)accessToken=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : null;
+    }
+
+    async function fetchWithAuth(url, options = {}) {
+        const token = getJwtFromCookie();
+        if (token) {
+            options.headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`
+            };
+        }
+        return await fetch(url, options);
+    }
 }
