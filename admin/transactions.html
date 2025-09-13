@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-container {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .filter-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        select,
+        button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        select:focus,
+        button:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .error {
+            color: #d9534f;
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+        }
+
+        .btn-view {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+
+        .btn-view:hover {
+            background-color: #0056b3;
+        }
+
+        .amount {
+            font-weight: bold;
+        }
+
+        .status-paid {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-unpaid {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .date {
+            font-family: 'Courier New', monospace;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 5px;
+        }
+
+        .pagination button {
+            min-width: 40px;
+            padding: 8px 12px;
+        }
+
+        .pagination button.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Transaction History</h1>
+        <div class="controls">
+            <div class="search-container">
+                <input type="text" id="searchInput"
+                    placeholder="Search transactions (by organization, plan, email, etc.)">
+            </div>
+            <div class="filter-container">
+                <select id="dateFilter">
+                    <option value="all">All Dates</option>
+                    <option value="latest">Latest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+            </div>
+        </div>
+        <div id="transactionTable">
+            <div class="loading">Loading transaction history...</div>
+        </div>
+        <div id="pagination" class="pagination"></div>
+        <div id="pageInfo" class="page-info"></div>
+    </div>
+
+    <script>
+        (function () {
+            class TransactionManager {
+                constructor() {
+                    this.transactions = [];
+                    this.filteredTransactions = [];
+                    this.currentPage = 1;
+                    this.itemsPerPage = 10;
+                    this.searchTerm = '';
+                    this.sortOrder = 'all';
+
+                    this.init();
+                }
+
+                async init() {
+                    await this.fetchTransactionHistory();
+                    this.bindEvents();
+                }
+
+                async fetchTransactionHistory() {
+                    const tableContainer = document.getElementById('transactionTable');
+
+                    try {
+                        const response = await fetch(`${window.APP_CONFIG.API_URL}/billing/transactions`);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        this.transactions = await response.json();
+
+                        if (!Array.isArray(this.transactions)) {
+                            this.transactions = [];
+                        }
+
+                        this.applyFilters();
+                        this.renderTable();
+                        this.renderPagination();
+
+                    } catch (error) {
+                        console.error('Error fetching transaction history:', error);
+                        tableContainer.innerHTML = `<div class="error">Failed to load transaction history: ${error.message}</div>`;
+                    }
+                }
+
+                bindEvents() {
+                    document.getElementById('searchInput').addEventListener('input', (e) => {
+                        this.searchTerm = e.target.value.toLowerCase();
+                        this.currentPage = 1;
+                        this.applyFilters();
+                        this.renderTable();
+                        this.renderPagination();
+                    });
+
+                    document.getElementById('dateFilter').addEventListener('change', (e) => {
+                        this.sortOrder = e.target.value;
+                        this.currentPage = 1;
+                        this.applyFilters();
+                        this.renderTable();
+                        this.renderPagination();
+                    });
+                }
+
+                applyFilters() {
+                    
+                    let filtered = this.transactions.filter(transaction => {
+                        if (!this.searchTerm) return true;
+
+                        
+                        const searchableText = [
+                            transaction.subscription?.organization?.name || '',
+                            transaction.subscription?.plan || '',
+                            transaction.currency || '',
+                            transaction.status || '',
+                            transaction.customer?.email || '',
+                            transaction.customer?.name || '',
+                            transaction.paymentMethods?.join(' ') || '',
+                            new Date(transaction.createdAt).toLocaleString() || ''
+                        ].join(' ').toLowerCase();
+
+                        return searchableText.includes(this.searchTerm);
+                    });
+
+                    
+                    if (this.sortOrder === 'latest') {
+                        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    } else if (this.sortOrder === 'oldest') {
+                        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    }
+
+                    this.filteredTransactions = filtered;
+                }
+
+                renderTable() {
+                    const tableContainer = document.getElementById('transactionTable');
+
+                    if (this.filteredTransactions.length === 0) {
+                        tableContainer.innerHTML = '<div class="error">No transactions found matching your criteria.</div>';
+                        return;
+                    }
+
+                    
+                    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+                    const endIndex = Math.min(startIndex + this.itemsPerPage, this.filteredTransactions.length);
+                    const paginatedTransactions = this.filteredTransactions.slice(startIndex, endIndex);
+
+                    let tableHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Organization</th>
+                                <th>Plan</th>
+                                <th>Amount</th>
+                                <th>Currency</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Customer Email</th>
+                                <th>Payment Method</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                    paginatedTransactions.forEach(transaction => {
+                        
+                        const organizationName = transaction.subscription?.organization?.name || 'N/A';
+                        const plan = transaction.subscription?.plan || 'N/A';
+                        const amount = (transaction.amount / 100).toFixed(2); 
+                        const currency = transaction.currency || 'N/A';
+                        const status = transaction.status || 'N/A';
+                        const date = new Date(transaction.createdAt).toLocaleString() || 'N/A';
+                        const customerEmail = transaction.customer?.email || 'N/A';
+                        const paymentMethod = transaction.paymentMethods?.[0] || 'N/A';
+                        const invoiceUrl = transaction.hosted_invoice_url?.trim() || '#';
+                        const invoicePdf = transaction.invoice_pdf?.trim() || '#';
+
+                        tableHTML += `
+                        <tr>
+                            <td>${this.highlightSearchTerm(organizationName)}</td>
+                            <td>${this.highlightSearchTerm(plan)}</td>
+                            <td class="amount">$${amount}</td>
+                            <td>${currency.toUpperCase()}</td>
+                            <td class="status-${status.toLowerCase()}">${status.toUpperCase()}</td>
+                            <td class="date">${date}</td>
+                            <td>${this.highlightSearchTerm(customerEmail)}</td>
+                            <td>${this.highlightSearchTerm(paymentMethod)}</td>
+                            <td>
+                                ${invoiceUrl !== '#' ? `<a href="${invoiceUrl}" target="_blank" class="btn-view">View Invoice</a>` : ''}
+                                ${invoicePdf !== '#' ? `<a href="${invoicePdf}" target="_blank" class="btn-view">Download PDF</a>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                    });
+
+                    tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+
+                    tableContainer.innerHTML = tableHTML;
+                }
+
+                highlightSearchTerm(text) {
+                    if (!this.searchTerm || !text) return text;
+
+                    const regex = new RegExp(`(${this.searchTerm})`, 'gi');
+                    return text.replace(regex, '<mark style="background-color: #ffeb3b; padding: 0 2px;">$1</mark>');
+                }
+
+                renderPagination() {
+                    const totalPages = Math.ceil(this.filteredTransactions.length / this.itemsPerPage);
+                    const paginationContainer = document.getElementById('pagination');
+                    const pageInfoContainer = document.getElementById('pageInfo');
+
+                    
+                    const startIndex = (this.currentPage - 1) * this.itemsPerPage + 1;
+                    const endIndex = Math.min(this.currentPage * this.itemsPerPage, this.filteredTransactions.length);
+                    const total = this.filteredTransactions.length;
+
+                    pageInfoContainer.innerHTML = `Showing ${startIndex}-${endIndex} of ${total} transactions`;
+
+                    
+                    let paginationHTML = '';
+
+                    
+                    paginationHTML += `
+                    <button ${this.currentPage === 1 ? 'disabled' : ''} onclick="transactionManager.goToPage(${this.currentPage - 1})">
+                        &laquo;
+                    </button>
+                `;
+
+                    
+                    const maxVisiblePages = 5;
+                    let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+                    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+                    if (endPage - startPage + 1 < maxVisiblePages) {
+                        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                    }
+
+                    for (let i = startPage; i <= endPage; i++) {
+                        paginationHTML += `
+                        <button ${this.currentPage === i ? 'class="active"' : ''} onclick="transactionManager.goToPage(${i})">
+                            ${i}
+                        </button>
+                    `;
+                    }
+
+                    
+                    paginationHTML += `
+                    <button ${this.currentPage === totalPages || totalPages === 0 ? 'disabled' : ''} onclick="transactionManager.goToPage(${this.currentPage + 1})">
+                        &raquo;
+                    </button>
+                `;
+
+                    paginationContainer.innerHTML = paginationHTML;
+                }
+
+                goToPage(page) {
+                    const totalPages = Math.ceil(this.filteredTransactions.length / this.itemsPerPage);
+                    if (page >= 1 && page <= totalPages) {
+                        this.currentPage = page;
+                        this.renderTable();
+                        this.renderPagination();
+                        
+                        document.getElementById('transactionTable').scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            }
+            const transactionManager = new TransactionManager();
+        })();
+
+        
+    </script>
+</body>
+
+</html>

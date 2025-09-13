@@ -362,7 +362,7 @@
                     <div class="file-item bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                         ${isImage ? `
                             <div class="h-48 overflow-hidden">
-                                <img src="${url}" alt="${fileName}" class="w-full h-full object-cover file-preview" onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'">
+                                <img src="${url}" alt="${fileName}" class="w-full h-full object-contain file-preview" onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'">
                             </div>
                         ` : `
                             <div class="h-48 bg-gray-100 flex items-center justify-center">
