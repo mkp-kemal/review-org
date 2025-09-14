@@ -225,6 +225,23 @@ function initPageScripts(page) {
                     document.body.appendChild(newScript);
                 });
             });
+    } else if (page === "tryouts") {
+        fetch('tryouts.html')
+            .then(res => res.text())
+            .then(html => {
+                const container = document.getElementById('main-content');
+                container.innerHTML = html;
+
+                container.querySelectorAll("script").forEach(oldScript => {
+                    const newScript = document.createElement("script");
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                    } else {
+                        newScript.textContent = oldScript.textContent;
+                    }
+                    document.body.appendChild(newScript);
+                });
+            });
     }
 }
 

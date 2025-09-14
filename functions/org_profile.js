@@ -453,6 +453,19 @@ async function loadOrgProfile() {
 
         renderTeamPhotos(data.teamPhoto || [], orgId, canUpload);
 
+        renderTryouts(data.tryOuts || [], data.name, storedUser, data.claimedById, data.organization?.claimedById);
+
+        const addTryoutBtn = document.getElementById('add-tryout-btn');
+        if (storedUser && (storedUser.role.includes('SITE_ADMIN') ||
+            data.claimedById === storedUser.id ||
+            data.organization?.claimedById === storedUser.id)) {
+            addTryoutBtn.classList.remove('hidden');
+
+            addTryoutBtn.addEventListener('click', () => {
+                showAddTryoutModal(orgId);
+            });
+        }
+
         if (data.reviews && data.reviews.length > 0) {
             data.reviews.forEach(review => {
                 const reviewDiv = document.createElement('div');
@@ -515,28 +528,28 @@ async function loadOrgProfile() {
 
 
                     adminActions.innerHTML = `
-        <button class="hide-review-btn bg-gray-100 text-gray-800 text-sm font-semibold py-1 px-3 rounded hover:bg-gray-200">
-            <i class="fas ${review.isPublic ? 'fa-eye-slash' : 'fa-eye'} mr-1"></i>${review.isPublic ? 'Hide' : 'Unhide'}
-        </button>
-    `;
+                        <button class="hide-review-btn bg-gray-100 text-gray-800 text-sm font-semibold py-1 px-3 rounded hover:bg-gray-200">
+                            <i class="fas ${review.isPublic ? 'fa-eye-slash' : 'fa-eye'} mr-1"></i>${review.isPublic ? 'Hide' : 'Unhide'}
+                        </button>
+                    `;
 
 
                     if (hasResponse) {
                         adminActions.innerHTML += `
-            <button class="edit-response-btn bg-blue-100 text-blue-800 text-sm font-semibold py-1 px-3 rounded hover:bg-blue-200">
-                <i class="fas fa-edit mr-1"></i>Edit
-            </button>
-            <button class="delete-response-btn bg-red-100 text-red-800 text-sm font-semibold py-1 px-3 rounded hover:bg-red-200">
-                <i class="fas fa-trash mr-1"></i>Delete
-            </button>
-        `;
+                            <button class="edit-response-btn bg-blue-100 text-blue-800 text-sm font-semibold py-1 px-3 rounded hover:bg-blue-200">
+                                <i class="fas fa-edit mr-1"></i>Edit
+                            </button>
+                            <button class="delete-response-btn bg-red-100 text-red-800 text-sm font-semibold py-1 px-3 rounded hover:bg-red-200">
+                                <i class="fas fa-trash mr-1"></i>Delete
+                            </button>
+                        `;
                     } else {
 
                         adminActions.innerHTML += `
-            <button class="respond-review-btn bg-purple-100 text-purple-800 text-sm font-semibold py-1 px-3 rounded hover:bg-purple-200">
-                <i class="fas fa-reply mr-1"></i>Respond
-            </button>
-        `;
+                            <button class="respond-review-btn bg-purple-100 text-purple-800 text-sm font-semibold py-1 px-3 rounded hover:bg-purple-200">
+                                <i class="fas fa-reply mr-1"></i>Respond
+                            </button>
+                        `;
                     }
 
                     reviewDiv.appendChild(adminActions);
@@ -571,10 +584,10 @@ async function loadOrgProfile() {
                             const flagsDiv = document.createElement('div');
                             flagsDiv.className = 'flex justify-end space-x-2 mt-3';
                             flagsDiv.innerHTML = `
-                <button class="flag-review-btn bg-gray-100 text-gray-800 text-sm font-semibold py-1 px-3 rounded hover:bg-gray-200">
-                    <i class="fas fa-flag mr-1"></i>Flag
-                </button>
-            `;
+                                <button class="flag-review-btn bg-gray-100 text-gray-800 text-sm font-semibold py-1 px-3 rounded hover:bg-gray-200">
+                                    <i class="fas fa-flag mr-1"></i>Flag
+                                </button>
+                            `;
                             reviewDiv.appendChild(flagsDiv);
 
                             flagsDiv.querySelector('.flag-review-btn')?.addEventListener('click', () => {
@@ -851,6 +864,264 @@ async function deletePhoto(photoId, teamId) {
             confirmButtonText: 'OK'
         });
     }
+}
+
+function showAddTryoutModal(teamId) {
+    Swal.fire({
+        title: 'Add New Tryout',
+        html: `
+            <div class="text-left">
+                <div class="mb-4">
+                    <label for="tryout-title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input type="text" id="tryout-title" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 14U AAA - Fall 2025 Season">
+                </div>
+                <div class="mb-4">
+                    <label for="tryout-datetime" class="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
+                    <input type="datetime-local" id="tryout-datetime" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="tryout-location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <input type="text" id="tryout-location" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Premier Fields, Dallas">
+                </div>
+                <div class="mb-4">
+                    <label for="tryout-register-url" class="block text-sm font-medium text-gray-700 mb-1">Registration URL</label>
+                    <input type="url" id="tryout-register-url" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://example.com/register">
+                    <p class="text-xs text-gray-500 mt-1">Enter a valid URL starting with http:// or https://</p>
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Create Tryout',
+        cancelButtonText: 'Cancel',
+        preConfirm: () => {
+            const title = document.getElementById('tryout-title').value;
+            const datetime = document.getElementById('tryout-datetime').value;
+            const location = document.getElementById('tryout-location').value;
+            const registerUrl = document.getElementById('tryout-register-url').value;
+
+            if (!title || !datetime || !location) {
+                Swal.showValidationMessage('Title, Date & Time, and Location are required');
+                return false;
+            }
+
+            if (registerUrl && !isValidUrl(registerUrl)) {
+                Swal.showValidationMessage('Please enter a valid URL (must start with http:// or https://)');
+                return false;
+            }
+
+            return { title, datetime, location, registerUrl };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { title, datetime, location, registerUrl } = result.value;
+
+
+            const formattedDatetime = new Date(datetime).toISOString();
+
+            createTryout(teamId, title, formattedDatetime, location, registerUrl);
+        }
+    });
+}
+
+
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+async function createTryout(teamId, title, datetime, location, registerUrl) {
+    try {
+        const response = await fetch(`${window.APP_CONFIG.API_URL}/teams/tryouts/${teamId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getJwtFromCookie()}`
+            },
+            body: JSON.stringify({
+                title: title,
+                datetime: datetime,
+                location: location,
+                urlregister: registerUrl || ''
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create tryout');
+        }
+
+        const data = await response.json();
+
+        Swal.fire({
+            title: 'Success!',
+            text: 'Tryout created successfully',
+            icon: 'success'
+        }).then(() => {
+
+            location.reload();
+        });
+
+    } catch (error) {
+        console.error('Error creating tryout:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'Failed to create tryout. Please try again.',
+            icon: 'error'
+        });
+    }
+}
+
+function renderTryouts(tryouts, teamId, storedUser, claimedById, orgClaimedById) {
+    const tryoutsContainer = document.getElementById('tryouts-container');
+    const noTryoutsMessage = document.getElementById('no-tryouts-message');
+
+    tryoutsContainer.innerHTML = '';
+
+    if (!tryouts || tryouts.length === 0) {
+        noTryoutsMessage.classList.remove('hidden');
+        return;
+    }
+
+    noTryoutsMessage.classList.add('hidden');
+
+    tryouts.forEach(tryout => {
+        const tryoutCard = document.createElement('div');
+        tryoutCard.className = 'flex-shrink-0 w-80 p-6 border-2 border-green-500 bg-green-50 rounded-lg relative group';
+
+        const date = new Date(tryout.datetime);
+        const formattedDate = date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+
+
+        const isSiteAdmin = storedUser?.role?.includes('SITE_ADMIN');
+        const isClaimedUser = storedUser?.id === claimedById || storedUser?.id === orgClaimedById;
+        const canDelete = isSiteAdmin || isClaimedUser;
+
+        let deleteButton = '';
+        if (canDelete) {
+            deleteButton = `
+                <button onclick="deleteTryout('${tryout.id}')" 
+                        class="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            `;
+        }
+
+        let registerButton = '';
+        if (tryout.registerUrl && tryout.registerUrl.trim() !== '') {
+            registerButton = `
+                <button onclick="confirmAndRedirect('${tryout.registerUrl}', '${tryout.title || 'this tryout'}')" 
+                        class="inline-block mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700">
+                    <i class="fas fa-external-link-alt mr-2"></i>Register Now
+                </button>
+            `;
+        }
+
+        tryoutCard.innerHTML = `
+            ${deleteButton}
+            <h4 class="text-xl font-bold">${tryout.title || teamId}</h4>
+            <p class="text-gray-600 mt-1"><i class="fas fa-calendar-alt mr-2"></i>Date: ${formattedDate}</p>
+            <p class="text-gray-600"><i class="fas fa-clock mr-2"></i>Time: ${formattedTime}</p>
+            <p class="text-gray-600"><i class="fas fa-map-marker-alt mr-2"></i>Location: ${tryout.location || 'Not specified'}</p>
+            ${registerButton}
+        `;
+
+        tryoutsContainer.appendChild(tryoutCard);
+    });
+}
+
+async function deleteTryout(tryoutId) {
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "This tryout will be permanently deleted!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        Swal.fire({
+            title: 'Deleting tryout...',
+            text: 'Please wait',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        const response = await fetch(`${window.APP_CONFIG.API_URL}/teams/tryouts/${tryoutId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getJwtFromCookie()}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Delete failed: ${response.statusText}`);
+        }
+
+        Swal.fire({
+            title: 'Deleted!',
+            text: 'Tryout has been deleted.',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        }).then(() => {
+
+            location.reload();
+        });
+
+    } catch (error) {
+        console.error('Error deleting tryout:', error);
+        Swal.fire({
+            title: 'Delete failed',
+            text: error.message || 'An error occurred while deleting the tryout',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    }
+}
+
+function confirmAndRedirect(url, tryoutTitle) {
+    Swal.fire({
+        title: 'Leave CurveballCritiques?',
+        text: `You are about to be redirected to an external website to register for ${tryoutTitle}.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Continue',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            window.open(url, '_blank');
+
+
+            Swal.fire({
+                title: 'Redirecting...',
+                text: 'You are being redirected to the registration page.',
+                icon: 'info',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
