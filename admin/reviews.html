@@ -878,7 +878,7 @@
 
         try {
             const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/${window.currentReviewId}/respond`, {
-                method: 'POST',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${getCookie('accessToken')}`

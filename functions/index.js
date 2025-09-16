@@ -46,51 +46,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     const entityList = document.getElementById("entityList");
     const upgradeType = document.getElementById("upgradeType");
 
-    
+
     if (!user) {
         document.getElementById("buttonPro")?.addEventListener("click", () => {
             window.location.href = "/Login.html";
         });
 
-        
+
         document.getElementById("buttonElite")?.addEventListener("click", () => {
             window.location.href = "/Login.html";
         });
     } else {
         document.getElementById("buttonPro")?.addEventListener("click", () => {
             currentPlan = "PRO";
+            window.currentPlan = "PRO";
 
             document.getElementById("upgradeTitle").innerText = "Upgrade to PRO";
             document.getElementById("benefitsList").innerHTML = benefits.PRO;
             $('#upgradeModal').modal('show');
 
-            
+
             loadEntities(upgradeType.value);
         });
 
-        
+
         document.getElementById("buttonElite")?.addEventListener("click", () => {
             currentPlan = "ELITE";
+            window.currentPlan = "ELITE";
+
             document.getElementById("upgradeTitle").innerText = "Upgrade to ELITE";
             document.getElementById("benefitsList").innerHTML = benefits.ELITE;
             $('#upgradeModal').modal('show');
 
-            
+
             loadEntities(upgradeType.value);
         });
     }
 
-    
+
     upgradeType?.addEventListener("change", (e) => {
         loadEntities(e.target.value);
     });
 
-    
-    
+
+
     async function loadEntities(type) {
         const parentEntityList = document.getElementById("parent-entity-list");
 
-        
+
         parentEntityList.innerHTML = `
         <label for="entityList">Select:</label>
         <select id="entityList" class="form-control" disabled>
@@ -99,7 +102,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
 
         const confirmBtn = document.getElementById("confirmUpgrade");
-        if (confirmBtn) confirmBtn.disabled = true; 
+        if (confirmBtn) confirmBtn.disabled = true;
 
         if (type) {
             const func = type === "team" ? loadTeamsClaimed : loadOrganizationsClaimed;
@@ -113,7 +116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     return;
                 }
 
-                
+
                 parentEntityList.innerHTML = `
                 <label for="entityList">Select:</label>
                 <select id="entityList" class="form-control">
@@ -122,7 +125,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             `;
                 const entityList = parentEntityList.querySelector("#entityList");
 
-                
+
                 res.forEach(item => {
                     const option = document.createElement("option");
                     option.value = item.id;
@@ -130,9 +133,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     entityList.appendChild(option);
                 });
 
-                
+
                 if (confirmBtn) {
-                    confirmBtn.disabled = true; 
+                    confirmBtn.disabled = true;
                     entityList.addEventListener("change", () => {
                         confirmBtn.disabled = !entityList.value;
                     });
@@ -165,7 +168,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-            
+
             const body = {
                 plan: currentPlan
             };
@@ -175,30 +178,46 @@ document.addEventListener("DOMContentLoaded", async () => {
                 body.organizationId = selectedId;
             }
 
-            
-            const res = await fetch(`${window.APP_CONFIG.API_URL}/billing/checkout-session`, {
-                method: "POST",
+            const checkSessionCheckout = await fetch(`${window.APP_CONFIG.API_URL}/billing/checkout/save/${selectedId}?plan=${currentPlan}`, {
+                method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${getCookie("accessToken")}`
                 },
-                body: JSON.stringify(body)
-            });
+            })
 
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData?.message || "Failed to create checkout session");
-            }
-
-            const data = await res.json();
+            const data = await checkSessionCheckout.json();
 
             if (data?.url) {
                 window.open(data.url, "_blank");
             } else {
-                alert("Checkout session did not return a valid URL");
+                const res = await fetch(`${window.APP_CONFIG.API_URL}/billing/checkout-session`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${getCookie("accessToken")}`
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData?.message || "Failed to create checkout session");
+                }
+
+                const data = await res.json();
+
+                if (data?.url) {
+                    window.open(data.url, "_blank");
+                } else {
+                    alert("Checkout session did not return a valid URL");
+                }
             }
 
-            $('#upgradeModal').modal('hide');
+
+
+
+            // $('#upgradeModal').modal('hide');
         } catch (err) {
             console.error("confirmUpgrade error:", err);
             swal.fire({
@@ -225,7 +244,7 @@ document.addEventListener('DOMContentLoaded', loadSeasonYears);
 function initTeamSearch(inputElement, options = {}) {
     const { hiddenInput } = options;
 
-    
+
     let suggestionsContainer = document.createElement('div');
     suggestionsContainer.className = 'absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto hidden';
     inputElement.parentElement.appendChild(suggestionsContainer);
@@ -246,7 +265,7 @@ function initTeamSearch(inputElement, options = {}) {
                 .then(data => {
                     suggestionsContainer.innerHTML = '';
 
-                    
+
                     const header = document.createElement('div');
                     header.className = 'sticky top-0 bg-gray-100 p-2 font-semibold border-b text-gray-600';
                     header.textContent = 'Teams';
@@ -283,7 +302,7 @@ function initTeamSearch(inputElement, options = {}) {
         }, 300);
     });
 
-    
+
     document.addEventListener('click', e => {
         if (!inputElement.contains(e.target) && !suggestionsContainer.contains(e.target)) {
             suggestionsContainer.classList.add('hidden');
@@ -319,7 +338,7 @@ async function loadSeasonYears() {
 
 async function loadOrganizationsClaimed() {
     try {
-        const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs/access/claim`, {
+        const res = await fetch(`${window.APP_CONFIG.API_URL}/orgs/access/claimby/${window.currentPlan}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -328,7 +347,7 @@ async function loadOrganizationsClaimed() {
         });
         if (!res.ok) throw new Error("Failed to load organizations");
 
-        
+
         const text = await res.text();
         if (!text) return [];
 
@@ -341,7 +360,7 @@ async function loadOrganizationsClaimed() {
 
 async function loadTeamsClaimed() {
     try {
-        const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/access/claim`, {
+        const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/access/claimby/${window.currentPlan}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
