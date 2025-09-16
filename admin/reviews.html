@@ -333,6 +333,17 @@
         background-color: #e9ecef;
     }
 
+    /* Highlighted review row */
+    .review-highlighted {
+        background-color: #fff3cd !important;
+        border-left: 4px solid #ffc107;
+        font-weight: 500;
+    }
+
+    .review-highlighted td {
+        background-color: #fff3cd !important;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 576px) {
         .modal-dialog {
@@ -346,11 +357,11 @@
 </style>
 
 <script>
-    // Initialize global variables
+    
     window.itemsPerPage = window.itemsPerPage || 10;
     window.currentPage = 1;
 
-    // Make functions available globally
+    
     window.showReview = showReview;
     window.changePage = changePage;
     window.fetchReviews = fetchReviews;
@@ -409,8 +420,9 @@
             const overallRating = r.rating?.overall ?? 0;
             const stars = getStarRating(overallRating);
             const hasResponse = r.orgResponse !== null;
+            tr.className = r.isHighlight ? 'review-highlighted' : '';
 
-            // Format preview text
+            
             const previewText = r.body.length > 50 ? r.body.substring(0, 47) + '...' : r.body;
 
             tr.innerHTML = `
@@ -449,6 +461,100 @@
             tbody.appendChild(tr);
         });
 
+        
+        document.querySelector("#reviewTable tbody").addEventListener('click', async function (e) {
+            
+            if (
+                e.target.closest('button') ||
+                e.target.closest('a') ||
+                e.target.closest('.status-badge') 
+            ) {
+                return;
+            }
+
+            const row = e.target.closest('tr');
+            if (!row) return;
+
+            const reviewId = row.querySelector('[data-id]')?.dataset.id;
+            if (!reviewId) return;
+
+            
+            const review = window.filteredReviews.find(r => r.id == reviewId);
+            if (!review) return;
+
+            
+            const teamPlan = review.team?.subscription?.plan;
+            if (teamPlan !== 'ELITE') {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Feature Unavailable',
+                    text: 'Highlight feature is only available for teams with ELITE subscription plan.',
+                    confirmButtonText: 'OK'
+                });
+                return; 
+            }
+
+            
+            const isCurrentlyHighlighted = review.isHighlight;
+
+            let confirmText, confirmTitle, confirmButton;
+            if (isCurrentlyHighlighted) {
+                confirmTitle = "Remove Highlight?";
+                confirmText = "This review is currently highlighted. Do you want to remove the highlight?";
+                confirmButton = 'Remove Highlight';
+            } else {
+                confirmTitle = "Set as Highlight Review?";
+                confirmText = "Do you want to highlight this review on public pages?";
+                confirmButton = 'Set Highlight';
+            }
+
+            const result = await Swal.fire({
+                title: confirmTitle,
+                text: confirmText,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: confirmButton,
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/${reviewId}/reviews/highlight`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${getCookie('accessToken')}`
+                    },
+                    body: JSON.stringify({
+                        isHighlight: !isCurrentlyHighlighted 
+                    })
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.message || `HTTP ${res.status}: Failed to update highlight`);
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: isCurrentlyHighlighted ? 'Highlight removed!' : 'Review is now highlighted!'
+                });
+
+                
+                fetchReviews();
+
+            } catch (err) {
+                console.error('Error updating highlight:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: `Failed: ${err.message}`
+                });
+            }
+        });
         enableEditableCells('.editable');
     }
 
@@ -509,7 +615,7 @@
                         }
 
                         renderCell(newValue);
-                        // Refresh the reviews list
+                        
                         fetchReviews();
                     } catch (err) {
                         console.error('Failed to save:', err);
@@ -545,13 +651,13 @@
         const paginationControls = document.getElementById('paginationControls');
         paginationControls.innerHTML = '';
 
-        // Previous button
+        
         const prevLi = document.createElement('li');
         prevLi.className = `page-item ${window.currentPage === 1 ? 'disabled' : ''}`;
         prevLi.innerHTML = `<a class="page-link" href="#" onclick="window.changePage(${window.currentPage - 1})">&laquo;</a>`;
         paginationControls.appendChild(prevLi);
 
-        // Page numbers
+        
         const maxVisiblePages = 5;
         let startPage = Math.max(1, window.currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -560,7 +666,7 @@
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
 
-        // First page and ellipsis
+        
         if (startPage > 1) {
             const firstLi = document.createElement('li');
             firstLi.className = 'page-item';
@@ -575,7 +681,7 @@
             }
         }
 
-        // Page numbers
+        
         for (let i = startPage; i <= endPage; i++) {
             const pageLi = document.createElement('li');
             pageLi.className = `page-item ${i === window.currentPage ? 'active' : ''}`;
@@ -583,7 +689,7 @@
             paginationControls.appendChild(pageLi);
         }
 
-        // Last page and ellipsis
+        
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) {
                 const ellipsisLi = document.createElement('li');
@@ -598,7 +704,7 @@
             paginationControls.appendChild(lastLi);
         }
 
-        // Next button
+        
         const nextLi = document.createElement('li');
         nextLi.className = `page-item ${window.currentPage === totalPages ? 'disabled' : ''}`;
         nextLi.innerHTML = `<a class="page-link" href="#" onclick="window.changePage(${window.currentPage + 1})">&raquo;</a>`;
@@ -630,16 +736,16 @@
     }
 
     function showReview(r) {
-        // Store current review ID for response submission
+        
         window.currentReviewId = r.id;
         window.currentResponse = r.orgResponse || null;
 
-        // Set modal content
+        
         document.getElementById('modalTitle').textContent = r.title;
         document.getElementById('modalBody').textContent = r.body;
         document.getElementById('modalTeam').textContent = r.team?.name || "-";
 
-        // Add organization info
+        
         if (r.team?.organization) {
             document.getElementById('modalTeamOrg').textContent = `Organization: ${r.team.organization.name}`;
         } else {
@@ -651,7 +757,7 @@
         document.getElementById('modalSeason').textContent = `${r.season_term} ${r.season_year}`;
         document.getElementById('modalDate').textContent = new Date(r.createdAt).toLocaleString();
 
-        // Show last edited date if different from created date
+        
         const editedDate = new Date(r.editedAt);
         const createdDate = new Date(r.createdAt);
         if (editedDate.getTime() !== createdDate.getTime()) {
@@ -660,13 +766,13 @@
             document.getElementById('modalEdited').textContent = 'Never edited';
         }
 
-        // Set visibility status
+        
         const publicBadge = r.isPublic ?
             '<span class="status-badge status-public">Public</span>' :
             '<span class="status-badge status-private">Private</span>';
         document.getElementById('modalPublic').innerHTML = publicBadge;
 
-        // Set ratings
+        
         const coaching = r.rating?.coaching ?? 0;
         const development = r.rating?.development ?? 0;
         const transparency = r.rating?.transparency ?? 0;
@@ -681,14 +787,14 @@
         document.getElementById('ratingSafety').textContent = safety.toFixed(1) + '/5';
         document.getElementById('ratingOverall').textContent = overall.toFixed(1) + '/5';
 
-        // Set progress bars
+        
         document.getElementById('progressCoaching').style.width = (coaching / 5 * 100) + '%';
         document.getElementById('progressDevelopment').style.width = (development / 5 * 100) + '%';
         document.getElementById('progressTransparency').style.width = (transparency / 5 * 100) + '%';
         document.getElementById('progressCulture').style.width = (culture / 5 * 100) + '%';
         document.getElementById('progressSafety').style.width = (safety / 5 * 100) + '%';
 
-        // Handle flags
+        
         if (r.flags && r.flags.length > 0) {
             document.getElementById('flagsSection').style.display = 'block';
             const flagsContainer = document.getElementById('flagsContainer').querySelector('.card-body');
@@ -716,7 +822,7 @@
                 flagsContainer.appendChild(flagElement);
             });
 
-            // Initialize tooltips if available
+            
             if (typeof $ !== 'undefined' && $.fn.tooltip) {
                 $('[data-toggle="tooltip"]').tooltip();
             }
@@ -724,17 +830,17 @@
             document.getElementById('flagsSection').style.display = 'none';
         }
 
-        // Set star rating
+        
         document.getElementById('ratingStars').innerHTML = getStarRating(overall);
 
-        // Handle admin response
+        
         if (window.currentResponse) {
             document.getElementById('adminResponseText').textContent = window.currentResponse.body;
             document.getElementById('adminResponseDate').textContent = 'Posted: ' + new Date(window.currentResponse.createdAt).toLocaleString();
             document.getElementById('adminResponseBy').textContent = 'By: ' + (window.currentResponse.user?.email || 'Admin');
             document.getElementById('adminResponseSection').style.display = 'block';
 
-            // Set up for update
+            
             document.getElementById('replyText').value = window.currentResponse.body;
             document.getElementById('submitReplyBtn').style.display = 'none';
             document.getElementById('updateReplyBtn').style.display = 'inline-block';
@@ -745,19 +851,19 @@
             document.getElementById('updateReplyBtn').style.display = 'none';
         }
 
-        // Show modal
+        
         if (typeof $ !== 'undefined' && $.fn.modal) {
             $('#reviewModal').modal('show');
         } else {
-            // Fallback for vanilla JS
+            
             const modal = document.getElementById('reviewModal');
             modal.style.display = 'block';
             document.body.classList.add('modal-open');
         }
     }
 
-    // Initialize event listeners
-    // Submit reply button
+    
+    
     document.getElementById('submitReplyBtn').addEventListener('click', async function () {
         const responseText = document.getElementById('replyText').value.trim();
 
@@ -793,10 +899,10 @@
                 text: 'Response submitted successfully'
             });
 
-            // Refresh reviews
+            
             fetchReviews();
 
-            // Close modal if jQuery is available
+            
             if (typeof $ !== 'undefined' && $.fn.modal) {
                 $('#reviewModal').modal('hide');
             }
@@ -810,7 +916,7 @@
         }
     });
 
-    // Update reply button
+    
     document.getElementById('updateReplyBtn').addEventListener('click', async function () {
         const responseText = document.getElementById('replyText').value.trim();
 
@@ -846,10 +952,10 @@
                 text: 'Response updated successfully'
             });
 
-            // Refresh reviews
+            
             fetchReviews();
 
-            // Close modal if jQuery is available
+            
             if (typeof $ !== 'undefined' && $.fn.modal) {
                 $('#reviewModal').modal('hide');
             }
@@ -863,7 +969,7 @@
         }
     });
 
-    // Flag status update
+    
     document.getElementById('reviewModal').addEventListener('click', async function (e) {
         if (e.target.classList.contains('flag-reason') || e.target.closest('.flag-reason')) {
             const flagElement = e.target.closest('.flag-reason');
@@ -910,7 +1016,7 @@
                     text: 'Flag status updated successfully'
                 });
 
-                // Refresh reviews
+                
                 fetchReviews();
             } catch (err) {
                 Swal.fire({
@@ -922,7 +1028,7 @@
         }
     });
 
-    // Global search
+    
     document.getElementById('reviewGlobalSearch').addEventListener('input', function (e) {
         const searchTerm = e.target.value.toLowerCase();
         window.filteredReviews = window.allReviews.filter(r => {
@@ -940,7 +1046,7 @@
         renderPaginationControls();
     });
 
-    // Initialize reviews
+    
     fetchReviews("recent");
 
     function getCookie(name) {

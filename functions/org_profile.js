@@ -334,6 +334,15 @@ async function loadOrgProfile() {
         document.getElementById('org-name').textContent = data.name || 'Unknown Team';
         document.getElementById('org-location').innerHTML = `<i class="fas fa-map-marker-alt mr-2"></i>${data.city || 'Unknown'}, ${data.state || 'Unknown'}`;
 
+        const logoImg = document.getElementById('org-logo');
+        if (data.logo && data.logo.trim()) {
+            logoImg.src = data.logo.trim();
+            logoImg.onerror = function () {
+                this.src = "https://placehold.co/150x150/1E40AF/FFFFFF?text=No+Logo";
+            };
+        } else {
+            logoImg.src = "https://placehold.co/150x150/1E40AF/FFFFFF?text=No+Logo";
+        }
 
         const tagsContainer = document.getElementById('team-tags');
         if (data.ageLevel) {
@@ -443,10 +452,9 @@ async function loadOrgProfile() {
         const reviewsContainer = document.getElementById('reviews-container');
         reviewsContainer.innerHTML = '';
 
-        //Team Photos
-
         const isSiteAdmin = storedUser?.role?.includes('SITE_ADMIN');
         const isRelatedUser = (data.claimedById == window?.user?.id || data.organization?.claimedById == window?.user?.id);
+        
         const isElite = data.subscription?.plan === 'ELITE';
         const canUpload = isSiteAdmin || (isRelatedUser && isElite);
 
@@ -886,7 +894,6 @@ function showAddTryoutModal(teamId) {
                 <div class="mb-4">
                     <label for="tryout-register-url" class="block text-sm font-medium text-gray-700 mb-1">Registration URL</label>
                     <input type="url" id="tryout-register-url" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://example.com/register">
-                    <p class="text-xs text-gray-500 mt-1">Enter a valid URL starting with http:// or https://</p>
                 </div>
             </div>
         `,
@@ -905,7 +912,6 @@ function showAddTryoutModal(teamId) {
             }
 
             if (registerUrl && !isValidUrl(registerUrl)) {
-                Swal.showValidationMessage('Please enter a valid URL (must start with http:// or https://)');
                 return false;
             }
 

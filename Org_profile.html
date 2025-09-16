@@ -192,44 +192,22 @@
 
     <!-- Main Content -->
     <main class="bg-white">
-        <!-- Admin Buttons (hidden by default) -->
-        <!-- <div id="admin-buttons" class="admin-buttons container mx-auto px-6 pt-6">
-            <div class="flex flex-wrap gap-2">
-                <button id="edit-team-btn"
-                    class="bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition-colors">
-                    <i class="fas fa-edit mr-2"></i>Edit Team
-                </button>
-                <button id="delete-team-btn"
-                    class="bg-red-600 text-white font-semibold py-2 px-4 rounded hover:bg-red-700 transition-colors">
-                    <i class="fas fa-trash mr-2"></i>Delete Team
-                </button>
-                <button id="add-review-btn"
-                    class="bg-green-600 text-white font-semibold py-2 px-4 rounded hover:bg-green-700 transition-colors">
-                    <i class="fas fa-plus mr-2"></i>Add Review
-                </button>
-                <button id="respond-review-btn"
-                    class="bg-purple-600 text-white font-semibold py-2 px-4 rounded hover:bg-purple-700 transition-colors">
-                    <i class="fas fa-reply mr-2"></i>Respond to Review
-                </button>
-                <button id="manage-members-btn"
-                    class="bg-yellow-600 text-white font-semibold py-2 px-4 rounded hover:bg-yellow-700 transition-colors">
-                    <i class="fas fa-users mr-2"></i>Manage Members
-                </button>
-            </div>
-        </div> -->
-
-        <!-- Profile Header -->
         <div class="container mx-auto px-6 py-12">
             <div class="md:flex justify-between items-start">
-                <div>
-                    <h1 id="org-name" class="text-4xl md:text-5xl font-extrabold">Loading...</h1>
-                    <p id="org-location" class="text-xl text-gray-500 mt-2"><i
-                            class="fas fa-map-marker-alt mr-2"></i>Loading...</p>
-                    <div id="team-tags" class="mt-4 flex space-x-2">
-                        <!-- Team tags will be inserted here -->
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <img id="org-logo" src="https://placehold.co/150x150/1E40AF/FFFFFF?text=No+Logo" alt="Team Logo"
+                            class="w-32 h-32 object-contain rounded-lg border">
                     </div>
-                    <div id="claim-btn">
-
+                    <div>
+                        <h1 id="org-name" class="text-4xl md:text-5xl font-extrabold">Loading...</h1>
+                        <p id="org-location" class="text-xl text-gray-500 mt-2"><i
+                                class="fas fa-map-marker-alt mr-2"></i>Loading...</p>
+                        <div id="team-tags" class="mt-4 flex space-x-2">
+                            <!-- Team tags will be inserted here -->
+                        </div>
+                        <div id="claim-btn">
+                        </div>
                     </div>
                 </div>
                 <div class="text-center mt-6 md:mt-0 bg-gray-50 p-6 rounded-xl">
