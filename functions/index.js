@@ -232,10 +232,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 
-document.addEventListener('DOMContentLoaded', loadTeams());
+document.addEventListener('DOMContentLoaded', loadTeams);
 
 
-document.addEventListener('DOMContentLoaded', loadReviews());
+// document.addEventListener('DOMContentLoaded', loadReviews);
+
+document.addEventListener('DOMContentLoaded', function() {
+    new ReviewFormManager();
+});
 
 
 document.addEventListener('DOMContentLoaded', loadSeasonYears);
@@ -380,12 +384,11 @@ async function loadTeamsClaimed() {
 }
 
 
-
-
-const heroInput = document.querySelector('.hero-section input[type="text"]');
-initTeamSearch(heroInput);
-
-
-const reviewInput = document.getElementById('team-big-search');
-const teamIdInput = document.getElementById('team-id');
-initTeamSearch(reviewInput, { hiddenInput: teamIdInput });
+document.addEventListener('DOMContentLoaded', async () => {
+    const heroInput = document.querySelector('.hero-section input[type="text"]');
+    const reviewInput = document.getElementById('team-big-search');
+    const teamIdInput = document.getElementById('team-id');
+    
+    initTeamSearch(heroInput);
+    initTeamSearch(reviewInput, { hiddenInput: teamIdInput });
+});

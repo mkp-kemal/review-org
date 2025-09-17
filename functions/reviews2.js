@@ -1,31 +1,72 @@
-class ReviewFormManager {
+class ReviewFormManager2 {
     constructor() {
         this.currentStep = 1;
         this.totalSteps = 4;
+        this.isSubmitting= false;
         this.init();
     }
 
     init() {
         this.setupEventListeners();
+        this.updateProgressLine();
         this.loadSeasonYears();
         this.checkAuth();
-        loadReviews();
     }
 
     setupEventListeners() {
-        // Setup star ratings
+
         this.setupStarRatings();
 
-        // Setup team search
+
         this.setupTeamSearch();
 
-        // Setup form validation
+
         this.setupFormValidation();
 
-        // Load reviews
+
         document.addEventListener('DOMContentLoaded', () => {
             loadReviews();
         });
+    }
+
+    goToStep(step) {
+        if (step < 1 || step > this.totalSteps) return;
+
+
+        document.getElementById(`form-step-${this.currentStep}`).classList.add('hidden');
+
+
+        const currentIndicator = document.getElementById(`step-indicator-${this.currentStep}`);
+        if (step > this.currentStep) {
+            currentIndicator.classList.remove('active');
+            currentIndicator.classList.add('completed');
+        } else if (step < this.currentStep) {
+            currentIndicator.classList.remove('completed');
+            currentIndicator.classList.add('active');
+        }
+
+
+        this.currentStep = step;
+        document.getElementById(`form-step-${this.currentStep}`).classList.remove('hidden');
+
+
+        const newIndicator = document.getElementById(`step-indicator-${this.currentStep}`);
+        newIndicator.classList.add('active');
+        newIndicator.classList.remove('inactive');
+
+
+        this.updateProgressLine();
+
+
+        document.getElementById('multi-step-form').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    updateProgressLine() {
+        const progressLine = document.getElementById('progress-line');
+        const progressPercentage = ((this.currentStep - 1) / (this.totalSteps - 1)) * 100;
+
+
+        progressLine.style.background = `linear-gradient(to right, #16a34a 0%, #16a34a ${progressPercentage}%, #d1d5db ${progressPercentage}%, #d1d5db 100%)`;
     }
 
     setupStarRatings() {
@@ -39,7 +80,7 @@ class ReviewFormManager {
                     hiddenInput.value = rating;
                     ratingContainer.dataset.rating = rating;
 
-                    // Highlight stars
+
                     stars.forEach(s => {
                         const starRating = parseInt(s.dataset.rating);
                         if (starRating <= rating) {
@@ -50,6 +91,9 @@ class ReviewFormManager {
                             s.classList.add('far');
                         }
                     });
+
+
+                    this.checkStep2Completion();
                 });
 
                 star.addEventListener('mouseover', () => {
@@ -97,6 +141,7 @@ class ReviewFormManager {
 
             if (searchTerm.length < 2) {
                 suggestions.classList.add('hidden');
+                this.checkStep1Completion();
                 return;
             }
 
@@ -140,6 +185,7 @@ class ReviewFormManager {
                     teamSearch.value = `${team.name} ${team.ageLevel}`;
                     teamIdInput.value = team.id;
                     suggestions.classList.add('hidden');
+                    this.checkStep1Completion();
                 });
                 teamSuggestions.appendChild(teamElement);
             });
@@ -151,34 +197,94 @@ class ReviewFormManager {
     }
 
     setupFormValidation() {
-        // Step 1 validation
+
         const requiredFieldsStep1 = ['team-search', 'season', 'season-year'];
         requiredFieldsStep1.forEach(fieldId => {
             const field = document.getElementById(fieldId);
             field.addEventListener('input', () => {
+                this.checkStep1Completion();
             });
         });
 
-        // Step 2 validation
+
         const ratingInputs = document.querySelectorAll('.star-rating input[type="hidden"]');
         ratingInputs.forEach(input => {
             input.addEventListener('change', () => {
+                this.checkStep2Completion();
             });
         });
 
-        // Step 3 validation
+
         const requiredFieldsStep3 = ['review-title', 'review-body'];
         requiredFieldsStep3.forEach(fieldId => {
             const field = document.getElementById(fieldId);
             field.addEventListener('input', () => {
+                this.checkStep3Completion();
             });
         });
 
-        // Form submission
-        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.submitReview();
+        const form = document.getElementById('reviewForm');
+
+        // Hapus event listener lama jika ada
+        form.removeEventListener('submit', this.boundSubmitHandler);
+
+        // Bind handler agar bisa diremove nanti
+        this.boundSubmitHandler = this.submitReview.bind(this);
+
+
+        document.getElementById('reviewForm').addEventListener(
+            'submit',
+            async (e) => {
+                e.preventDefault();
+                await this.submitReview();
+            },
+            { once: true }
+        );
+
+    }
+
+    checkStep1Completion() {
+        const teamSearch = document.getElementById('team-search').value.trim();
+        const season = document.getElementById('season').value;
+        const seasonYear = document.getElementById('season-year').value;
+        const teamId = document.getElementById('team-id').value;
+
+        const isComplete = teamSearch && season && seasonYear && teamId;
+        const nextButton = document.getElementById('step1-next-btn');
+
+        if (isComplete) {
+            nextButton.classList.remove('cursor-not-allowed', 'opacity-50');
+            nextButton.disabled = false;
+        } else {
+            nextButton.classList.add('cursor-not-allowed', 'opacity-50');
+            nextButton.disabled = true;
+        }
+    }
+
+    checkStep2Completion() {
+        const ratingInputs = document.querySelectorAll('.star-rating input[type="hidden"]');
+        let allRated = true;
+
+        ratingInputs.forEach(input => {
+            if (parseInt(input.value) === 0) {
+                allRated = false;
+            }
         });
+
+        const nextButton = document.getElementById('step2-next-btn');
+
+        if (allRated) {
+            nextButton.classList.remove('cursor-not-allowed', 'opacity-50');
+            nextButton.disabled = false;
+        } else {
+            nextButton.classList.add('cursor-not-allowed', 'opacity-50');
+            nextButton.disabled = true;
+        }
+    }
+
+    checkStep3Completion() {
+
+
     }
 
     async loadSeasonYears() {
@@ -215,7 +321,7 @@ class ReviewFormManager {
             if (user && user.email) {
                 sessionStorage.setItem("user", JSON.stringify(user));
 
-                // Redirect if user is admin
+
                 if (["SITE_ADMIN", "ORG_ADMIN", "TEAM_ADMIN"].includes(user.role)) {
                     window.location.href = '/';
                 }
@@ -230,6 +336,12 @@ class ReviewFormManager {
 
     async submitReview() {
         Swal.showLoading();
+
+        if (this.isSubmitting) {
+            console.warn("Submit already in progress");
+            return;
+        }
+        this.isSubmitting = true;
 
         const formData = new FormData(document.getElementById('reviewForm'));
         const reviewData = {
@@ -284,9 +396,10 @@ class ReviewFormManager {
                     showConfirmButton: false
                 });
 
-                // Reset form and go back to step 1
+
                 document.getElementById('reviewForm').reset();
                 this.resetAllStarRatings();
+                this.goToStep(1);
             } else {
                 Swal.fire({
                     title: "Error",
@@ -301,6 +414,8 @@ class ReviewFormManager {
                 icon: "error"
             });
             console.error("Error submitting review:", error);
+        } finally {
+            this.isSubmitting = false;
         }
     }
 
@@ -345,7 +460,7 @@ class ReviewFormManager {
 }
 
 async function loadReviews() {
-    // Helper functions (kept for backward compatibility)
+
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);

@@ -9,7 +9,7 @@
     <script src="dist/config.js"></script>
     <script src="dist/auth.js"></script>
     <script src="dist/teams.js"></script>
-    <script src="dist/reviews.js"></script>
+    <script src="dist/reviews2.js"></script>
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- JWT DECODE -->
@@ -353,8 +353,8 @@
     <script>
         // Initialize the form manager when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            window.reviewFormManager = new ReviewFormManager();
-            window.reviewFormManager.init();
+            window.reviewFormManager = new ReviewFormManager2();
+            
             // Make goToStep globally available for backward compatibility
             window.goToStep = function(step) {
                 window.reviewFormManager.goToStep(step);
