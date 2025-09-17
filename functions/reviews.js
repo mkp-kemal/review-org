@@ -8,8 +8,6 @@ class ReviewFormManager {
     init() {
         this.setupEventListeners();
         this.loadSeasonYears();
-        this.checkAuth();
-        loadReviews();
     }
 
     setupEventListeners() {
@@ -23,9 +21,9 @@ class ReviewFormManager {
         this.setupFormValidation();
 
         // Load reviews
-        document.addEventListener('DOMContentLoaded', () => {
-            loadReviews();
-        });
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     loadReviews();
+        // });
     }
 
     setupStarRatings() {
@@ -204,27 +202,6 @@ class ReviewFormManager {
             });
         } catch (err) {
             console.error("loadSeasonYears error:", err);
-        }
-    }
-
-    async checkAuth() {
-        try {
-            const res = await fetchWithAuth(`${window.APP_CONFIG.API_URL}/auth/me`);
-            const user = await res.json();
-
-            if (user && user.email) {
-                sessionStorage.setItem("user", JSON.stringify(user));
-
-                // Redirect if user is admin
-                if (["SITE_ADMIN", "ORG_ADMIN", "TEAM_ADMIN"].includes(user.role)) {
-                    window.location.href = '/';
-                }
-            } else {
-                sessionStorage.removeItem("user");
-            }
-        } catch (err) {
-            console.error('You are not logged in - ANONYMOUS', err);
-            sessionStorage.removeItem("user");
         }
     }
 

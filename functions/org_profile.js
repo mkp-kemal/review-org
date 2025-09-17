@@ -454,7 +454,7 @@ async function loadOrgProfile() {
 
         const isSiteAdmin = storedUser?.role?.includes('SITE_ADMIN');
         const isRelatedUser = (data.claimedById == window?.user?.id || data.organization?.claimedById == window?.user?.id);
-        
+
         const isElite = data.subscription?.plan === 'ELITE';
         const canUpload = isSiteAdmin || (isRelatedUser && isElite);
 
@@ -912,6 +912,7 @@ function showAddTryoutModal(teamId) {
             }
 
             if (registerUrl && !isValidUrl(registerUrl)) {
+                Swal.showValidationMessage('Invalid Registration URL, must be a valid URL');
                 return false;
             }
 
@@ -967,7 +968,7 @@ async function createTryout(teamId, title, datetime, location, registerUrl) {
             icon: 'success'
         }).then(() => {
 
-            location.reload();
+            window.location.reload();
         });
 
     } catch (error) {
@@ -1026,9 +1027,9 @@ function renderTryouts(tryouts, teamId, storedUser, claimedById, orgClaimedById)
         }
 
         let registerButton = '';
-        if (tryout.registerUrl && tryout.registerUrl.trim() !== '') {
+        if (tryout.urlregister && tryout.urlregister.trim() !== '') {
             registerButton = `
-                <button onclick="confirmAndRedirect('${tryout.registerUrl}', '${tryout.title || 'this tryout'}')" 
+                <button onclick="confirmAndRedirect('${tryout.urlregister}', '${tryout.title || 'this tryout'}')" 
                         class="inline-block mt-4 bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700">
                     <i class="fas fa-external-link-alt mr-2"></i>Register Now
                 </button>

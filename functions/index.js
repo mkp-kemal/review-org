@@ -242,9 +242,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-document.addEventListener('DOMContentLoaded', loadSeasonYears);
-
-
 function initTeamSearch(inputElement, options = {}) {
     const { hiddenInput } = options;
 
@@ -312,32 +309,6 @@ function initTeamSearch(inputElement, options = {}) {
             suggestionsContainer.classList.add('hidden');
         }
     });
-}
-
-async function loadSeasonYears() {
-    try {
-        const res = await fetch(`${window.APP_CONFIG.API_URL}/teams/years`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${getCookie('accessToken')}`
-            }
-        });
-        if (!res.ok) throw new Error("Failed to load years");
-
-        const data = await res.json();
-
-        const select = document.getElementById('season-year');
-
-        data.years.forEach(year => {
-            const opt = document.createElement('option');
-            opt.value = year;
-            opt.textContent = year;
-            select.appendChild(opt);
-        });
-    } catch (err) {
-        console.error("loadSeasonYears error:", err);
-    }
 }
 
 async function loadOrganizationsClaimed() {
