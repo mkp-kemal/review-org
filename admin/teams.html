@@ -509,7 +509,7 @@
                     `<td class="editable" data-field="status" data-id="${team.id}">${statusBadge}</td>` :
                     `<td>${statusBadge}</td>`}
                 <td>${team.claimedBy?.email || '-'}</td>
-                ${window.user.role === 'SITE_ADMIN' ?
+                ${window.user.role === 'SITE_ADMIN' || window.user.role === 'ORG_ADMIN' ?
                     `<td class="text-nowrap">
                         <button class="btn btn-info btn-sm mr-1" onclick="viewTeamDetails('${team.id}')">
                             <i class="fas fa-eye"></i> View
