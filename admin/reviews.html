@@ -2,22 +2,29 @@
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h2 class="mb-0"><i class="fas fa-quote-left mr-2"></i> Reviews Management</h2>
-            <div class="btn-group">
-                <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="reviewSortDropdown"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-sort"></i> Sort By
+            <div class="flex gap-2">
+                <!-- Tombol Export CSV -->
+                <button class="btn btn-success btn-sm" id="exportCSVBtn"
+                    title="Export all reviews as CSV (sorted by current selection)">
+                    <i class="fas fa-file-csv mr-2"></i> Export CSV
                 </button>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="reviewSortDropdown">
-                    <a class="dropdown-item" href="#" onclick="fetchReviews('rating')">
-                        <i class="fas fa-star mr-2"></i> Rating
-                    </a>
-                    <a class="dropdown-item" href="#" onclick="fetchReviews('recent')">
-                        <i class="fas fa-clock mr-2"></i> Recent
-                    </a>
+                <!-- Dropdown Sort (tetap ada) -->
+                <div class="btn-group">
+                    <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="reviewSortDropdown"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-sort"></i> Sort By
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="reviewSortDropdown">
+                        <a class="dropdown-item" href="#" onclick="fetchReviews('rating')">
+                            <i class="fas fa-star mr-2"></i> Rating
+                        </a>
+                        <a class="dropdown-item" href="#" onclick="fetchReviews('recent')">
+                            <i class="fas fa-clock mr-2"></i> Recent
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-
         <div class="card-body">
             <!-- Search Bar -->
             <div class="mb-4">
@@ -357,16 +364,17 @@
 </style>
 
 <script>
-    
+
     window.itemsPerPage = window.itemsPerPage || 10;
     window.currentPage = 1;
 
-    
+
     window.showReview = showReview;
     window.changePage = changePage;
     window.fetchReviews = fetchReviews;
 
     async function fetchReviews(sort = "recent", page = 1) {
+        window.currentSort = sort;
         try {
             let url;
             if (window?.user?.role === 'SITE_ADMIN') {
@@ -422,7 +430,7 @@
             const hasResponse = r.orgResponse !== null;
             tr.className = r.isHighlight ? 'review-highlighted' : '';
 
-            
+
             const previewText = r.body.length > 50 ? r.body.substring(0, 47) + '...' : r.body;
 
             tr.innerHTML = `
@@ -461,13 +469,13 @@
             tbody.appendChild(tr);
         });
 
-        
+
         document.querySelector("#reviewTable tbody").addEventListener('click', async function (e) {
-            
+
             if (
                 e.target.closest('button') ||
                 e.target.closest('a') ||
-                e.target.closest('.status-badge') 
+                e.target.closest('.status-badge')
             ) {
                 return;
             }
@@ -478,11 +486,11 @@
             const reviewId = row.querySelector('[data-id]')?.dataset.id;
             if (!reviewId) return;
 
-            
+
             const review = window.filteredReviews.find(r => r.id == reviewId);
             if (!review) return;
 
-            
+
             const teamPlan = review.team?.subscription?.plan;
             if (teamPlan !== 'ELITE') {
                 Swal.fire({
@@ -491,10 +499,10 @@
                     text: 'Highlight feature is only available for teams with ELITE subscription plan.',
                     confirmButtonText: 'OK'
                 });
-                return; 
+                return;
             }
 
-            
+
             const isCurrentlyHighlighted = review.isHighlight;
 
             let confirmText, confirmTitle, confirmButton;
@@ -528,7 +536,7 @@
                         Authorization: `Bearer ${getCookie('accessToken')}`
                     },
                     body: JSON.stringify({
-                        isHighlight: !isCurrentlyHighlighted 
+                        isHighlight: !isCurrentlyHighlighted
                     })
                 });
 
@@ -543,7 +551,7 @@
                     text: isCurrentlyHighlighted ? 'Highlight removed!' : 'Review is now highlighted!'
                 });
 
-                
+
                 fetchReviews();
 
             } catch (err) {
@@ -615,7 +623,7 @@
                         }
 
                         renderCell(newValue);
-                        
+
                         fetchReviews();
                     } catch (err) {
                         console.error('Failed to save:', err);
@@ -651,13 +659,13 @@
         const paginationControls = document.getElementById('paginationControls');
         paginationControls.innerHTML = '';
 
-        
+
         const prevLi = document.createElement('li');
         prevLi.className = `page-item ${window.currentPage === 1 ? 'disabled' : ''}`;
         prevLi.innerHTML = `<a class="page-link" href="#" onclick="window.changePage(${window.currentPage - 1})">&laquo;</a>`;
         paginationControls.appendChild(prevLi);
 
-        
+
         const maxVisiblePages = 5;
         let startPage = Math.max(1, window.currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -666,7 +674,7 @@
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
 
-        
+
         if (startPage > 1) {
             const firstLi = document.createElement('li');
             firstLi.className = 'page-item';
@@ -681,7 +689,7 @@
             }
         }
 
-        
+
         for (let i = startPage; i <= endPage; i++) {
             const pageLi = document.createElement('li');
             pageLi.className = `page-item ${i === window.currentPage ? 'active' : ''}`;
@@ -689,7 +697,7 @@
             paginationControls.appendChild(pageLi);
         }
 
-        
+
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) {
                 const ellipsisLi = document.createElement('li');
@@ -704,7 +712,7 @@
             paginationControls.appendChild(lastLi);
         }
 
-        
+
         const nextLi = document.createElement('li');
         nextLi.className = `page-item ${window.currentPage === totalPages ? 'disabled' : ''}`;
         nextLi.innerHTML = `<a class="page-link" href="#" onclick="window.changePage(${window.currentPage + 1})">&raquo;</a>`;
@@ -736,16 +744,16 @@
     }
 
     function showReview(r) {
-        
+
         window.currentReviewId = r.id;
         window.currentResponse = r.orgResponse || null;
 
-        
+
         document.getElementById('modalTitle').textContent = r.title;
         document.getElementById('modalBody').textContent = r.body;
         document.getElementById('modalTeam').textContent = r.team?.name || "-";
 
-        
+
         if (r.team?.organization) {
             document.getElementById('modalTeamOrg').textContent = `Organization: ${r.team.organization.name}`;
         } else {
@@ -757,7 +765,7 @@
         document.getElementById('modalSeason').textContent = `${r.season_term} ${r.season_year}`;
         document.getElementById('modalDate').textContent = new Date(r.createdAt).toLocaleString();
 
-        
+
         const editedDate = new Date(r.editedAt);
         const createdDate = new Date(r.createdAt);
         if (editedDate.getTime() !== createdDate.getTime()) {
@@ -766,13 +774,13 @@
             document.getElementById('modalEdited').textContent = 'Never edited';
         }
 
-        
+
         const publicBadge = r.isPublic ?
             '<span class="status-badge status-public">Public</span>' :
             '<span class="status-badge status-private">Private</span>';
         document.getElementById('modalPublic').innerHTML = publicBadge;
 
-        
+
         const coaching = r.rating?.coaching ?? 0;
         const development = r.rating?.development ?? 0;
         const transparency = r.rating?.transparency ?? 0;
@@ -787,14 +795,14 @@
         document.getElementById('ratingSafety').textContent = safety.toFixed(1) + '/5';
         document.getElementById('ratingOverall').textContent = overall.toFixed(1) + '/5';
 
-        
+
         document.getElementById('progressCoaching').style.width = (coaching / 5 * 100) + '%';
         document.getElementById('progressDevelopment').style.width = (development / 5 * 100) + '%';
         document.getElementById('progressTransparency').style.width = (transparency / 5 * 100) + '%';
         document.getElementById('progressCulture').style.width = (culture / 5 * 100) + '%';
         document.getElementById('progressSafety').style.width = (safety / 5 * 100) + '%';
 
-        
+
         if (r.flags && r.flags.length > 0) {
             document.getElementById('flagsSection').style.display = 'block';
             const flagsContainer = document.getElementById('flagsContainer').querySelector('.card-body');
@@ -822,7 +830,7 @@
                 flagsContainer.appendChild(flagElement);
             });
 
-            
+
             if (typeof $ !== 'undefined' && $.fn.tooltip) {
                 $('[data-toggle="tooltip"]').tooltip();
             }
@@ -830,17 +838,17 @@
             document.getElementById('flagsSection').style.display = 'none';
         }
 
-        
+
         document.getElementById('ratingStars').innerHTML = getStarRating(overall);
 
-        
+
         if (window.currentResponse) {
             document.getElementById('adminResponseText').textContent = window.currentResponse.body;
             document.getElementById('adminResponseDate').textContent = 'Posted: ' + new Date(window.currentResponse.createdAt).toLocaleString();
             document.getElementById('adminResponseBy').textContent = 'By: ' + (window.currentResponse.user?.email || 'Admin');
             document.getElementById('adminResponseSection').style.display = 'block';
 
-            
+
             document.getElementById('replyText').value = window.currentResponse.body;
             document.getElementById('submitReplyBtn').style.display = 'none';
             document.getElementById('updateReplyBtn').style.display = 'inline-block';
@@ -851,19 +859,19 @@
             document.getElementById('updateReplyBtn').style.display = 'none';
         }
 
-        
+
         if (typeof $ !== 'undefined' && $.fn.modal) {
             $('#reviewModal').modal('show');
         } else {
-            
+
             const modal = document.getElementById('reviewModal');
             modal.style.display = 'block';
             document.body.classList.add('modal-open');
         }
     }
 
-    
-    
+
+
     document.getElementById('submitReplyBtn').addEventListener('click', async function () {
         const responseText = document.getElementById('replyText').value.trim();
 
@@ -899,10 +907,10 @@
                 text: 'Response submitted successfully'
             });
 
-            
+
             fetchReviews();
 
-            
+
             if (typeof $ !== 'undefined' && $.fn.modal) {
                 $('#reviewModal').modal('hide');
             }
@@ -916,7 +924,7 @@
         }
     });
 
-    
+
     document.getElementById('updateReplyBtn').addEventListener('click', async function () {
         const responseText = document.getElementById('replyText').value.trim();
 
@@ -952,10 +960,10 @@
                 text: 'Response updated successfully'
             });
 
-            
+
             fetchReviews();
 
-            
+
             if (typeof $ !== 'undefined' && $.fn.modal) {
                 $('#reviewModal').modal('hide');
             }
@@ -969,7 +977,7 @@
         }
     });
 
-    
+
     document.getElementById('reviewModal').addEventListener('click', async function (e) {
         if (e.target.classList.contains('flag-reason') || e.target.closest('.flag-reason')) {
             const flagElement = e.target.closest('.flag-reason');
@@ -1016,7 +1024,7 @@
                     text: 'Flag status updated successfully'
                 });
 
-                
+
                 fetchReviews();
             } catch (err) {
                 Swal.fire({
@@ -1028,7 +1036,43 @@
         }
     });
 
-    
+    // Tambahkan fungsi exportCSV
+    async function exportCSV() {
+        // Ambil sort yang sedang aktif — kita simpan di window.currentSort
+        const sort = window.currentSort || 'recent'; // default ke 'recent'
+
+        try {
+            let url = `${window.APP_CONFIG.API_URL}/teams/export/reviews/csv?sort=${sort}`;
+
+            // Trigger download langsung
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `reviews-export-${sort}-${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Export Started',
+                text: 'Your CSV file is being downloaded.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } catch (err) {
+            console.error("Error exporting CSV:", err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Export Failed',
+                text: 'Failed to export reviews: ' + err.message
+            });
+        }
+    }
+
+    // Pasang event listener ke tombol
+    document.getElementById('exportCSVBtn').addEventListener('click', exportCSV);
+
+
     document.getElementById('reviewGlobalSearch').addEventListener('input', function (e) {
         const searchTerm = e.target.value.toLowerCase();
         window.filteredReviews = window.allReviews.filter(r => {
@@ -1046,7 +1090,7 @@
         renderPaginationControls();
     });
 
-    
+
     fetchReviews("recent");
 
     function getCookie(name) {
