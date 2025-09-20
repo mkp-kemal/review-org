@@ -196,6 +196,11 @@
                                     Created At <i class="bi bi-arrow-down"></i>
                                 </button>
                             </th>
+                            <th>
+    <button class="btn btn-sm btn-link sort-btn p-0" data-sort="lastLogin">
+        Last Login <i class="bi bi-arrow-down"></i>
+    </button>
+</th>
                             <th style="width: 120px;">Actions</th>
                         </tr>
                     </thead>
@@ -331,17 +336,48 @@
         const userDetailModal = new bootstrap.Modal(userDetailModalElement);
 
         // Helper Functions
-        function formatDate(dateString) {
-            if (!dateString) return '-';
-            const options = {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            return new Date(dateString).toLocaleDateString('en-US', options);
-        }
+        function formatRelativeTime(dateString) {
+    if (!dateString) return '<span class="text-muted">Never</span>';
+
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHrs = Math.floor(diffMin / 60);
+    const diffDays = Math.floor(diffHrs / 24);
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffDays / 365);
+
+    let relativeTime = '';
+
+    if (diffSec < 60) {
+        relativeTime = `${diffSec} second${diffSec !== 1 ? 's' : ''} ago`;
+    } else if (diffMin < 60) {
+        relativeTime = `${diffMin} minute${diffMin !== 1 ? 's' : ''} ago`;
+    } else if (diffHrs < 24) {
+        relativeTime = `${diffHrs} hour${diffHrs !== 1 ? 's' : ''} ago`;
+    } else if (diffDays < 30) {
+        relativeTime = `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    } else if (diffMonths < 12) {
+        relativeTime = `${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
+    } else {
+        relativeTime = `${diffYears} year${diffYears !== 1 ? 's' : ''} ago`;
+    }
+
+    // Format tooltip date
+    const options = {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    };
+    const tooltipDate = date.toLocaleDateString('en-US', options);
+
+    return `<span title="${tooltipDate}" data-bs-toggle="tooltip">${relativeTime}</span>`;
+}
 
         function getCookie(name) {
             const value = `; ${document.cookie}`;
@@ -449,7 +485,8 @@
                             <option value="true" ${user.isBanned ? 'selected' : ''}>Banned</option>
                         </select>
                     </td>
-                    <td>${formatDate(user.createdAt)}</td>
+                    <td>${formatRelativeTime(user.createdAt)}</td>
+                    <td>${formatRelativeTime(user.lastLogin)}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary action-btn view-details" data-user-id="${user.id}">
                             <i class="bi bi-eye"></i> View
@@ -457,6 +494,21 @@
                     </td>
                 `;
                 tableBody.appendChild(row);
+
+                // Render table rows
+paginatedData.forEach(user => {
+    // ... kode pembuatan row ...
+    tableBody.appendChild(row);
+});
+
+// Initialize tooltips after rendering
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+tooltipTriggerList.forEach(el => {
+    if (bootstrap.Tooltip.getInstance(el)) {
+        bootstrap.Tooltip.getInstance(el).dispose();
+    }
+    new bootstrap.Tooltip(el);
+});
             });
 
             // Attach event listeners
@@ -533,8 +585,7 @@
             document.getElementById('modal-user-email').textContent = user.email || 'No email';
             document.getElementById('modal-user-email-full').textContent = user.email || 'No email';
             document.getElementById('modal-user-role').textContent = user.role;
-            document.getElementById('modal-user-created').textContent = formatDate(user.createdAt);
-
+document.getElementById('modal-user-created').innerHTML = formatRelativeTime(user.createdAt);
             // Set role badge
             const roleBadge = document.getElementById('modal-user-role-badge');
             roleBadge.textContent = user.role;
@@ -798,6 +849,10 @@
         function init() {
             initEventListeners();
             fetchUsers();
+
+            // Initialize tooltips
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
         }
 
         // Start the application
